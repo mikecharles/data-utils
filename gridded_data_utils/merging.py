@@ -1,5 +1,5 @@
 """
-Contains methods for QCing gridded data.
+Contains methods for merging gridded data.
 """
 
 def test():
