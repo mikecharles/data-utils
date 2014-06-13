@@ -20,8 +20,10 @@ data = numpy.reshape(data, (6, 1080, 2160))
 data = data[4]
 
 # Interpolate to a new grid
-
-new_grid = gridded_data_utils.interpolation.interpolate(data, (-90 + 1 / 12), (1 / 12), (1 / 6), -90, 0, 90, 355, 5, grid_type="latlon")
+orig_ll_corner = ((-90 + 1 / 12), (1 / 12))
+new_ll_corner = (-90, 0)
+new_ur_corner = (90, 355)
+new_grid = gridded_data_utils.interpolation.interpolate(data, orig_ll_corner, (1 / 6), new_ll_corner, new_ur_corner, 5, grid_type="latlon")
 
 num_x = 2160
 num_y = 1080

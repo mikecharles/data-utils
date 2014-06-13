@@ -7,8 +7,8 @@ Contains methods for interpolating gridded data.
 
 
 def interpolate(orig_grid,
-                  orig_start_lat, orig_start_lon, orig_res,
-                  new_start_lat, new_start_lon, new_end_lat, new_end_lon, new_res,
+                  orig_ll_corner, orig_res,
+                  new_ll_corner, new_ur_corner, new_res,
                   grid_type="latlon"):
     """Interpolates a grid from one resolution to another.
 
@@ -16,21 +16,15 @@ def interpolate(orig_grid,
     ----------
     orig_grid : array_like
         2-dimensional (lat x lon) Numpy array of data to interpolate
-    orig_start_lat : float
-        Start latitude (bottom-left corner) of original grid
-    orig_start_lon : float
-        Start longitude (bottom-left corner) of original grid
+    orig_ll_corner : tuple of floats
+        Lower-left corner of the original grid, formatted as (lat, lon)
     orig_res : float
         Original grid resolution (in km if ``grid_type="even"``, in degrees if
         ``grid_type="latlon"``)
-    new_start_lat : float
-        Start latitude (bottom-left corner) of new grid
-    new_start_lon : float
-        Start longitude (bottom-left corner) of new grid
-    new_end_lat : float
-        End latitude (bottom-left corner) of new grid
-    new_end_lon : float
-        End longitude (bottom-left corner) of new grid
+    new_ll_corner : tuple of floats
+        Lower-left corner of the new grid, formatted as (lat, lon)
+    new_ur_corner : tuple of floats
+        Upper-right corner of the new grid, formatted as (lat, lon)
     new_res : float
         New grid resolution (in km if ``grid_type="even"``, in degrees if
         ``grid_type="latlon"``)
@@ -51,6 +45,7 @@ def interpolate(orig_grid,
 
     # Generate arrays of longitude and latitude values for the original grid
     num_lats, num_lons = orig_grid.shape
+    orig_start_lat, orig_start_lon = orig_ll_corner
     orig_lons = numpy.arange(orig_start_lon,
                              orig_start_lon + (num_lons * orig_res),
                              orig_res,
@@ -62,6 +57,8 @@ def interpolate(orig_grid,
     print(num_lats, num_lons, orig_lons, orig_lats, sep="\n")
 
     # Generate mesh of longitude and latitude values for the new grid
+    new_start_lat, new_start_lon = new_ll_corner
+    new_end_lat, new_end_lon = new_ur_corner
     new_lons = numpy.arange(new_start_lon,
                             new_end_lon + new_res,
                             new_res,

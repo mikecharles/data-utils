@@ -9,6 +9,7 @@ cd $DOCS_DIR
 echo "sys.path.insert(0, os.path.abspath('../..'))" >> conf.py
 echo "extensions.append('numpydoc')" >> conf.py
 echo "html_theme = 'sphinxdoc'" >> conf.py
+echo "html_title = 'Documentation for CPC\'s Gridded Data Utilities Python package'" >> conf.py
 pwd
 make html
 
