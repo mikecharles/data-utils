@@ -1,10 +1,10 @@
 import numpy
-import mpl_toolkits.basemap
-import matplotlib.pyplot
 
+import gridded_data_utils.plotting
 import gridded_data_utils.interpolation
 import gridded_data_utils.merging
 import gridded_data_utils.qc
+
 
 # Read in one of Wei Shi's obs files
 file = '/cpc/sfc_temp/GLOBAL-T/OUTPUT/y2013/CPC_GLOBAL_T_V0.x_10min.lnx.20131220'
@@ -20,47 +20,32 @@ data = numpy.reshape(data, (6, 1080, 2160))
 data = data[4]
 
 # Interpolate to a new grid
+new_res = 4
 orig_ll_corner = ((-90 + 1 / 12), (1 / 12))
 new_ll_corner = (-90, 0)
-new_ur_corner = (90, 355)
-new_grid = gridded_data_utils.interpolation.interpolate(data, orig_ll_corner, (1 / 6), new_ll_corner, new_ur_corner, 5, grid_type="latlon")
+new_ur_corner = (90, 360-new_res)
+new_grid = gridded_data_utils.interpolation.interpolate(data,
+                                                        orig_ll_corner,
+                                                        (1/6),
+                                                        new_ll_corner,
+                                                        new_ur_corner,
+                                                        new_res,
+                                                        grid_type="latlon")
 
-num_x = 2160
-num_y = 1080
-num_vars = 6
-start_x = 1.0 / 12.0
-start_y = -90.0 + 1.0 / 12.0
-resolution = 1 / 6.0
-lons, lats = numpy.meshgrid(
-    numpy.arange(start_x, start_x + (num_x * resolution), resolution,
-                 numpy.float32),
-    numpy.arange(start_y, start_y + (num_y * resolution), resolution,
-                 numpy.float32))
+# Plot grid
+gridded_data_utils.plotting.plot_to_screen(new_grid,
+                                         numpy.arange(-90, 90 + new_res,
+                                                      new_res),
+                                         numpy.arange(0, 360, new_res))
 
-lons_new = numpy.arange(0, 360, 5)
-lats_new = numpy.arange(-90, 91, 5)
-lons_new, lats_new = numpy.meshgrid(lons_new, lats_new)
+gridded_data_utils.plotting.plot_to_file(new_grid,
+                                         numpy.arange(-90, 90 + new_res, new_res),
+                                         numpy.arange(0, 360, new_res),
+                                         'new_res.png',
+                                         title="New Resolution")
 
-# Create Basemap
-matplotlib.pyplot.figure()
-m = mpl_toolkits.basemap.Basemap(llcrnrlon=0, llcrnrlat=-80, urcrnrlon=360,
-                                 urcrnrlat=80, projection='mill')
-m.drawcoastlines(linewidth=1.25)
-m.drawparallels(numpy.arange(-80, 81, 20), labels=[1, 1, 0, 0])
-m.drawmeridians(numpy.arange(0, 360, 60), labels=[0, 0, 0, 1])
-m.drawmapboundary(fill_color='#DDDDDD')
-m.contourf(lons, lats, data, latlon=True)
-
-matplotlib.pyplot.figure()
-m2 = mpl_toolkits.basemap.Basemap(llcrnrlon=0, llcrnrlat=-80,
-                                  urcrnrlon=360, urcrnrlat=80,
-                                  projection='mill')
-m2.drawcoastlines(linewidth=1.25)
-m2.drawparallels(numpy.arange(-80, 81, 20), labels=[1, 1, 0, 0])
-m2.drawmeridians(numpy.arange(0, 360, 60), labels=[0, 0, 0, 1])
-m2.drawmapboundary(fill_color='#DDDDDD')
-m2.contourf(lons_new, lats_new, new_grid, latlon=True)
-matplotlib.pyplot.show()
-
-print('something')
-
+gridded_data_utils.plotting.plot_to_file(data,
+                                         numpy.arange(1/12-90, 90-1/12 + 1/6, 1/6),
+                                         numpy.arange(0, 360, 1/6),
+                                         'old_res.png',
+                                         title="Old Resolution")
