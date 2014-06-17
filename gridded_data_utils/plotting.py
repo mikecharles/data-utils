@@ -8,7 +8,7 @@ import matplotlib.pyplot
 import numpy
 
 
-def plot_to_screen(grid, lats, lons, title=None):
+def plot_to_screen(grid, ll_corner, ur_corner, res, grid_type="latlon", title=None):
     """Plots the given grid and displays on-screen.
 
     Essentially makes calls to :func:`make_plot` and :func:`show_plot` to do
@@ -18,18 +18,25 @@ def plot_to_screen(grid, lats, lons, title=None):
     ----------
     grid : 2-d array
         2-dimensional (lat x lon) Numpy array of data to plot
-    lats : 1-d array
-        1-d array of latitudes corresponding to the grid
-    lons : 1-d array
-        1-d array of longitudes corresponding to the grid
+    ll_corner : tuple of floats
+        Lower-left corner of the grid, formatted as (lat, lon)
+    ur_corner : tuple of floats
+        Upper-right corner of the grid, formatted as (lat, lon)
+    res : float
+        Grid resolution (in km if ``grid_type="even"``, in degrees if
+        ``grid_type="latlon"``)
+    grid_type : str
+        Grid type. Possible values are:
+            - latlon : Latlon grid
+            - equal : Equally-spaced square grid
     title : str, optional
         Title of the resulting plot
     """
-    make_plot(grid, lats, lons, title)
+    make_plot(grid, ll_corner, ur_corner, res, grid_type, title)
     show_plot()
 
 
-def plot_to_file(grid, lats, lons, file, dpi=200, title=None):
+def plot_to_file(grid, ll_corner, ur_corner, res, file, grid_type="latlon", dpi=200, title=None):
     """Plots the given grid and saves to a file.
 
     Essentially makes calls to :func:`make_plot` and :func:`save_plot` to do
@@ -39,23 +46,30 @@ def plot_to_file(grid, lats, lons, file, dpi=200, title=None):
     ----------
     grid : 2-d array
         2-dimensional (lat x lon) Numpy array of data to plot
-    lats : 1-d array
-        1-d array of latitudes corresponding to the grid
-    lons : 1-d array
-        1-d array of longitudes corresponding to the grid
+    ll_corner : tuple of floats
+        Lower-left corner of the grid, formatted as (lat, lon)
+    ur_corner : tuple of floats
+        Upper-right corner of the grid, formatted as (lat, lon)
+    res : float
+        Grid resolution (in km if ``grid_type="even"``, in degrees if
+        ``grid_type="latlon"``)
     file : str
         File name to save plot to
+    grid_type : str
+        Grid type. Possible values are:
+            - latlon : Latlon grid
+            - equal : Equally-spaced square grid
     dpi : float, optional
         dpi of the image (higher means higher resolution). By default `dpi =
         200`.
     title : str, optional
         Title of the resulting plot
     """
-    make_plot(grid, lats, lons, title)
+    make_plot(grid, ll_corner, ur_corner, res, grid_type, title)
     save_plot(file, dpi)
 
 
-def make_plot(grid, lats, lons, title=None):
+def make_plot(grid, ll_corner, ur_corner, res, grid_type="latlon", title=None):
     """Creates a plot object using
     `mpl_toolkits.basemap <http://matplotlib.org/basemap/users/examples.html>`_.
     Nothing is actually plotted. Usually you'd want to call :func:`show_plot`
@@ -65,14 +79,27 @@ def make_plot(grid, lats, lons, title=None):
     ----------
     grid : 2-d array
         2-dimensional (lat x lon) Numpy array of data to plot
-    lats : 1-d array
-        1-d array of latitudes corresponding to the grid
-    lons : 1-d array
-        1-d array of longitudes corresponding to the grid
+    ll_corner : tuple of floats
+        Lower-left corner of the grid, formatted as (lat, lon)
+    ur_corner : tuple of floats
+        Upper-right corner of the grid, formatted as (lat, lon)
+    res : float
+        Grid resolution (in km if ``grid_type="even"``, in degrees if
+        ``grid_type="latlon"``)
+    grid_type : str
+        Grid type. Possible values are:
+            - latlon : Latlon grid
+            - equal : Equally-spaced square grid
     title : str, optional
         Title of the resulting plot
     """
-    # Convert 1-d arrays of lats and lons into a 2-d mesh grid for pyplot
+    # Convert the ll_corner and res to arrays of lons and lats
+    start_lat, start_lon = ll_corner
+    end_lat, end_lon = ur_corner
+    lats = numpy.arange(start_lat, end_lat + res, res)
+    lons = numpy.arange(start_lon, end_lon + res, res)
+
+    # Create a 2-d mesh grid of lons and lats for pyplot
     lons, lats = numpy.meshgrid(lons, lats)
 
     # Create Basemap

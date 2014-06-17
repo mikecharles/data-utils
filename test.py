@@ -33,10 +33,7 @@ new_grid = gridded_data_utils.interpolation.interpolate(data,
                                                         grid_type="latlon")
 
 # Plot grid
-gridded_data_utils.plotting.plot_to_screen(new_grid,
-                                         numpy.arange(-90, 90 + new_res,
-                                                      new_res),
-                                         numpy.arange(0, 360, new_res))
+gridded_data_utils.plotting.plot_to_screen(new_grid, new_ll_corner, new_ur_corner, new_res)
 
 # gridded_data_utils.plotting.plot_to_file(new_grid,
 #                                          numpy.arange(-90, 90 + new_res, new_res),
