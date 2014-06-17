@@ -112,11 +112,14 @@ def make_plot(grid, ll_corner, ur_corner, res, grid_type="latlon", title=None):
     m.drawmapboundary(fill_color='#DDDDDD')
 
     # Plot grid
-    m.contourf(lons, lats, grid, latlon=True)
+    plot = m.contourf(lons, lats, grid, latlon=True)
 
     # Add labels
     fontsize = 14
     matplotlib.pyplot.title(title, fontsize=fontsize)
+
+    # Add a colorbar
+    matplotlib.pyplot.colorbar(plot, orientation="horizontal")
 
 
 def show_plot():
