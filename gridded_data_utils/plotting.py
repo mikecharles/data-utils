@@ -2,6 +2,7 @@
 Contains methods for plotting gridded data.
 """
 
+from __future__ import print_function
 import mpl_toolkits.basemap
 import matplotlib.pyplot
 import numpy

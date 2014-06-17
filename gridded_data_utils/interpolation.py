@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy
 import mpl_toolkits.basemap
 
@@ -54,7 +55,6 @@ def interpolate(orig_grid,
                              orig_start_lat + (num_lats * orig_res),
                              orig_res,
                              numpy.float32)
-    print(num_lats, num_lons, orig_lons, orig_lats, sep="\n")
 
     # Generate mesh of longitude and latitude values for the new grid
     new_start_lat, new_start_lon = new_ll_corner
@@ -68,7 +68,6 @@ def interpolate(orig_grid,
                             new_res,
                             numpy.float32)
     new_lons, new_lats = numpy.meshgrid(new_lons, new_lats)
-    print(new_lons, new_lats, sep="\n")
 
     # Use the interp() function from mpl_toolkits.basemap to interpolate the
     # grid to the new lat/lon values. Note that this requires 2 calls because
@@ -86,6 +85,5 @@ def interpolate(orig_grid,
     # May be faster, but so far doesn't work with missing data (ex. oceans)
     # f = interpolate.RectBivariateSpline(lats[:,1], lons[1,:], numpy.ma.masked_invalid(data), kx=1, ky=1)
     # data_new = f(lats_new[:,1], lons_new[1,:])
-
 
     return new_grid

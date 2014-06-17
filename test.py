@@ -21,12 +21,12 @@ data = data[4]
 
 # Interpolate to a new grid
 new_res = 4
-orig_ll_corner = ((-90 + 1 / 12), (1 / 12))
+orig_ll_corner = ((-90 + 1 / 12.0), (1 / 12.0))
 new_ll_corner = (-90, 0)
 new_ur_corner = (90, 360-new_res)
 new_grid = gridded_data_utils.interpolation.interpolate(data,
                                                         orig_ll_corner,
-                                                        (1/6),
+                                                        (1/6.0),
                                                         new_ll_corner,
                                                         new_ur_corner,
                                                         new_res,
@@ -38,14 +38,14 @@ gridded_data_utils.plotting.plot_to_screen(new_grid,
                                                       new_res),
                                          numpy.arange(0, 360, new_res))
 
-gridded_data_utils.plotting.plot_to_file(new_grid,
-                                         numpy.arange(-90, 90 + new_res, new_res),
-                                         numpy.arange(0, 360, new_res),
-                                         'new_res.png',
-                                         title="New Resolution")
-
-gridded_data_utils.plotting.plot_to_file(data,
-                                         numpy.arange(1/12-90, 90-1/12 + 1/6, 1/6),
-                                         numpy.arange(0, 360, 1/6),
-                                         'old_res.png',
-                                         title="Old Resolution")
+# gridded_data_utils.plotting.plot_to_file(new_grid,
+#                                          numpy.arange(-90, 90 + new_res, new_res),
+#                                          numpy.arange(0, 360, new_res),
+#                                          'new_res.png',
+#                                          title="New Resolution")
+#
+# gridded_data_utils.plotting.plot_to_file(data,
+#                                          numpy.arange(1/12.0-90, 90-1/12.0 + 1/6.0, 1/6.0),
+#                                          numpy.arange(0, 360, 1/6.0),
+#                                          'old_res.png',
+#                                          title="Old Resolution")
