@@ -41,31 +41,26 @@ def interpolate(orig_grid,
 
     Examples
     --------
-    # Read in one of Wei Shi's obs files
+
+    Interpolate Wei Shi's gridded temperature obs from 1/6th deg to 1 deg
+
     >>> file = '/cpc/sfc_temp/GLOBAL-T/OUTPUT/y2013/CPC_GLOBAL_T_V0.x_10min.lnx.20131220'
     >>> data = numpy.fromfile(file, 'float32')
-
-    # Set missing values to NaNs
     >>> data[data <= -999] = numpy.nan
-
-    # Reshape to 3 dimensions (vars x lats x lons)
     >>> data = numpy.reshape(data, (6, 1080, 2160))
-
-    # Extract one variable
     >>> data = data[4]
-
-    # Interpolate to a new grid
+    >>> orig_ll_corner = (-89.9167, 0.0833)
+    >>> orig_res = 1/6.0
     >>> new_res = 4
-    >>> orig_ll_corner = ((-90 + 1 / 12.0), (1 / 12.0))
     >>> new_ll_corner = (-90, 0)
     >>> new_ur_corner = (90, 360-new_res)
-    >>> new_grid = gridded_data_utils.interpolation.interpolate(data,\
-                        orig_ll_corner,\
-                        (1/6.0),\
-                        new_ll_corner,\
-                        new_ur_corner,\
-                        new_res,\
-                        grid_type="latlon")
+    >>> new_grid = gridded_data_utils.interpolation.interpolate(data, \
+orig_ll_corner, \
+orig_res, \
+new_ll_corner, \
+new_ur_corner, \
+new_res, \
+grid_type="latlon")
     """
 
     # Generate arrays of longitude and latitude values for the original grid
