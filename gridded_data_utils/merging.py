@@ -2,7 +2,6 @@
 Contains methods for merging gridded data.
 """
 
-from __future__ import print_function
 import numpy
 
 
