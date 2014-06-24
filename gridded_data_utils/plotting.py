@@ -8,7 +8,7 @@ import matplotlib.pyplot
 import numpy
 
 
-def plot_to_screen(grid, ll_corner, ur_corner, res, grid_type="latlon", title=None):
+def plot_to_screen(grid, ll_corner, ur_corner, res, grid_type="latlon", levels=None, title=None):
     """Plots the given grid and displays on-screen.
 
     Essentially makes calls to :func:`make_plot` and :func:`show_plot` to do
@@ -32,11 +32,11 @@ def plot_to_screen(grid, ll_corner, ur_corner, res, grid_type="latlon", title=No
     title : str, optional
         Title of the resulting plot
     """
-    make_plot(grid, ll_corner, ur_corner, res, grid_type, title)
+    make_plot(grid, ll_corner, ur_corner, res, grid_type=grid_type, levels=levels, title=title)
     show_plot()
 
 
-def plot_to_file(grid, ll_corner, ur_corner, res, file, grid_type="latlon", dpi=200, title=None):
+def plot_to_file(grid, ll_corner, ur_corner, res, file, grid_type="latlon", dpi=200, levels=None, title=None):
     """Plots the given grid and saves to a file.
 
     Essentially makes calls to :func:`make_plot` and :func:`save_plot` to do
@@ -65,11 +65,11 @@ def plot_to_file(grid, ll_corner, ur_corner, res, file, grid_type="latlon", dpi=
     title : str, optional
         Title of the resulting plot
     """
-    make_plot(grid, ll_corner, ur_corner, res, grid_type, title)
+    make_plot(grid, ll_corner, ur_corner, res, grid_type=grid_type, levels=levels, title=title)
     save_plot(file, dpi)
 
 
-def make_plot(grid, ll_corner, ur_corner, res, grid_type="latlon", title=None):
+def make_plot(grid, ll_corner, ur_corner, res, grid_type="latlon", levels=None, title=None):
     """Creates a plot object using
     `mpl_toolkits.basemap <http://matplotlib.org/basemap/users/examples.html>`_.
     Nothing is actually plotted. Usually you'd want to call :func:`show_plot`
@@ -112,7 +112,10 @@ def make_plot(grid, ll_corner, ur_corner, res, grid_type="latlon", title=None):
     m.drawmapboundary(fill_color='#DDDDDD')
 
     # Plot grid
-    plot = m.contourf(lons, lats, grid, latlon=True)
+    if levels:
+        plot = m.contourf(lons, lats, grid, levels, latlon=True)
+    else:
+        plot = m.contourf(lons, lats, grid, latlon=True)
 
     # Add labels
     fontsize = 14
