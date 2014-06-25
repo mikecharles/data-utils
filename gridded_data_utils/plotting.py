@@ -34,6 +34,7 @@ def plot_to_screen(grid, ll_corner, ur_corner, res, grid_type="latlon", levels=N
     """
     make_plot(grid, ll_corner, ur_corner, res, grid_type=grid_type, levels=levels, title=title)
     show_plot()
+    matplotlib.pyplot.close("all")
 
 
 def plot_to_file(grid, ll_corner, ur_corner, res, file, grid_type="latlon", dpi=200, levels=None, title=None):
@@ -67,6 +68,7 @@ def plot_to_file(grid, ll_corner, ur_corner, res, file, grid_type="latlon", dpi=
     """
     make_plot(grid, ll_corner, ur_corner, res, grid_type=grid_type, levels=levels, title=title)
     save_plot(file, dpi)
+    matplotlib.pyplot.close("all")
 
 
 def make_plot(grid, ll_corner, ur_corner, res, grid_type="latlon", levels=None, title=None):
