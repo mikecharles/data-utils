@@ -52,7 +52,11 @@ orig_ll_corner, \
 1)
     >>> merged_grid = gridded_data_utils.merging.stack_grids(bottom, top)
     """
-    # Wherever the mask is 1, set final_grid to the top grid, bottom elsewhere
-    final_grid = numpy.where(mask == 1, top, bottom)
+    if mask:
+        # Wherever the mask is 1, set final_grid to the top grid, bottom elsewhere
+        final_grid = numpy.where(mask == 1, top, bottom)
+    else:
+        # Wherever the top grid is not NAN, set final_grid to the top grid, bottom elsewhere
+        final_grid = numpy.where(~numpy.isnan(top), top, bottom)
 
     return final_grid
