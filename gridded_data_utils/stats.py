@@ -9,10 +9,8 @@ import numpy
 Contains statistical methods.
 """
 
-# Setup logging (with a custom message format that includes the level name and message, and level INFO)
-logging.basicConfig(format='[%(levelname)s] %(message)s',level=logging.INFO)
-# Change the logging level to DEBUG
-logging.getLogger().setLevel(logging.DEBUG)
+# Initialize a logging object specific to this module
+logger = logging.getLogger(__name__)
 
 def values_to_ptiles(obs_data,climo,ref_ptiles,k):
     """ Converts values to percentiles based on a set of climatology data containing values with associated percentiles.
@@ -57,23 +55,6 @@ def values_to_ptiles(obs_data,climo,ref_ptiles,k):
 
     # Initialize returned array var
     ptiles = None
-
-    logging.debug("--- reference ptiles and size--- : ")
-    logging.debug(str(ref_ptiles))
-    logging.debug(str(ref_ptiles.shape))
-
-    # Print obs and climo data
-    logging.debug("--- obs data and size --- : ")
-    logging.debug(obs_data)
-    logging.debug(str(obs_data.shape))
-
-    
-    #raise Exception("Test except")
-
-    logging.debug("--- climo data and size--- : ")
-    logging.debug(climo)
-    logging.debug(str(climo.shape))
-    logging.debug("ndim = " + str(ref_ptiles.ndim))
     
     # Check to see if number of dims are correct
     # Ref ptiles should be 1, Obs should be 1, Climo 2
@@ -105,7 +86,6 @@ def values_to_ptiles(obs_data,climo,ref_ptiles,k):
     # Print Estimated 0th ptile
     #p_0 = k*(climo[0,loc] - climo[ptile_50th,loc]) + climo[ptile_50th,loc]
     #logging.debug("est p 0th = " + str(p_0))
-
     
     try:    
         # Calculate the associated or corresponding climatological percentile with the observation array
