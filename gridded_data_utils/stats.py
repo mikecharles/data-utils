@@ -42,15 +42,26 @@ def values_to_ptiles(obs_data,climo,ref_ptiles,k):
     Examples
     --------
 
-    >>> ref_ptiles = numpy.array( [0.01,0.02,0.05,0.1,0.15,0.2,0.25,0.33,0.4,0.5,0.6,0.67,0.75,0.8,0.85,0.9,0.95,0.98,0.99] )
+    >>> ref_ptiles = numpy.array([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9])
     >>> num_ptiles = ref_ptiles.shape[0]
     >>>num_locations = 181*360
     >>> k = 1.343
-    >>> obs_data = numpy.fromfile("/cpc/prod_tst/mcharles/data/observations/land_air/short_range/global/merged_tmean/1deg/05d/2013/08/15/tmean_05d_20130815.bin","float32").astype('float64')
+    >>> obs_data = numpy.array([14.9, 21.1, 30.2, 28.4, 12.12])
     >>> climo_data = numpy.fromfile("/cpc/data/climatologies/land_air/short_range/global/merged_tmean_poe/1deg/05d/tmean_clim_poe_05d_0815.bin","float32").astype('float64')
-    >>> climo_data = numpy.reshape(climo_data, (num_ptiles, num_locations))
+    >>> climo_data = numpy.array([
+    [ 15.2,  15.2,  15.2,  15.2,  15.2],
+    [ 16.4,  16.4,  16.4,  16.4,  16.4],
+    [ 17.8,  17.8,  17.8,  17.8,  17.8],
+    [ 18.8,  18.8,  18.8,  18.8,  18.8],
+    [ 20.5,  numpy.nan, 20.5,  20.5,  20.5],
+    [ 22.3,  22.3,  22.3,  22.3,  22.3],
+    [23.7,  23.7,  23.7,  23.7,  23.7],
+    [ 24.6 ,  24.6,  24.6,  24.6,  24.6],
+    [ 27.6,   27.6,   27.6,   27.6,   27.6],
+    ])
 
     >>> obs_ptiles = values_to_ptiles(obs_data,climo_data,ref_ptiles,k)
+    [ 0.08349744         nan  1.          0.93285016  0.        ]
     """
 
     # Initialize returned array var
@@ -67,8 +78,6 @@ def values_to_ptiles(obs_data,climo,ref_ptiles,k):
 
     # Check to see if obs, climo, and ref_ptiles correct dimensions
     # Size of obs should match the size of climo 2nd dim
-    logging.debug("obs " + str(obs_data.shape[0]))
-    logging.debug("climo " + str(climo.shape[1]))
     if obs_data.shape[0] != climo.shape[1]:
         raise Exception("Size of obs array does not match size of 2nd dim of climo array.")
     if climo.shape[0] != ref_ptiles.shape[0]:
