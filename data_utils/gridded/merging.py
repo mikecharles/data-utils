@@ -44,13 +44,13 @@ CPC_GLOBAL_T_V0.x_10min.lnx.20131220','float32')
     >>> top = numpy.reshape(top, (6, 1080, 2160))
     >>> top = top[4] # Extract one variable
     >>> orig_ll_corner = ((-90 + 1 / 12.0), (1 / 12.0)) # Interpolate to 1 deg
-    >>> top = gridded_data_utils.interpolation.interpolate(top, \
+    >>> top = data_utils.gridded.interpolation.interpolate(top, \
 orig_ll_corner, \
 1/6.0, \
 (-90, 0), \
 (90, 359), \
 1)
-    >>> merged_grid = gridded_data_utils.merging.stack_grids(bottom, top)
+    >>> merged_grid = data_utils.gridded.merging.stack_grids(bottom, top)
     """
     if mask:
         # Wherever the mask is 1, set final_grid to the top grid, bottom elsewhere

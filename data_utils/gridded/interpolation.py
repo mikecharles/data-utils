@@ -53,7 +53,7 @@ def interpolate(orig_grid,
     >>> new_res = 4
     >>> new_ll_corner = (-90, 0)
     >>> new_ur_corner = (90, 360-new_res)
-    >>> new_grid = gridded_data_utils.interpolation.interpolate(data, \
+    >>> new_grid = data_utils.gridded.interpolation.interpolate(data, \
 orig_ll_corner, \
 orig_res, \
 new_ll_corner, \
