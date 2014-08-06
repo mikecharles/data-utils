@@ -1,20 +1,50 @@
 #!/bin/sh
 
-DOCS_DIR="docs/api"
+docs_dir="docs/api"
+pkg_dir="data_utils"
 
-rm -rf $DOCS_DIR
+# Clean DOCS dir
+rm -rf $docs_dir
 
-sphinx-apidoc -f -F -o docs/api gridded_data_utils
-cd $DOCS_DIR
-echo "sys.path.insert(0, os.path.abspath('../../gridded_data_utils'))" >> conf.py
+# Generate a list of directories that contain Python modules
+python_dirs=`find $pkg_dir -type d -not -iwholename '*.svn*'`
+
+# Setup the Sphinx API docs
+sphinx-apidoc -f -F -o docs/api $pkg_dir
+
+# Change into the DOCS dir
+cd $docs_dir
+
+# Add the main package dir to the PYTHONPATH
+#echo "sys.path.insert(0, os.path.abspath('../../data_utils'))" >> conf.py
+
+# Add the main package dir and all sub-package dirs to the PYTHONPATH
+# Also add a temporary __init__.py to all Python dirs to make Sphinx see them as packages
+for python_dir in $python_dirs ; do
+#	if [[ ! -e "$python_dir/__init__.py" ]] ; then
+#		echo "Create init"
+#		touch "$python_dir/__init__.py"
+#	else
+		echo "sys.path.insert(0, os.path.abspath('../../$python_dir'))" >> conf.py
+#	fi
+done
+
+# Add extensions
 echo "extensions.append('numpydoc')" >> conf.py
 echo "extensions.append('sphinx.ext.autosummary')" >> conf.py
-echo "html_title = 'Documentation for CPC\'s Gridded Data Utilities Python package'" >> conf.py
+echo "extensions.append('sphinx.ext.autodoc')" >> conf.py
+
+# Set some options
+echo "html_title = 'Documentation for CPC\'s Data Utilities Python package'" >> conf.py
 echo "html_theme = \"sphinxdoc\"" >> conf.py
+
+# Set some intersphinx mapping settings
 echo "intersphinx_mapping = {}" >> conf.py
 echo "intersphinx_mapping['python'] = ('http://docs.python.org/2', None)" >> conf.py
 echo "intersphinx_mapping['numpy'] = ('http://docs.scipy.org/doc/numpy/', None)" >> conf.py
 echo "intersphinx_mapping['scipy'] = ('http://docs.scipy.org/doc/scipy/reference/', None)" >> conf.py
 echo "intersphinx_mapping['matplotlib'] = ('http://matplotlib.org/1.3.1/api/', None)" >> conf.py
+
+# Generate API HTML
 make html
 
