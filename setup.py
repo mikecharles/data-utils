@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
-    name='model_data_utilities',
+    name='data_utils',
     version='0.1',
-    packages=['data_utils'],
+    packages=find_packages(),
     url='https://cpc-devtools.ncep.noaa.gov/trac/projects/data_utils',
     license='',
     author='Mike Charles',
