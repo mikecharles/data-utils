@@ -42,6 +42,8 @@ def read_grib(file, grib_type, variable, level):
     ------
     IOError
         If wgrib has a problem reading the grib and/or writing the temp file
+    Exception
+        If no grib record is found
 
     """
     # Generate a temporary file name
