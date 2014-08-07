@@ -37,6 +37,12 @@ def read_grib(file, grib_type, variable, level):
     -------
     data : array_like
         A data array
+
+    Raises
+    ------
+    IOError
+        If wgrib has a problem reading the grib and/or writing the temp file
+
     """
     # Generate a temporary file name
     temp_file = str(uuid.uuid4()) + '.bin'
@@ -49,14 +55,16 @@ def read_grib(file, grib_type, variable, level):
                      '-no_header -bin "{}"'.format(file, variable, level,
                                                    temp_file)
     else:
-        raise Exception(__name__ + ' requires grib_type to be grib1 or grib2')
+        raise IOError(__name__ + ' requires grib_type to be grib1 or grib2')
     # Generate a wgrib call
     try:
         output = subprocess.check_output(shlex.split(wgrib_call))
     except Exception as e:
-        raise Exception('Couldn\'t read {} file: {}'.format(grib_type, str(e)))
+        raise IOError('Couldn\'t read {} file: {}'.format(grib_type, str(e)))
     # Read in the binary data
     data = numpy.fromfile(temp_file, dtype=numpy.float32)
+    if data.size == 0:
+        raise Exception('No grib record found')
     # Delete the temporary file
     os.remove(temp_file)
     # Return data
