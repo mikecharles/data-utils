@@ -1,16 +1,20 @@
 #!/bin/sh
 
+# Read in command-line args
+html_path=$1
+
+# Set variables
 docs_dir="docs/api"
-pkg_dir="data_utils"
+pkg_name="data_utils"
 
 # Clean DOCS dir
 rm -rf $docs_dir
 
 # Generate a list of directories that contain Python modules
-python_dirs=`find $pkg_dir -mindepth 1 -type d -not -iwholename '*.svn*'`
+python_dirs=`find $pkg_name -mindepth 1 -type d -not -iwholename '*.svn*'`
 
 # Setup the Sphinx API docs
-sphinx-apidoc -f -F -o docs/api $pkg_dir
+sphinx-apidoc -f -F -o docs/api $pkg_name
 
 # Copy JS file for hiding code prompts
 cp library/copybutton.js docs/api/_static
@@ -53,4 +57,11 @@ echo "    app.add_javascript('copybutton.js')" >> conf.py
 
 # Generate API HTML
 make html
+
+# Copy API HTML to html_path (if provided)
+if [[ ! -z $html_path ]] ; then
+	mkdir -p $html_path
+	cp -rp _build/html/* $html_path
+	echo "Copied documentation to $html_path"
+fi
 
