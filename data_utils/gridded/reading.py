@@ -7,7 +7,6 @@ import shlex
 import uuid
 import os
 
-import data_utils.gridded.plotting
 import numpy
 
 
