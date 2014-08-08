@@ -7,7 +7,7 @@ pkg_dir="data_utils"
 rm -rf $docs_dir
 
 # Generate a list of directories that contain Python modules
-python_dirs=`find $pkg_dir -type d -not -iwholename '*.svn*'`
+python_dirs=`find $pkg_dir -mindepth 1 -type d -not -iwholename '*.svn*'`
 
 # Setup the Sphinx API docs
 sphinx-apidoc -f -F -o docs/api $pkg_dir
@@ -19,17 +19,11 @@ cp library/copybutton.js docs/api/_static
 cd $docs_dir
 
 # Add the main package dir to the PYTHONPATH
-#echo "sys.path.insert(0, os.path.abspath('../../data_utils'))" >> conf.py
+echo "sys.path.insert(0, os.path.abspath('../..'))" >> conf.py
 
 # Add the main package dir and all sub-package dirs to the PYTHONPATH
-# Also add a temporary __init__.py to all Python dirs to make Sphinx see them as packages
 for python_dir in $python_dirs ; do
-#	if [[ ! -e "$python_dir/__init__.py" ]] ; then
-#		echo "Create init"
-#		touch "$python_dir/__init__.py"
-#	else
-		echo "sys.path.insert(0, os.path.abspath('../../$python_dir'))" >> conf.py
-#	fi
+	echo "sys.path.insert(0, os.path.abspath('../../$python_dir'))" >> conf.py
 done
 
 # Add extensions
