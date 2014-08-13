@@ -44,7 +44,7 @@ def values_to_ptiles(obs_data,climo,ref_ptiles,k):
 
     >>> ref_ptiles = numpy.array([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9])
     >>> num_ptiles = ref_ptiles.shape[0]
-    >>>num_locations = 181*360
+    >>> num_locations = 181*360
     >>> k = 1.343
     >>> obs_data = numpy.array([14.9, 21.1, 30.2, 28.4, 12.12])
     >>> climo_data = numpy.fromfile("/cpc/data/climatologies/land_air/short_range/global/merged_tmean_poe/1deg/05d/tmean_clim_poe_05d_0815.bin","float32").astype('float64')
