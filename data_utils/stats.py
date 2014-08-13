@@ -12,14 +12,14 @@ Contains statistical methods.
 # Initialize a logging object specific to this module
 logger = logging.getLogger(__name__)
 
-def values_to_ptiles(obs_data,climo,ref_ptiles,k):
+def values_to_ptiles(array,climo,ref_ptiles,k):
     """ Converts values to percentiles based on a set of climatology data containing values with associated percentiles.
 
     Method assumes that the values being converted follow a Gaussian distribution to estimated the percentiles.
 
     Parameters
     ----------
-    obs_data : array_like   
+    array : array_like   
         1-dimensional (# locations) Numpy array of data to convert
     climo : array_like
         2-dimensional (# percentiles x # locations) Numpy array of climatology values associated with a set of percentiles
@@ -32,7 +32,7 @@ def values_to_ptiles(obs_data,climo,ref_ptiles,k):
     Returns
     -------
     array_like
-        A 1-dimensional (# locations) Numpy array of percentiles associated with the passed observation data (obs_data).
+        A 1-dimensional (# locations) Numpy array of percentiles associated with the passed observation data (array).
 
     Raises
     ------
@@ -46,7 +46,7 @@ def values_to_ptiles(obs_data,climo,ref_ptiles,k):
     >>> num_ptiles = ref_ptiles.shape[0]
     >>> num_locations = 181*360
     >>> k = 1.343
-    >>> obs_data = numpy.array([14.9, 21.1, 30.2, 28.4, 12.12])
+    >>> array = numpy.array([14.9, 21.1, 30.2, 28.4, 12.12])
     >>> climo_data = numpy.fromfile("/cpc/data/climatologies/land_air/short_range/global/merged_tmean_poe/1deg/05d/tmean_clim_poe_05d_0815.bin","float32").astype('float64')
     >>> climo_data = numpy.array([[ 15.2,  15.2,  15.2,  15.2,  15.2],
     ...                           [ 16.4,  16.4,  16.4,  16.4,  16.4],
@@ -57,7 +57,7 @@ def values_to_ptiles(obs_data,climo,ref_ptiles,k):
     ...                           [23.7,  23.7,  23.7,  23.7,  23.7],
     ...                           [ 24.6 ,  24.6,  24.6,  24.6,  24.6],
     ...                           [ 27.6,   27.6,   27.6,   27.6,   27.6]])
-    >>> obs_ptiles = values_to_ptiles(obs_data,climo_data,ref_ptiles,k)
+    >>> obs_ptiles = values_to_ptiles(array,climo_data,ref_ptiles,k)
     >>> obs_ptiles
     [ 0.08349744         nan  1.          0.93285016  0.        ]
     """
@@ -69,14 +69,14 @@ def values_to_ptiles(obs_data,climo,ref_ptiles,k):
     # Ref ptiles should be 1, Obs should be 1, Climo 2
     if ref_ptiles.ndim != 1:
         raise Exception("Reference percentile array has a dimension of " + str(ref_ptiles.ndim) + ". Must have an array dimension of 1.")
-    if obs_data.ndim != 1:
-        raise Exception("Observation array has a dimension of " + str(obs_data.ndim) + ". Must have an array dimension of 1.")
+    if array.ndim != 1:
+        raise Exception("Observation array has a dimension of " + str(array.ndim) + ". Must have an array dimension of 1.")
     if climo.ndim != 2:
         raise Exception("Observation array has a dimension of " + str(climo.ndim) + ". Must have an array dimension of 2.")    
 
     # Check to see if obs, climo, and ref_ptiles correct dimensions
     # Size of obs should match the size of climo 2nd dim
-    if obs_data.shape[0] != climo.shape[1]:
+    if array.shape[0] != climo.shape[1]:
         raise Exception("Size of obs array does not match size of 2nd dim of climo array.")
     if climo.shape[0] != ref_ptiles.shape[0]:
         raise Exception("Size of climo array (1st dim) does not match size reference percentiles array.")
@@ -134,7 +134,7 @@ def values_to_ptiles(obs_data,climo,ref_ptiles,k):
      
             # Else set to NaN (a climo value may have potentially been a NaN that is necessary)
             else numpy.nan
-            for loc, obs in enumerate(obs_data)
+            for loc, obs in enumerate(array)
         ])
     except:
         raise Exception("Percentile calculation failed.")
