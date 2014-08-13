@@ -44,6 +44,21 @@ def read_grib(file, grib_type, variable, level):
     Exception
         If no grib record is found
 
+    Examples
+    --------
+
+    >>> import data_utils.gridded.reading
+    >>>
+    >>> file = 'gefs_20140101_00z_f036_m05.grb2'
+    >>> grib_type = 'grib2'
+    >>> variable = 'TMP'
+    >>> level = '2 m above ground'
+    >>> data = data_utils.gridded.reading.read_grib(file, grib_type, variable, level)
+    >>> data.shape
+    (65160,)
+    >>> data
+    array([ 246.3999939 ,  246.3999939 ,  246.3999939 , ...,  242.74000549,
+            242.74000549,  242.74000549], dtype=float32)
     """
     # Generate a temporary file name
     temp_file = str(uuid.uuid4()) + '.bin'
