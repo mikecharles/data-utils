@@ -17,7 +17,7 @@ python_dirs=`find $pkg_name -mindepth 1 -type d -not -iwholename '*.svn*'`
 sphinx-apidoc -f -F -o docs/api $pkg_name
 
 # Copy JS file for hiding code prompts
-cp library/copybutton.js docs/api/_static
+wget -q http://docs.python.org/_static/copybutton.js -O docs/api/_static/copybutton.js
 
 # Change into the DOCS dir
 cd $docs_dir
