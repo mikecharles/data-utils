@@ -1,3 +1,6 @@
+import numpy
+
+import data_utils.gridded.plotting
 
 
 """
@@ -5,8 +8,8 @@ Contains methods for converting gridded data from one format to another
 """
 
 
-def fcst_bin_to_ascii():
-    """Converts a forecast binary file to an ASCII file
+def fcst_bin_to_txt(data, fcst_ptiles, desired_ptiles, file, terciles=False):
+    """Converts a forecast binary file to a text file
 
     The forecast binary file must contain probabilities of exceeding certain
     percentiles (AKA a POE file), where the percentiles are ascending in the
@@ -19,66 +22,110 @@ def fcst_bin_to_ascii():
 
     Parameters
     ----------
-    orig_grid : array_like
-        2-dimensional (lat x lon) Numpy array of data to interpolate
-    orig_ll_corner : tuple of floats
-        Lower-left corner of the original grid, formatted as (lat, lon)
-    orig_res : float
-        Original grid resolution (in km if ``grid_type="even"``, in degrees if
-        ``grid_type="latlon"``)
-    new_ll_corner : tuple of floats
-        Lower-left corner of the new grid, formatted as (lat, lon)
-    new_ur_corner : tuple of floats
-        Upper-right corner of the new grid, formatted as (lat, lon)
-    new_res : float
-        New grid resolution (in km if ``grid_type="even"``, in degrees if
-        ``grid_type="latlon"``)
-    grid_type : str
-        Original grid type. Possible values are:
-            - latlon : Latlon grid
-            - equal : Equally-spaced square grid
+    data : array_like
+        3-dimensional (ptile x lat x lon) Numpy array of forecast data at
+        percentiles
+    fcst_ptiles : list
+        1-dimensional list of percentiles found in the forecast file
+    desired_ptiles : list
+        1-dimensional list of percentiles to include in the output file
+    file : string
+        Text file name to write data to
+    terciles : bool
+        - If True, will output tercile probabilities (prob below, near, above)
+        - If False (default), will output probabilities of exceeding percentiles
+        - Can only be set when 2 percentiles are supplied
 
-    Returns
-    -------
-    grid : array_like
-        A grid at the desired resolution.
+    Raises
+    ------
+    ValueError
+        If arguments are incorrect
+
 
     Examples
     --------
 
-    Interpolate Wei Shi's gridded temperature obs from 1/6th deg to 1 deg
-
     >>> file = '/cpc/sfc_temp/GLOBAL-T/OUTPUT/y2013/CPC_GLOBAL_T_V0.x_10min.lnx.20131220'
     >>> data = numpy.fromfile(file, 'float32')
     >>> data[data <= -999] = numpy.nan
-    >>> data = numpy.reshape(data, (6, 1080, 2160))
-    >>> data = data[4]
-    >>> orig_ll_corner = (-89.9167, 0.0833)
-    >>> orig_res = 1/6.0
-    >>> new_res = 4
-    >>> new_ll_corner = (-90, 0)
-    >>> new_ur_corner = (90, 360-new_res)
-    >>> new_grid = data_utils.gridded.interpolation.interpolate(data, \
-orig_ll_corner, \
-orig_res, \
-new_ll_corner, \
-new_ur_corner, \
-new_res, \
-grid_type="latlon")
     """
 
-    # --------------------------------------------------------------------------
-    # Read in forecast binary file
-    #
+    # If terciles=True, make sure there are only 2 percentiles
+    if terciles:
+        if len(desired_ptiles) != 2:
+            raise ValueError('To output terciles, you must pass exactly 2 desired percentiles')
 
-    # --------------------------------------------------------------------------
     # Make sure desired percentiles are part of the forecast percentiles
-    #
+    if set(fcst_ptiles).issuperset(set(desired_ptiles)):
+
+        # Find the indexes of the desired_ptiles within fcst_ptiles
+        ptile_indexes = [fcst_ptiles.index(i) for i in desired_ptiles]
+
+        # Open the output file
+        file = open(file, 'w')
+
+        # Establish the format for the grid point column and the data column(s)
+        gridpoint_col_fmt = '{:03d}{:03d}'
+        data_col_fmt = '{:>7.3f}'
 
         # ----------------------------------------------------------------------
-        # If not, then interpolate
+        # Create a header string
         #
+        # The word 'id' is used for the first column (which contains
+        # gridpoints). This is the typical header used in the other VWT text
+        # files.
+        #
+        # Also note that the header of each column is designed to match the
+        # length of the data in that column, so they are aligned.
+        header_string = ('{:<' + str(len(gridpoint_col_fmt.format(0,0))) + 's}  ').format('id')
+        if terciles:
+            header_string = ('{:<' + str(len(gridpoint_col_fmt.format(0, 0))) + 's}  ').format('id')
+            for temp_str in ['below', 'normal', 'above']:
+                header_string += ('{:>' + str(len(data_col_fmt.format(0))) + 's}  ').format(temp_str)
+        else:
+            for ptile_index in ptile_indexes:
+                header_string += ('{:>' + str(len(data_col_fmt.format(0))) + 's}  ').format('ptile{:02d}'.format(fcst_ptiles[ptile_index]))
 
-    # --------------------------------------------------------------------------
-    # Read in forecast binary file
-    #
+        # Write header to file
+        file.write(header_string + '\n')
+
+        # Loop over grid
+        for x in range(numpy.shape(data)[2]):
+            for y in range(numpy.shape(data)[1]):
+                # Create a data string consisting of the desired ptiles
+                if terciles:
+                    probs = []
+                    probs.append(1.0 - data[ptile_indexes[0], y, x])
+                    probs.append(data[ptile_indexes[0], y, x] - data[ptile_indexes[1], y, x])
+                    probs.append(data[ptile_indexes[1], y, x])
+                    data_string = ''
+                    for prob in probs:
+                        data_string += (data_col_fmt + '  ').format(prob)
+                else:
+                    data_string = ''
+                    for ptile_index in ptile_indexes:
+                        data_string += (data_col_fmt + '  ').format(data[ptile_index, y, x])
+                # Write the grid point and data to the file
+                file.write((gridpoint_col_fmt + '  {}\n').format(x+1, y+1, data_string))
+
+        # Close the output file
+        file.close()
+    else:
+        raise ValueError('Desired percentiles must all be found in fcst percentiles')
+
+
+if __name__ == "__main__":
+    file = '/cpc/data/forecasts/models/all_ranges/global/calibrated/gefs/2014/03/01/00/gefs_tmax_2m_20140301_00z_d08_poe_ER.bin'
+    fcst_ptiles = [ 1,  2,  5, 10, 15,
+                   20, 25, 33, 40, 50,
+                   60, 67, 75, 80, 85,
+                   90, 95, 98, 99]
+    desired_ptiles = [33, 67]
+
+    num_x = 360
+    num_y = 181
+
+    data = numpy.fromfile(file, dtype='float32')
+    data = numpy.reshape(data, (len(fcst_ptiles), num_y, num_x))
+
+    fcst_bin_to_txt(data, fcst_ptiles, desired_ptiles, 'out.txt', terciles=True)
