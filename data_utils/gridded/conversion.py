@@ -32,8 +32,10 @@ def fcst_bin_to_txt(data, fcst_ptiles, desired_ptiles, file, terciles=False):
     file : string
         Text file name to write data to
     terciles : bool
-        - If True, will output tercile probabilities (prob below, near, above)
+        - If True, will output tercile probabilities (with headers below, normal
+          , and above)
         - If False (default), will output probabilities of exceeding percentiles
+          (with headers ptileXX, ptileYY, etc.)
         - Can only be set when 2 percentiles are supplied
 
     Raises
@@ -41,13 +43,22 @@ def fcst_bin_to_txt(data, fcst_ptiles, desired_ptiles, file, terciles=False):
     ValueError
         If arguments are incorrect
 
-
     Examples
     --------
 
-    >>> file = '/cpc/sfc_temp/GLOBAL-T/OUTPUT/y2013/CPC_GLOBAL_T_V0.x_10min.lnx.20131220'
-    >>> data = numpy.fromfile(file, 'float32')
-    >>> data[data <= -999] = numpy.nan
+    >>> import numpy
+    >>> import data_utils.gridded.conversion
+    >>> file = '/cpc/data/forecasts/models/all_ranges/global/calibrated/gefs/2014/03/01/00/gefs_tmax_2m_20140301_00z_d08_poe_ER.bin'
+    >>> fcst_ptiles = [ 1,  2,  5, 10, 15,
+    ...                20, 25, 33, 40, 50,
+    ...                60, 67, 75, 80, 85,
+    ...                90, 95, 98, 99]
+    >>> desired_ptiles = [10, 90]
+    >>> num_x = 360
+    >>> num_y = 181
+    >>> data = numpy.fromfile(file, dtype='float32')
+    >>> data = numpy.reshape(data, (len(fcst_ptiles), num_y, num_x))
+    >>> data_utils.gridded.conversion.fcst_bin_to_txt(data, fcst_ptiles, desired_ptiles, 'out.txt', terciles=True)
     """
 
     # If terciles=True, make sure there are only 2 percentiles
@@ -66,7 +77,7 @@ def fcst_bin_to_txt(data, fcst_ptiles, desired_ptiles, file, terciles=False):
 
         # Establish the format for the grid point column and the data column(s)
         gridpoint_col_fmt = '{:03d}{:03d}'
-        data_col_fmt = '{:>7.3f}'
+        data_col_fmt = '{:>12.5f}'
 
         # ----------------------------------------------------------------------
         # Create a header string
@@ -80,7 +91,7 @@ def fcst_bin_to_txt(data, fcst_ptiles, desired_ptiles, file, terciles=False):
         header_string = ('{:<' + str(len(gridpoint_col_fmt.format(0,0))) + 's}  ').format('id')
         if terciles:
             header_string = ('{:<' + str(len(gridpoint_col_fmt.format(0, 0))) + 's}  ').format('id')
-            for temp_str in ['below', 'normal', 'above']:
+            for temp_str in ['prob_below', 'prob_normal', 'prob_above']:
                 header_string += ('{:>' + str(len(data_col_fmt.format(0))) + 's}  ').format(temp_str)
         else:
             for ptile_index in ptile_indexes:
@@ -113,19 +124,3 @@ def fcst_bin_to_txt(data, fcst_ptiles, desired_ptiles, file, terciles=False):
     else:
         raise ValueError('Desired percentiles must all be found in fcst percentiles')
 
-
-if __name__ == "__main__":
-    file = '/cpc/data/forecasts/models/all_ranges/global/calibrated/gefs/2014/03/01/00/gefs_tmax_2m_20140301_00z_d08_poe_ER.bin'
-    fcst_ptiles = [ 1,  2,  5, 10, 15,
-                   20, 25, 33, 40, 50,
-                   60, 67, 75, 80, 85,
-                   90, 95, 98, 99]
-    desired_ptiles = [33, 67]
-
-    num_x = 360
-    num_y = 181
-
-    data = numpy.fromfile(file, dtype='float32')
-    data = numpy.reshape(data, (len(fcst_ptiles), num_y, num_x))
-
-    fcst_bin_to_txt(data, fcst_ptiles, desired_ptiles, 'out.txt', terciles=True)

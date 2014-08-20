@@ -51,6 +51,9 @@ echo "intersphinx_mapping['numpy'] = ('http://docs.scipy.org/doc/numpy/', None)"
 echo "intersphinx_mapping['scipy'] = ('http://docs.scipy.org/doc/scipy/reference/', None)" >> conf.py
 echo "intersphinx_mapping['matplotlib'] = ('http://matplotlib.org/1.3.1/api/', None)" >> conf.py
 
+# Add autodoc options
+echo "autodoc_member_order = 'bysource'" >> conf.py
+
 # Add code to use JS to hide Python prompts in code snippets
 echo "def setup(app):" >> conf.py
 echo "    app.add_javascript('copybutton.js')" >> conf.py
