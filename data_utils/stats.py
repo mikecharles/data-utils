@@ -38,10 +38,13 @@ def values_to_ptiles(array,climo,ref_ptiles,k):
     ------
     Exception
         If input argument data arrays are not the required shape or dimensions or if the percentile calculation returns an exception.
+    valueError: An error occurred if the reference percentiles used were not in order from least to greatest. 
 
     Examples
     --------
 
+    >>> import numpy
+    >>> import data_utils.stats
     >>> ref_ptiles = numpy.array([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9])
     >>> num_ptiles = ref_ptiles.shape[0]
     >>> num_locations = 181*360
@@ -57,8 +60,7 @@ def values_to_ptiles(array,climo,ref_ptiles,k):
     ...                           [23.7,  23.7,  23.7,  23.7,  23.7],
     ...                           [ 24.6 ,  24.6,  24.6,  24.6,  24.6],
     ...                           [ 27.6,   27.6,   27.6,   27.6,   27.6]])
-    >>> obs_ptiles = values_to_ptiles(array,climo_data,ref_ptiles,k)
-    >>> obs_ptiles
+    >>> data_utils.stats.values_to_ptiles(array,climo_data,ref_ptiles,k)
     [ 0.08349744         nan  1.          0.93285016  0.        ]
     """
 
@@ -84,6 +86,10 @@ def values_to_ptiles(array,climo,ref_ptiles,k):
     # Set indices of the last, 50th, and 100th percentile associated with array ref_ptiles
     ptile_last = numpy.size(ref_ptiles)-1
     ptile_50th = bisect.bisect(ref_ptiles,0.50)-1
+
+    # Check to see if reference ptiles passed are ordered least to greatest 
+    if not (all(ref_ptiles[i] <= ref_ptiles[i+1] for i in range(ref_ptiles.shape[0]-1))):  
+        raise Exception("Reference percentiles are not in order (least to greatest). Check passed array to make sure it is correct and ordered.")
 
     # Print Estimated 100th ptile
     #loc = 4
