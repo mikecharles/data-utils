@@ -2,7 +2,6 @@ import numpy
 from bisect import bisect
 
 import data_utils.stats
-import data_utils.gridded.plotting
 
 
 """
