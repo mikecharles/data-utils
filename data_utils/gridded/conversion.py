@@ -1,7 +1,7 @@
 import numpy
 from bisect import bisect
 
-import data_utils.stats
+import stats_utils.stats
 
 
 """
@@ -235,7 +235,7 @@ def obs_bin_to_txt(bin_file, num_x, num_y, category_thresholds, txt_file,
 
         # Convert observations to percentiles
         k = 1.343
-        obs_ptile_data = data_utils.stats.values_to_ptiles(obs_data, climo_data, climo_ptiles, k)
+        obs_ptile_data = stats_utils.stats.values_to_ptiles(obs_data, climo_data, climo_ptiles, k)
 
         # Reshape obs data
         obs_ptile_data = numpy.reshape(obs_ptile_data, (num_y, num_x))  # Reshape data
