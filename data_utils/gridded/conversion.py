@@ -38,8 +38,8 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
     bin_file : string
         Binary file containing the forecast, with the dimensions (ptile x Y x
         X)
-    grid : GridDef
-        Grid definition
+    grid : Grid
+        Grid that the binary file maps to
     fcst_ptiles : list
         1-dimensional list of ptiles found in the forecast file
     desired_output_thresholds : list
@@ -165,7 +165,7 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
         raise ValueError('Desired percentiles must all be found in fcst '
                          'percentiles')
 
-def obs_bin_to_txt(bin_file, num_x, num_y, category_thresholds, txt_file,
+def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
                    category_threshold_type='ptile', climo_file=None,
                    climo_ptiles=None):
     """Converts an observation binary file to a text file
@@ -189,10 +189,8 @@ def obs_bin_to_txt(bin_file, num_x, num_y, category_thresholds, txt_file,
     ----------
     bin_file : string
         Binary file containing the observation, with the dimensions (Y x X)
-    num_x : int
-        Number of points in the X-direction
-    num_y : int
-        Number of points in the Y-direction
+    grid : Grid
+        Grid that the binary file maps to
     category_thresholds : list
         1-dimensional list of thresholds (either ptiles or raw values) to
         include in the output file
@@ -215,8 +213,7 @@ def obs_bin_to_txt(bin_file, num_x, num_y, category_thresholds, txt_file,
 
     >>> import numpy
     >>> import data_utils.gridded.conversion
-    >>> num_x = 360
-    >>> num_y = 181
+    >>> grid = data_utils.gridded.griddef.GridDeg('1deg_global')
     >>> climo_file = '/cpc/data/climatologies/land_air/short_range/global/merged_tmean_poe/1deg/07d/tmean_clim_poe_07d_0625.bin'
     >>> climo_ptiles = numpy.array([ 1,  2,  5, 10, 15,
     ...                             20, 25, 33, 40, 50,
@@ -224,7 +221,7 @@ def obs_bin_to_txt(bin_file, num_x, num_y, category_thresholds, txt_file,
     ...                             90, 95, 98, 99])
     >>> bin_file = '/cpc/efsr_realtime/merged_tmean/1deg/07d/2014/06/25/tmean_07d_20140625.bin'
     >>> category_thresholds = [33, 67]
-    >>> data_utils.gridded.conversion.obs_bin_to_txt(bin_file, num_x, num_y, category_thresholds, 'out3.txt', climo_file=climo_file, climo_ptiles=climo_ptiles)
+    >>> data_utils.gridded.conversion.obs_bin_to_txt(bin_file, grid, category_thresholds, 'obs.txt', climo_file=climo_file, climo_ptiles=climo_ptiles)
     """
 
     # Currently only supports 3 categories
@@ -241,14 +238,14 @@ def obs_bin_to_txt(bin_file, num_x, num_y, category_thresholds, txt_file,
     if set(climo_ptiles).issuperset(set(category_thresholds)):
 
         # Reshape climo data
-        climo_data = numpy.reshape(climo_data, (len(climo_ptiles), num_y*num_x))  # Reshape data
+        climo_data = numpy.reshape(climo_data, (len(climo_ptiles), grid.num_y*grid.num_x))  # Reshape data
 
         # Convert observations to percentiles
         k = 1.343
         obs_ptile_data = stats_utils.stats.values_to_ptiles(obs_data, climo_data, climo_ptiles, k)
 
         # Reshape obs data
-        obs_ptile_data = numpy.reshape(obs_ptile_data, (num_y, num_x))  # Reshape data
+        obs_ptile_data = numpy.reshape(obs_ptile_data, (grid.num_y, grid.num_x))  # Reshape data
 
         # Open the output file
         file = open(txt_file, 'w')
@@ -271,8 +268,8 @@ def obs_bin_to_txt(bin_file, num_x, num_y, category_thresholds, txt_file,
         file.write(header_string + '\n')
 
         # Loop over grid
-        for x in range(numpy.shape(obs_ptile_data)[1]):
-            for y in range(numpy.shape(obs_ptile_data)[0]):
+        for x in range(grid.num_x):
+            for y in range(grid.num_y):
                 # Create a data string consisting of the desired data columns
                 data_string = ''
                 data_string += (data_col_fmt['category'] + '  ').format(
