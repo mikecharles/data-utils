@@ -6,37 +6,20 @@ Contains methods for interpolating gridded data.
 """
 
 
-def interpolate(orig_grid,
-                  orig_ll_corner, orig_res,
-                  new_ll_corner, new_ur_corner, new_res,
-                  grid_type="latlon"):
+def interpolate(orig_grid, new_grid):
     """Interpolates a grid from one resolution to another.
 
     Parameters
     ----------
-    orig_grid : array_like
-        2-dimensional (lat x lon) Numpy array of data to interpolate
-    orig_ll_corner : tuple of floats
-        Lower-left corner of the original grid, formatted as (lat, lon)
-    orig_res : float
-        Original grid resolution (in km if ``grid_type="even"``, in degrees if
-        ``grid_type="latlon"``)
-    new_ll_corner : tuple of floats
-        Lower-left corner of the new grid, formatted as (lat, lon)
-    new_ur_corner : tuple of floats
-        Upper-right corner of the new grid, formatted as (lat, lon)
-    new_res : float
-        New grid resolution (in km if ``grid_type="even"``, in degrees if
-        ``grid_type="latlon"``)
-    grid_type : str
-        Original grid type. Possible values are:
-            - latlon : Latlon grid
-            - equal : Equally-spaced square grid
+    orig_grid : Grid
+        Original :class:`~data_utils.gridded.grid.Grid`
+    new_grid : Grid
+        New :class:`~data_utils.gridded.grid.Grid`
 
     Returns
     -------
-    grid : array_like
-        A grid at the desired resolution.
+    data : array_like
+        A data array on the desired grid.
 
     Examples
     --------
@@ -53,13 +36,8 @@ def interpolate(orig_grid,
     >>> new_res = 4
     >>> new_ll_corner = (-90, 0)
     >>> new_ur_corner = (90, 360-new_res)
-    >>> new_grid = data_utils.gridded.interpolation.interpolate(data, \
-orig_ll_corner, \
-orig_res, \
-new_ll_corner, \
-new_ur_corner, \
-new_res, \
-grid_type="latlon")
+    >>> new_data = data_utils.gridded.interpolation.interpolate(old_grid,
+    ...                                                         new_grid)
     """
 
     # Generate arrays of longitude and latitude values for the original grid
