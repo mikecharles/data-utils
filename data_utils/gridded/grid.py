@@ -1,4 +1,4 @@
-class GridDef:
+class Grid:
     """
     Grid definition storing attributes of a grid.
 
@@ -28,3 +28,6 @@ class GridDef:
             self.ur_corner = ur_corner
             self.res = res
             self.type = type
+        # Calculate additional attributes
+        self.num_y = int(((self.ur_corner[0] - self.ll_corner[0]) / self.res) + 1)
+        self.num_x = int(((self.ur_corner[1] - self.ll_corner[1]) / self.res) + 1)

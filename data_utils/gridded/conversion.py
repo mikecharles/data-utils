@@ -1,6 +1,8 @@
 import numpy
 from bisect import bisect
 
+import data_utils.gridded.grid
+
 import stats_utils.stats
 
 
@@ -9,9 +11,10 @@ Contains methods for converting gridded data from one format to another
 """
 
 
-def fcst_bin_to_txt(bin_file, num_x, num_y, fcst_ptiles,
+def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
                     desired_output_thresholds, txt_file,
-                    output_threshold_type='ptile', terciles=False):
+                    output_threshold_type='ptile', terciles=False,
+                    output_grid=None):
     """Converts a forecast binary file to a text file
 
     The forecast binary file must contain probabilities of exceeding certain
@@ -35,10 +38,8 @@ def fcst_bin_to_txt(bin_file, num_x, num_y, fcst_ptiles,
     bin_file : string
         Binary file containing the forecast, with the dimensions (ptile x Y x
         X)
-    num_x : int
-        Number of points in the X-direction
-    num_y : int
-        Number of points in the Y-direction
+    grid : GridDef
+        Grid definition
     fcst_ptiles : list
         1-dimensional list of ptiles found in the forecast file
     desired_output_thresholds : list
@@ -53,6 +54,9 @@ def fcst_bin_to_txt(bin_file, num_x, num_y, fcst_ptiles,
         - If False (default), will output probabilities of exceeding percentiles
           (with headers ptileXX, ptileYY, etc.)
         - Can only be set when 2 percentiles are supplied
+    output_grid : GridDef (optional)
+        Tuple of resolution and dimension to interpolate to before converting
+        to a txt file, in the form (new_y, new_x, new_res)
 
     Raises
     ------
@@ -64,15 +68,14 @@ def fcst_bin_to_txt(bin_file, num_x, num_y, fcst_ptiles,
 
     >>> import data_utils.gridded.conversion
     >>> bin_file = 'gefs_temp_2m_20140611_00z_d08_d14_poe_ER.bin'
-    >>> num_x = 360
-    >>> num_y = 181
+    >>> grid = data_utils.gridded.griddef.GridDeg('1deg_global')
     >>> fcst_ptiles = [ 1,  2,  5, 10, 15,
     ...                20, 25, 33, 40, 50,
     ...                60, 67, 75, 80, 85,
     ...                90, 95, 98, 99]
     >>> desired_output_thresholds = [33, 67]
     >>> data_utils.gridded.conversion.fcst_bin_to_txt(
-    ...    bin_file, num_x, num_y, fcst_ptiles, desired_output_thresholds,
+    ...    bin_file, grid, fcst_ptiles, desired_output_thresholds,
     ...    'out.txt', terciles=True)
     """
 
@@ -86,7 +89,14 @@ def fcst_bin_to_txt(bin_file, num_x, num_y, fcst_ptiles,
     data = numpy.fromfile(bin_file, dtype='float32')
 
     # Reshape data
-    data = numpy.reshape(data, (len(fcst_ptiles), num_y, num_x))
+    data = numpy.reshape(data, (len(fcst_ptiles), grid.num_y, grid.num_x))
+
+    # Interpolate, if necessary
+    # if interp:
+    #     (new_y, new_x, new_res) = interp
+    #     data_new = numpy.zeros(len(fcst_ptiles), new_y, new_x)
+    #     for p in range(len(fcst_ptiles)):
+    #         data_new(p) = data_utils.gridded.interpolation.interpolate(data, (-90, 0), 1, (-90, 0), (90, 358), 2)
 
     # Make sure desired percentiles are part of the forecast percentiles
     if set(fcst_ptiles).issuperset(set(desired_output_thresholds)):
