@@ -4,8 +4,12 @@ class Grid:
 
     A Grid object can either be created by providing the name of the grid, in
     which case the name must match one of the following:
+
         1. 1deg_global
-        1. 2deg_conus
+        2. 2deg_global
+        3. 2deg_conus
+        4. 1/6th_deg_global
+
     or by providing the other attributes listed below
 
     Attributes
@@ -34,11 +38,23 @@ class Grid:
             self.ur_corner = (90, 359)
             self.res = 1
             self.type = 'latlon'
+        elif name == '2deg_global':
+            self.name = name
+            self.ll_corner = (-90, 0)
+            self.ur_corner = (90, 358)
+            self.res = 2
+            self.type = 'latlon'
         elif name == '2deg_conus':
             self.name = name
             self.ll_corner = (20, 230)
             self.ur_corner = (56, 300)
             self.res = 2
+            self.type = 'latlon'
+        elif name == '1/6th_deg_global':
+            self.name = name
+            self.ll_corner = (-89.9167, 0.0833)
+            self.ur_corner = (89.9167, 359.9167)
+            self.res = 1/6
             self.type = 'latlon'
         # Otherwise create a custom grid definition
         else:
