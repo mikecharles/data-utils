@@ -54,9 +54,9 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
         - If False (default), will output probabilities of exceeding percentiles
           (with headers ptileXX, ptileYY, etc.)
         - Can only be set when 2 percentiles are supplied
-    output_grid : GridDef (optional)
-        Tuple of resolution and dimension to interpolate to before converting
-        to a txt file, in the form (new_y, new_x, new_res)
+    output_grid : Grid (optional)
+        :class:`~data_utils.gridded.grid.Grid` to interpolate to before
+        converting to a txt file
 
     Raises
     ------
@@ -68,7 +68,7 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
 
     >>> import data_utils.gridded.conversion
     >>> bin_file = 'gefs_temp_2m_20140611_00z_d08_d14_poe_ER.bin'
-    >>> grid = data_utils.gridded.griddef.GridDeg('1deg_global')
+    >>> grid = data_utils.gridded.grid.Grid('1deg_global')
     >>> fcst_ptiles = [ 1,  2,  5, 10, 15,
     ...                20, 25, 33, 40, 50,
     ...                60, 67, 75, 80, 85,
@@ -92,11 +92,11 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
     data = numpy.reshape(data, (len(fcst_ptiles), grid.num_y, grid.num_x))
 
     # Interpolate, if necessary
-    # if interp:
-    #     (new_y, new_x, new_res) = interp
-    #     data_new = numpy.zeros(len(fcst_ptiles), new_y, new_x)
-    #     for p in range(len(fcst_ptiles)):
-    #         data_new(p) = data_utils.gridded.interpolation.interpolate(data, (-90, 0), 1, (-90, 0), (90, 358), 2)
+    if output_grid:
+        data_new = numpy.zeros(len(fcst_ptiles), output_grid.new_y, output_grid.new_x)
+        for p in range(len(fcst_ptiles)):
+            data_new[p] = data_utils.gridded.interpolation.interpolate(data, grid, output_grid)
+        data = data_new
 
     # Make sure desired percentiles are part of the forecast percentiles
     if set(fcst_ptiles).issuperset(set(desired_output_thresholds)):
@@ -167,7 +167,7 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
 
 def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
                    category_threshold_type='ptile', climo_file=None,
-                   climo_ptiles=None):
+                   climo_ptiles=None, output_grid=None):
     """Converts an observation binary file to a text file
 
     The observation binary file must contain raw values of the given variable.
@@ -190,7 +190,7 @@ def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
     bin_file : string
         Binary file containing the observation, with the dimensions (Y x X)
     grid : Grid
-        Grid that the binary file maps to
+        :class:`~data_utils.gridded.grid.Grid` that the binary file maps to
     category_thresholds : list
         1-dimensional list of thresholds (either ptiles or raw values) to
         include in the output file
@@ -202,6 +202,9 @@ def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
         Binary file containing the observation, with the dimensions (Y x X)
     climo_ptiles : list (optional)
         List of percentiles found in the climatology file
+    output_grid : Grid (optional)
+        :class:`~data_utils.gridded.grid.Grid` to interpolate to before
+        converting to a txt file
 
     Raises
     ------
@@ -213,7 +216,7 @@ def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
 
     >>> import numpy
     >>> import data_utils.gridded.conversion
-    >>> grid = data_utils.gridded.griddef.GridDeg('1deg_global')
+    >>> grid = data_utils.gridded.grid.Grid('1deg_global')
     >>> climo_file = '/cpc/data/climatologies/land_air/short_range/global/merged_tmean_poe/1deg/07d/tmean_clim_poe_07d_0625.bin'
     >>> climo_ptiles = numpy.array([ 1,  2,  5, 10, 15,
     ...                             20, 25, 33, 40, 50,
@@ -247,6 +250,13 @@ def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
         # Reshape obs data
         obs_ptile_data = numpy.reshape(obs_ptile_data, (grid.num_y, grid.num_x))  # Reshape data
 
+        # Interpolate, if necessary
+        if output_grid:
+            obs_ptile_data = data_utils.gridded.interpolation.interpolate(
+                obs_ptile_data,
+                grid,
+                output_grid)
+
         # Open the output file
         file = open(txt_file, 'w')
 
@@ -268,12 +278,12 @@ def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
         file.write(header_string + '\n')
 
         # Loop over grid
-        for x in range(grid.num_x):
-            for y in range(grid.num_y):
+        for x in range(numpy.shape(obs_ptile_data)[1]):
+            for y in range(numpy.shape(obs_ptile_data)[0]):
                 # Create a data string consisting of the desired data columns
                 data_string = ''
                 data_string += (data_col_fmt['category'] + '  ').format(
-                    bisect(category_thresholds,obs_ptile_data[y, x])+1)
+                    bisect(category_thresholds, obs_ptile_data[y, x])+1)
                 data_string += (data_col_fmt['percentile'] + '  ').format(
                     obs_ptile_data[y, x])
                 # Write the grid point and data to the file
