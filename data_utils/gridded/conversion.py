@@ -93,9 +93,9 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
 
     # Interpolate, if necessary
     if output_grid:
-        data_new = numpy.zeros(len(fcst_ptiles), output_grid.new_y, output_grid.new_x)
+        data_new = numpy.zeros((len(fcst_ptiles), output_grid.num_y, output_grid.num_x))
         for p in range(len(fcst_ptiles)):
-            data_new[p] = data_utils.gridded.interpolation.interpolate(data, grid, output_grid)
+            data_new[p] = data_utils.gridded.interpolation.interpolate(data[p, :, :], grid, output_grid)
         data = data_new
 
     # Make sure desired percentiles are part of the forecast percentiles
