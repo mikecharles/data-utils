@@ -165,15 +165,15 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
         raise ValueError('Desired percentiles must all be found in fcst '
                          'percentiles')
 
-def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
-                   category_threshold_type='ptile', climo_file=None,
+def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
+                   output_threshold_type='ptile', climo_file=None,
                    climo_ptiles=None, output_grid=None):
     """Converts an observation binary file to a text file
 
     The observation binary file must contain raw values of the given variable.
     The file should be a single dimension (locations).
 
-    A climatology file is necessary if category_threshold_type='ptile', in which
+    A climatology file is necessary if output_threshold_type='ptile', in which
     case the raw values in the observation file needs to first be converted to
     ptiles. The climatology file must have probabilities of exceeding a given
     set of percentiles, and be of dimensions (P x L)
@@ -191,12 +191,12 @@ def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
         Binary file containing the observation, with the dimensions (Y x X)
     grid : Grid
         :class:`~data_utils.gridded.grid.Grid` that the binary file maps to
-    category_thresholds : list
+    desired_output_thresholds : list
         1-dimensional list of thresholds (either ptiles or raw values) to
         include in the output file
     txt_file : string
         Text file to write data to (will be overwritten)
-    category_threshold_type : string (optional)
+    output_threshold_type : string (optional)
         Type of thresholds to write out ('ptile' or 'raw')
     climo_file : string (optional)
         Binary file containing the observation, with the dimensions (Y x X)
@@ -223,12 +223,12 @@ def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
     ...                             60, 67, 75, 80, 85,
     ...                             90, 95, 98, 99])
     >>> bin_file = '/cpc/efsr_realtime/merged_tmean/1deg/07d/2014/06/25/tmean_07d_20140625.bin'
-    >>> category_thresholds = [33, 67]
-    >>> data_utils.gridded.conversion.obs_bin_to_txt(bin_file, grid, category_thresholds, 'obs.txt', climo_file=climo_file, climo_ptiles=climo_ptiles)
+    >>> desired_output_thresholds = [33, 67]
+    >>> data_utils.gridded.conversion.obs_bin_to_txt(bin_file, grid, desired_output_thresholds, 'obs.txt', climo_file=climo_file, climo_ptiles=climo_ptiles)
     """
 
     # Currently only supports 3 categories
-    if len(category_thresholds) != 2:
+    if len(desired_output_thresholds) != 2:
         raise ValueError('Currently only supports 3 categories')
 
     # Open obs binary file
@@ -238,7 +238,7 @@ def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
     climo_data = numpy.fromfile(climo_file, dtype='float32')
 
     # Make sure desired percentiles are part of the forecast percentiles
-    if set(climo_ptiles).issuperset(set(category_thresholds)):
+    if set(climo_ptiles).issuperset(set(desired_output_thresholds)):
 
         # Reshape climo data
         climo_data = numpy.reshape(climo_data, (len(climo_ptiles), grid.num_y*grid.num_x))  # Reshape data
@@ -283,7 +283,7 @@ def obs_bin_to_txt(bin_file, grid, category_thresholds, txt_file,
                 # Create a data string consisting of the desired data columns
                 data_string = ''
                 data_string += (data_col_fmt['category'] + '  ').format(
-                    bisect(category_thresholds, obs_ptile_data[y, x])+1)
+                    bisect(desired_output_thresholds, obs_ptile_data[y, x])+1)
                 data_string += (data_col_fmt['percentile'] + '  ').format(
                     obs_ptile_data[y, x])
                 # Write the grid point and data to the file
