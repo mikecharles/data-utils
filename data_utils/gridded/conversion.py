@@ -233,9 +233,11 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
 
     # Open obs binary file
     obs_data = numpy.fromfile(bin_file, dtype='float32')
+    obs_data[obs_data <= -999] = numpy.nan
 
     # Open climo binary file
     climo_data = numpy.fromfile(climo_file, dtype='float32')
+    climo_data[climo_data <= -999] = numpy.nan
 
     # Make sure desired percentiles are part of the forecast percentiles
     if set(climo_ptiles).issuperset(set(desired_output_thresholds)):
@@ -281,11 +283,14 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
         for x in range(numpy.shape(obs_ptile_data)[1]):
             for y in range(numpy.shape(obs_ptile_data)[0]):
                 # Create a data string consisting of the desired data columns
-                data_string = ''
-                data_string += (data_col_fmt['category'] + '  ').format(
-                    bisect(desired_output_thresholds, obs_ptile_data[y, x])+1)
-                data_string += (data_col_fmt['percentile'] + '  ').format(
-                    obs_ptile_data[y, x])
+                if numpy.isnan(obs_ptile_data[y, x]):
+                    data_string = (data_col_fmt['category'] + '  ' + data_col_fmt['category']).format(-999, -999)
+                else:
+                    data_string = ''
+                    data_string += (data_col_fmt['category'] + '  ').format(
+                        bisect(desired_output_thresholds, obs_ptile_data[y, x])+1)
+                    data_string += (data_col_fmt['percentile'] + '  ').format(
+                        obs_ptile_data[y, x])
                 # Write the grid point and data to the file
                 file.write((gridpoint_col_fmt + '  {}\n').format(x + 1, y + 1,
                                                                  data_string))
