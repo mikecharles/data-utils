@@ -107,8 +107,11 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
         # Open the output file
         file = open(txt_file, 'w')
 
+        # Get the number of digits in num_x and num_y for formatting below
+        num_digits = max(len(str(output_grid.num_y)), len(str(output_grid.num_x)))
+
         # Establish the format for the grid point column and the data column(s)
-        gridpoint_col_fmt = '{:03d}{:03d}'
+        gridpoint_col_fmt = '{:0' + str(num_digits) + 'd}{:0' + str(num_digits) + 'd}'
         data_col_fmt = '{:>12.5f}'
 
         # ----------------------------------------------------------------------
@@ -262,8 +265,11 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
         # Open the output file
         file = open(txt_file, 'w')
 
+        # Get the number of digits in num_x and num_y for formatting below
+        num_digits = max(len(str(output_grid.num_y)), len(str(output_grid.num_x)))
+
         # Establish the format for the grid point column and the data column(s)
-        gridpoint_col_fmt = '{:03d}{:03d}'
+        gridpoint_col_fmt = '{:0' + str(num_digits) + 'd}{:0' + str(num_digits) + 'd}'
         data_col_fmt = {'category': '{:>12.0f}', 'percentile': '{:>12.2f}'}
 
         # ----------------------------------------------------------------------
