@@ -60,9 +60,9 @@ class Grid:
         else:
             if ll_corner or ur_corner or res == None:
                 raise ValueError('You must either supply the name of a '
-                                 'built-in GridDef, or an ll_corner, '
+                                 'built-in Grid, or an ll_corner, '
                                  'ur_corner, and res to create a custom '
-                                 'GridDef')
+                                 'Grid')
             self.name = 'custom'
             self.ll_corner = ll_corner
             self.ur_corner = ur_corner

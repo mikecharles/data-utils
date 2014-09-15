@@ -43,7 +43,7 @@ def interpolate(orig_data, orig_grid, new_grid):
     """
 
     # Generate arrays of longitude and latitude values for the original grid
-    num_lats, num_lons = orig_data.shape
+    num_lats, num_lons = (orig_grid.num_y, orig_grid.num_x)
     orig_start_lat, orig_start_lon = orig_grid.ll_corner
     orig_lons = numpy.arange(orig_start_lon,
                              orig_start_lon + (num_lons * orig_grid.res),
