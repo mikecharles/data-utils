@@ -122,11 +122,15 @@ def make_plot(data, grid, levels=None, title=None, lat_range=(-90, 90), lon_rang
                                      llcrnrlat=lat_range[0],
                                      urcrnrlon=lon_range[1],
                                      urcrnrlat=lat_range[1],
-                                     projection='mill', ax=ax)
-    m.drawcoastlines(linewidth=1.25)
-    m.drawparallels(numpy.arange(lat_range[0], lat_range[1]+1, 20), labels=[1, 1, 0, 0])
-    m.drawmeridians(numpy.arange(lon_range[0], lon_range[1]+1, 60), labels=[0, 0, 0, 1])
+                                     projection='mill',
+                                     ax=ax,
+                                     resolution='l')
+    m.drawcoastlines(linewidth=1)
+    m.drawparallels(numpy.arange(lat_range[0], lat_range[1]+1, 10), labels=[1, 1, 0, 0])
+    m.drawmeridians(numpy.arange(lon_range[0], lon_range[1]+1, 10), labels=[0, 0, 0, 1])
     m.drawmapboundary(fill_color='#DDDDDD')
+    m.drawstates()
+    m.drawcountries()
 
     # Plot data
     if levels:
