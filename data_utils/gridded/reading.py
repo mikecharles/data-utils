@@ -64,7 +64,7 @@ def read_grib(file, grib_type, variable, level):
     temp_file = str(uuid.uuid4()) + '.bin'
     # Set the name of the wgrib program to call
     if grib_type == 'grib1':
-        wgrib_call = 'wgrib "{}" | grep "{}" | grep "{} | wgrib -i "{}" -nh ' \
+        wgrib_call = 'wgrib "{}" | grep "{}" | grep "{}" | wgrib -i "{}" -nh ' \
                      '-bin -o "{}"'.format(file, variable, level, temp_file)
     elif grib_type == 'grib2':
         wgrib_call = 'wgrib2 "{}" -match "{}" -match "{}" -order we:sn ' \
