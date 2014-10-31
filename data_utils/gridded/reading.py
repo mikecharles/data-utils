@@ -67,9 +67,9 @@ def read_grib(file, grib_type, variable, level):
         wgrib_call = 'wgrib "{}" | grep "{}" | grep "{}" | wgrib -i "{}" -nh ' \
                      '-bin -o "{}"'.format(file, variable, level, temp_file)
     elif grib_type == 'grib2':
-        wgrib_call = 'wgrib2 "{}" -match "{}" -match "{}" -order we:sn ' \
-                     '-no_header -bin "{}"'.format(file, variable, level,
-                                                   temp_file)
+        wgrib_call = 'wgrib2 "{}" -match "{}" -match "{}" -match "^1" -order ' \
+                     'we:sn -no_header -bin "{}"'.format(file, variable,
+                                                         level, temp_file)
     else:
         raise IOError(__name__ + ' requires grib_type to be grib1 or grib2')
     # Generate a wgrib call
