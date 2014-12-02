@@ -48,10 +48,11 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2)):
     #---------------------------------------------------------------------------
     # Create kernels for all members
     #
+    num_members = discrete_members.shape[0]
     # Create list of x values in standardized space
     x = numpy.linspace(-4, 4, num_xvals)
     # Create an empty NumPy array to store the kernels
-    kernels = numpy.empty(shape=(discrete_members.shape[0], num_xvals))
+    kernels = numpy.empty(shape=(num_members, num_xvals))
     # Loop over all ensemble members and create their kernels
     for m in range(num_members):
         kernels[m] = scipy.stats.norm.pdf(x, discrete_members[m],
@@ -79,7 +80,6 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2)):
     #
     if make_plot:
         matplotlib.rcParams['font.size'] = 10
-        #matplotlib.rcParams['legend.fontsize'] = 'small'
         # Create a figure
         fig, ax1 = matplotlib.pyplot.subplots(1, 1)
         # Loop over all standardized ensemble members and plot their kernel
@@ -104,24 +104,3 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2)):
         matplotlib.pyplot.savefig('output.png')
 
     return output
-
-
-if __name__ == '__main__':
-    # --------------------------------------------------------------------------
-    # Make a set of fake, standardized ensemble members
-    num_members = 21  # Number of ensemble members
-    discrete_members = numpy.random.randn(num_members)
-
-    # Use R_best to calculate the standard deviation of the kernels
-    R_best = 0.7  # Correlation of best member
-    kernel_std = math.sqrt(1 - R_best ** 2)
-
-    # Define ptiles
-    ptiles = [ 1,  2,  5, 10, 15,
-              20, 25, 33, 40, 50,
-              60, 67, 75, 80, 85,
-              90, 95, 98, 99]
-
-    poe = make_poe(discrete_members, ptiles, kernel_std)
-
-    print(poe)
