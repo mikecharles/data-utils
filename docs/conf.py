@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Model Post Processing documentation build configuration file, created by
-# sphinx-quickstart on Mon Dec  1 12:06:49 2014.
+# mpp documentation build configuration file, created by
+# sphinx-quickstart on Tue Dec  2 17:15:16 2014.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -19,7 +19,7 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('..'))
 
 # -- General configuration ------------------------------------------------
 
@@ -31,11 +31,8 @@ sys.path.insert(0, os.path.abspath('../..'))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
+    'numpydoc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -51,7 +48,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Model Post Processing'
+project = 'mpp'
 copyright = '2014, Mike Charles'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -184,7 +181,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'ModelPostProcessingdoc'
+htmlhelp_basename = 'mppdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -204,8 +201,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'ModelPostProcessing.tex', 'Model Post Processing Documentation',
-   'Mike Charles', 'manual'),
+  ('index', 'mpp.tex', 'mpp Documentation',
+   'Author', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -234,8 +231,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'modelpostprocessing', 'Model Post Processing Documentation',
-     ['Mike Charles'], 1)
+    ('index', 'mpp', 'mpp Documentation',
+     ['Author'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -248,8 +245,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'ModelPostProcessing', 'Model Post Processing Documentation',
-   'Mike Charles', 'ModelPostProcessing', 'One line description of project.',
+  ('index', 'mpp', 'mpp Documentation',
+   'Author', 'mpp', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -266,5 +263,71 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+# -- Options for Epub output ----------------------------------------------
+
+# Bibliographic Dublin Core info.
+epub_title = 'mpp'
+epub_author = 'Author'
+epub_publisher = 'Author'
+epub_copyright = '2014, Author'
+
+# The basename for the epub file. It defaults to the project name.
+#epub_basename = 'mpp'
+
+# The HTML theme for the epub output. Since the default themes are not optimized
+# for small screen space, using the same theme for HTML and epub output is
+# usually not wise. This defaults to 'epub', a theme designed to save visual
+# space.
+#epub_theme = 'epub'
+
+# The language of the text. It defaults to the language option
+# or en if the language is not set.
+#epub_language = ''
+
+# The scheme of the identifier. Typical schemes are ISBN or URL.
+#epub_scheme = ''
+
+# The unique identifier of the text. This can be a ISBN number
+# or the project homepage.
+#epub_identifier = ''
+
+# A unique identification for the text.
+#epub_uid = ''
+
+# A tuple containing the cover image and cover page html template filenames.
+#epub_cover = ()
+
+# A sequence of (type, uri, title) tuples for the guide element of content.opf.
+#epub_guide = ()
+
+# HTML files that should be inserted before the pages created by sphinx.
+# The format is a list of tuples containing the path and title.
+#epub_pre_files = []
+
+# HTML files shat should be inserted after the pages created by sphinx.
+# The format is a list of tuples containing the path and title.
+#epub_post_files = []
+
+# A list of files that should not be packed into the epub file.
+epub_exclude_files = ['search.html']
+
+# The depth of the table of contents in toc.ncx.
+#epub_tocdepth = 3
+
+# Allow duplicate toc entries.
+#epub_tocdup = True
+
+# Choose between 'default' and 'includehidden'.
+#epub_tocscope = 'default'
+
+# Fix unsupported image types using the PIL.
+#epub_fix_images = False
+
+# Scale large images.
+#epub_max_image_width = 0
+
+# How to display URL addresses: 'footnote', 'no', or 'inline'.
+#epub_show_urls = 'inline'
+
+# If false, no index is generated.
+#epub_use_index = True
