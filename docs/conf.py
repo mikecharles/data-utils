@@ -15,6 +15,10 @@
 
 import sys
 import os
+import sphinx_rtd_theme
+
+# Necessary for using the Sphinx ReadTheDocs theme
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -103,7 +107,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -331,3 +335,7 @@ epub_exclude_files = ['search.html']
 
 # If false, no index is generated.
 #epub_use_index = True
+
+# Import the copybutton.js file to enable toggling of the '>>>'s
+def setup(app):
+    app.add_javascript('copybutton.js')
