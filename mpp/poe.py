@@ -7,7 +7,8 @@ import matplotlib.pyplot
 import math
 
 
-def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2)):
+def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
+             make_plot=False):
     """ Converts a set of discrete ensemble members into a continuous
     Probability of Exceedance (POE) distribution. The members are each "dressed"
     with a "kernel" (small Gaussian PDF), and then the kernels are all averaged
@@ -23,6 +24,8 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2)):
     kernel_std : real, optional
         Standard deviation of the kernels. Defaults to a PDF in which the best
         member has a 0.7 correlation with observations.
+    make_plot : boolean
+        Whether to make a plot of the PDFs and POE. Defaults to False
 
     Returns
     -------
@@ -43,7 +46,6 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2)):
     # Options
     #
     num_xvals = 1000  # Number of discrete X values for generating PDFs
-    make_plot = False # Whether to make a plot of all steps of the POE creation
 
     #---------------------------------------------------------------------------
     # Create kernels for all members
