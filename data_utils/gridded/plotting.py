@@ -22,8 +22,8 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
 
     Parameters
     ----------
-    data : 2-d array
-        2-dimensional (lat x lon) Numpy array of data to plot
+    data : array_like
+        1- or 2-dimensional (lat x lon) Numpy array of data to plot
     grid : Grid
         :class:`~data_utils.gridded.grid.Grid`
     levels : list (optional)
@@ -61,7 +61,8 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
     matplotlib.pyplot.close("all")
 
 
-def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None, title=None, lat_range=(-90, 90), lon_range=(0, 360)):
+def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
+                 title=None, lat_range=(-90, 90), lon_range=(0, 360)):
     """Plots the given data and saves to a file.
 
     Essentially makes calls to :func:`make_plot` and :func:`save_plot` to do
@@ -69,8 +70,8 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None, title=None
 
     Parameters
     ----------
-    data : 2-d array
-        2-dimensional (lat x lon) Numpy array of data to plot
+    data : array_like
+        1- or 2-dimensional (lat x lon) Numpy array of data to plot
     grid : Grid
         :class:`~data_utils.gridded.grid.Grid`
     levels : list (optional)
@@ -92,14 +93,20 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None, title=None
     Examples
     --------
     >>> import numpy
-    >>> import data_utils.gridded.plotting
+    >>> from data_utils.gridded.plotting import plot_to_file
     >>> grid = data_utils.gridded.grid.Grid('1deg_global')
-    >>> A = numpy.fromfile('/export/cpc-lw-mcharles/mcharles/data/observations/land_air/short_range/global/merged_tmax/1deg/01d/2013/01/01/tmax_01d_20130101.bin','float32')
+    >>> A = numpy.fromfile('tmax_01d_20130101.bin','float32')
     >>> A = numpy.reshape(A, (grid.num_y, grid.num_x))
     >>> A[A == -999] = numpy.nan
-    >>> data_utils.gridded.plotting.plot_to_file(A, grid, 'test.png', lat_range=(20, 75), lon_range=(180, 310))
-
+    >>> plot_to_file(A, grid, 'test.png', lat_range=(20, 75), lon_range=(180, 310))
     """
+
+    # Reshape array if necessary
+    if data.ndim == 1:
+        data = numpy.reshape(data, (grid.num_y, grid.num_x))
+    elif data.ndim != 2:
+        raise ValueError('data array must have 1 or 2 dimensions')
+
     make_plot(data, grid, levels=levels, colors=colors, title=title, lat_range=lat_range, lon_range=lon_range)
     save_plot(file, dpi)
     matplotlib.pyplot.close("all")
