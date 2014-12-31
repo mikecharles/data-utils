@@ -55,7 +55,7 @@ apidoc:
 	@echo "Build finished. Created ReST files. You can now run the 'html'" \
 	      "target to generate the API for all modules."
 
-html:
+html: apidoc
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
