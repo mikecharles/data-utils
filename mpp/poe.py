@@ -47,7 +47,7 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     #
     num_xvals = 1000  # Number of discrete X values for generating PDFs
 
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Create kernels for all members
     #
     num_members = discrete_members.shape[0]
@@ -77,7 +77,7 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     for ptile in scipy.stats.norm.ppf(numpy.array(ptiles)/100):
         output.append(final_poe[find_nearest_index(x, ptile)])
 
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Plot all ensemble members
     #
     if make_plot:
