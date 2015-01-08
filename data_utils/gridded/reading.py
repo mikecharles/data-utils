@@ -6,9 +6,13 @@ import subprocess
 import shlex
 import uuid
 import os
+import logging
 
 import numpy
 
+
+# Initialize a logging object specific to this module
+logger = logging.getLogger(__name__)
 
 def read_grib(file, grib_type, variable, level):
     """Reads a record from a grib file
@@ -74,6 +78,7 @@ def read_grib(file, grib_type, variable, level):
         raise IOError(__name__ + ' requires grib_type to be grib1 or grib2')
     # Generate a wgrib call
     try:
+        logger.debug('Command to extract grib data: ' + wgrib_call)
         output = subprocess.check_output(shlex.split(wgrib_call))
     except Exception as e:
         raise IOError('Couldn\'t read {} file: {}'.format(grib_type, str(e)))
