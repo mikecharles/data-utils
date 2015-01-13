@@ -5,6 +5,11 @@ import scipy.stats
 from stats_utils.stats import find_nearest_index
 import matplotlib.pyplot
 import math
+import logging
+
+
+# Initialize a logging object specific to this module
+logger = logging.getLogger(__name__)
 
 
 def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
@@ -35,10 +40,7 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     Examples
     --------
 
-    >>> import numpy
-    >>> import stats_utils.stats
-    >>> arr = numpy.array([4, 5, 6, 7, 8])
-    >>> stats_utils.stats.find_nearest_index(arr, 6.1)
+
     2
     """
 
@@ -106,3 +108,44 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
         matplotlib.pyplot.savefig('output.png')
 
     return output
+
+
+def poe_to_terciles(poe, ptiles):
+    """
+
+    Parameters
+    ----------
+    discrete_members : array_like
+        1-dimensional Numpy array of discrete member values
+    ptiles : list
+        List of percentiles at which to return the POE
+    kernel_std : real, optional
+        Standard deviation of the kernels. Defaults to a PDF in which the best
+        member has a 0.7 correlation with observations.
+    make_plot : boolean
+        Whether to make a plot of the PDFs and POE. Defaults to False
+
+    Returns
+    -------
+    array_like
+        NumPy array of POE values at the given percentiles
+
+    Examples
+    --------
+
+
+    """
+    # --------------------------------------------------------------------------
+    # Verify input
+    #
+    # ptiles must contain 33 and 67
+    if 33 not in ptiles or 67 not in ptiles:
+        raise ValueError('ptiles must contain 33 and 67')
+
+    logger.debug('33 is at index {}'.format(find_nearest_index(ptiles, 33)))
+
+    below = 1 - poe[find_nearest_index(ptiles, 33), :]
+    above = poe[find_nearest_index(ptiles, 67), :]
+    near = 1 - (below + above)
+
+    return below, near, above
