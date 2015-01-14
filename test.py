@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 import numpy as np
-# import math
-# import mpp.poe
+import math
+from mpp.poe import make_poe, poe_to_terciles
 import logging
 from data_utils.gridded.reading import read_grib
-import sys
+import time
 from data_utils.gridded.grid import Grid
+from stats_utils.stats import poe_to_moments
 # from data_utils.gridded.plotting import plot_to_file
 # from stats_utils import stats
 
@@ -20,7 +21,7 @@ ptiles = [ 1,  2,  5, 10, 15,
           20, 25, 33, 40, 50,
           60, 67, 75, 80, 85,
           90, 95, 98, 99]
-num_members = 21
+num_members = 5
 fhr_int = 6
 
 # ------------------------------------------------------------------------------
@@ -29,6 +30,8 @@ fhr_int = 6
 model = 'gefsbc'
 cycle = '00'
 lead = 'd6-10'
+var = 'temp'
+log_level = 'DEBUG'
 
 if lead == 'd6-10' and cycle == '00':
     fhr1 = 150
@@ -38,10 +41,13 @@ elif lead == 'd8-14' and cycle == '00':
     fhr2 = 360
 else:
     raise ValueError()
+fhrs = range(fhr1, fhr2 + 1, fhr_int)
+
+members = ['{:02d}'.format(m) for m in range(num_members)]
 
 # Setup logging
 logging.basicConfig(format='%(levelname)s - %(module)s - %(message)s',
-                    level=logging.DEBUG)
+                    level=getattr(logging, log_level))
 
 # Initialize a logging object
 logger = logging.getLogger(__name__)
@@ -54,77 +60,81 @@ date = '20150101'
 yyyy, mm, dd = date[0:4], date[4:6], date[6:8]
 
 grid = Grid('1deg_global')
-grid.print_info()
 
 # ------------------------------------------------------------------------------
 # Load ensemble forecast data
 #
+logger.info('Loading ensemble forecast data...')
 fcst_file_template = '/cpc/model_realtime/raw/{model}/06h/{yyyy}/{mm}/{dd}/{cycle}/{model}_{yyyy}{mm}{dd}_{cycle}z_f{fhr}_m{member}.grb2'
 
-# Initialize a data NumPy array
-# data = np.empty(())
+# Initialize data NumPy arrays
+fcst_data = np.empty((num_members, grid.num_x * grid.num_y)) # all
+# members/gridpoints
+temp_data = np.empty((len(fhrs), grid.num_x * grid.num_y)) # all fhrs/gridpoints
 
-for member in ['{:02d}'.format(m) for m in range(num_members)]:
-    for fhr in range(fhr1, fhr2 + 1, fhr_int):
+# Loop over members
+for m in range(len(members)):
+    member = members[m]
+    logger.debug('Loading member {}'.format(member))
+    # Loop over fhrs
+    for f in range(len(fhrs)):
+        fhr = fhrs[f]
+        # Establish fcst file name
         fcst_file = replace_vars_in_string(fcst_file_template, model=model,
                                            yyyy=yyyy, mm=mm, dd=dd,
                                            cycle=cycle, fhr=fhr, member=member)
-        logger.info('Loading data from {}...'.format(fcst_file))
-        print(read_grib(fcst_file, 'grib2', 'TMP', '2 m above ground').shape())
-        sys.exit()
+        # Load data from fcst file
+        logger.debug('Loading data from {}...'.format(fcst_file))
+        temp_data[f] = read_grib(fcst_file, 'grib2', 'TMP', '2 m above ground')
+    # Create average or accumulation over fhrs
+    if var == 'temp':
+        fcst_data[m] = np.nanmean(temp_data, axis=0)
+    elif var == 'precip':
+        fcst_data[m] = np.nansum(temp_data, axis=0)
 
-# replace_vars_in_string
+    #     fcst_data[m].astype('float32').tofile('test_m{}.bin'.format(member))
+
+# Convert fcst data from Kelvin to Celsius
+if var == 'temp':
+    fcst_data -= 273.15
 
 # ------------------------------------------------------------------------------
 # Load climo data
 #
+logger.info('Loading climatology data...')
+climo_file = '/export/cpc-lw-mcharles/mcharles/data/climatologies/land_air' \
+             '/short_range/global/merged_tmean_poe/1deg/05d' \
+             '/tmean_clim_poe_05d_1213.bin'
+climo_data = np.reshape(np.fromfile(climo_file, 'float32'), (len(ptiles),
+                                                  grid.num_y*grid.num_x))
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Obtain the climatological mean and standard deviation at each gridpoint
 #
-# Load the climo file
-# climo_file = '/export/cpc-lw-mcharles/mcharles/data/climatologies/land_air' \
-#              '/short_range/global/merged_tmean_poe_missing_vals/1deg/05d' \
-#              '/tmean_clim_poe_05d_1213.bin'
-# climo_data = np.reshape(np.fromfile(climo_file, 'float32'), (len(ptiles),
-#                                                   grid.num_y*grid.num_x))
+# Use stats_utils.stats.poe_to_moments()
+logger.info('Converting climatologies from percentile to mean/standard '
+            'deviation...')
+climo_mean, climo_std = poe_to_moments(climo_data, ptiles, axis=0)
+
+# ------------------------------------------------------------------------------
+# Anomalize all ensemble members
 #
-# # Loop over climo gridpoints and calculate the mean and standard deviation
-# # for i in range(grid.num_y*grid.num_x):
-# for i in [0]:
-#     [mean, std] = stats.poe_to_moments(ptiles, climo_data[:, i])
-#     print(mean, std)
+logger.info('Converting forecast data to standardized anomaly space...')
+fcst_data_z = (fcst_data - climo_mean) / climo_std
 
-
-
-
-
-
-
-
-# --------------------------------------------------------------------------
-# Make a set of fake, standardized ensemble members
-# num_members = 21  # Number of ensemble members
-# discrete_members = numpy.random.randn(num_members)
-# grid = Grid('1deg_global')
-# model_data = np.empty([num_members, grid.num_y*grid.num_x])
-# model_file = '/cpc/model_realtime/raw/gefs/06h/2014/12/03/00' \
-#              '/gefs_20141203_00z_f180_m{:02d}.grb2'
-# for m in range(model_data.shape[0]):
-#     print('Loading ' + model_file.format(m))
-#     model_data[m, :] = read_grib(model_file.format(m),
-#                                  'grib2', 'TMP',  '2 m above ground')
-
-
-
+# ------------------------------------------------------------------------------
 # Use R_best to calculate the standard deviation of the kernels
-# R_best = 0.7  # Correlation of best member
-# kernel_std = math.sqrt(1 - R_best ** 2)
 #
-# print(model_data[:, 0])
-#
-# mpp.poe.make_poe(model_data[:, 0], ptiles, kernel_std, make_plot=True)
+logger.info('Creating POEs from standardized anomaly forecasts...')
 
-# for i in range(data.shape[1]):
-#     print('Calculating POE at point {}'.format(i))
-#     poe = mpp.poe.make_poe(data[:,i], ptiles, kernel_std)
+# Define R_best and the kernel standard deviation (currently arbitrary)
+R_best = 0.7  # correlation of best member
+kernel_std = math.sqrt(1 - R_best ** 2)
+# Loop over all gridpoints
+for i in range(fcst_data_z.shape[1]):
+    poe = make_poe(fcst_data_z[:, i], ptiles, kernel_std)
+
+# ------------------------------------------------------------------------------
+# Convert the final POE to terciles for plotting
+#
+below, near, above = poe_to_terciles(fcst_data_z, ptiles)
