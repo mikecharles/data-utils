@@ -204,8 +204,35 @@ def save_plot(file, dpi=200):
     matplotlib.pyplot.savefig(file, dpi=dpi, bbox_inches='tight')
 
 
-def plot_tercile_probs(below, near, above, grid, levels=None, colors=None,
-                       title=None, lat_range=(-90, 90), lon_range=(0, 360)):
+def plot_tercile_probs(below, near, above, grid, var='temp',levels=None,
+                       colors=None, title=None, lat_range=(-90, 90),
+                       lon_range=(0, 360)):
+    # If colors set to '[var]_colors', use one of these default color scales
+    if colors == 'temp_colors':
+        colors = [
+            # Below normal (blues)
+            [0.03, 0.27, 0.58],
+            [0.13, 0.44, 0.71],
+            [0.26, 0.57, 0.78],
+            [0.42, 0.68, 0.84],
+            [0.62, 0.79, 0.88],
+            [0.78, 0.86, 0.94],
+            [0.94, 0.95, 1.00],
+            # Near normal (grey)
+            [0.85, 0.85, 0.85],
+            # Above normal (reds)
+            [1.00, 0.9, 0.85],
+            [0.99, 0.73, 0.63],
+            [0.99, 0.57, 0.45],
+            [0.98, 0.42, 0.29],
+            [0.94, 0.23, 0.17],
+            [0.80, 0.09, 0.11],
+            [0.60, 0.00, 0.05]
+        ]
+    else:
+        raise ValueError('Supported vars for default color scales (colors=['
+                         'var]_colors): temp, precip')
+
     # Make an empty array to store above, near, and below
     all_probs = np.empty(below.shape)
     all_probs[:] = np.nan
