@@ -137,7 +137,8 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(-90, 
     """
     # Check args
     if (colors and not levels) or (levels and not colors):
-        raise ValueError('The "levels" and "colors" parameters must both be defined together or not at all')
+        raise ValueError('The "levels" and "colors" parameters must both be '
+                         'defined together or not at all')
     # Convert the ll_corner and res to arrays of lons and lats
     start_lat, start_lon = grid.ll_corner
     end_lat, end_lon = grid.ur_corner
@@ -165,28 +166,9 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(-90, 
 
     # Plot data
     if levels:
-        # plot = m.contourf(lons, lats, data, levels=levels, latlon=True)
-        # plot = m.contourf(lons, lats, data, levels, latlon=True, colors=colors)
-        # cmap = matplotlib.colors.ListedColormap(colors[1:-1])
-        # cmap.set_over(colors[-1])
-        # cmap.set_under(colors[0])
-        # bounds = levels
-        # norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
-        cmap = matplotlib.pyplot.cm.jet
-        cmaplist = [cmap(i) for i in range(cmap.N)]
-        cmap = cmap.from_list('Custom cmap', cmaplist, cmap.N)
-        bounds = np.linspace(levels[0],levels[-1],levels[-1]+1)
-        norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
-        plot = m.pcolormesh(lons - grid.res / 2, lats - grid.res / 2, np.ma.masked_invalid(data), latlon=True, cmap=cmap, norm=norm)
-#        cb = matplotlib.colorbar.ColorbarBase(plot, cmap=cmap, norm=norm, spacing='proportional', ticks=bounds, boundaries=bounds, format='%1i')
-#        cb.set_label('TEST')
-        # plot = m.pcolormesh(lons - grid.res / 2, lats - grid.res / 2, np.ma.masked_invalid(data), latlon=True, cmap=matplotlib.cm.get_cmap('jet'), norm=matplotlib.colors.BoundaryNorm(levels, ncolors=len(levels), clip=False))
+        plot = m.contourf(lons, lats, data, levels, latlon=True, colors=colors)
     else:
         plot = m.contourf(lons, lats, data, latlon=True)
-        # data[np.isnan(data)] = -999
-        # plot = m.pcolormesh(lons-grid.res/2, lats-grid.res/2, np.ma.masked_invalid(data), latlon=True)
-        # print(grid.ll_corner[1]-1, grid.ur_corner[1]+1, grid.ll_corner[0]-1, grid.ur_corner[0]+1)
-        # plot = m.imshow(data, interpolation='none', aspect='auto')
 
     # Add labels
     fontsize = 14
@@ -196,6 +178,7 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(-90, 
     matplotlib.pyplot.colorbar(plot, orientation="horizontal")
     # cb = matplotlib.colorbar.ColorbarBase(plot, norm=norm, boundaries=[-10]+bounds+[10], extend='both', extendfrac='auto', ticks=bounds, spacing='uniform', orientation='horizontal')
     # cb.set_label('TEST')
+
 
 def show_plot():
     """Shows an existing plot that was created using
@@ -219,3 +202,21 @@ def save_plot(file, dpi=200):
         200`.
     """
     matplotlib.pyplot.savefig(file, dpi=dpi, bbox_inches='tight')
+
+
+def plot_tercile_probs(below, near, above, grid, levels=None, colors=None,
+                       title=None, lat_range=(-90, 90), lon_range=(0, 360)):
+    # Make an empty array to store above, near, and below
+    all_probs = np.empty(below.shape)
+    all_probs[:] = np.nan
+    # Insert belows where they are the winning category and above 33%
+    all_probs = np.where((below > 0.333) & (below > above), -1*below, all_probs)
+    # Insert aboves where they are the winning category and above 33%
+    all_probs = np.where((above > 0.333) & (above > below), above, all_probs)
+    # Insert nears where neither above or below are above 33%
+    all_probs = np.where((below <= 0.333) & (above <= 0.333), 0, all_probs)
+    # Convert all_probs into probabilities from 0-100
+    all_probs *= 100
+    # Plot
+    plot_to_screen(all_probs, grid, levels=levels, colors=colors,
+                   title=title, lat_range=(20, 70), lon_range=(200, 300))
