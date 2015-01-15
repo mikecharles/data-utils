@@ -142,8 +142,6 @@ def poe_to_terciles(poe, ptiles):
     if 33 not in ptiles or 67 not in ptiles:
         raise ValueError('ptiles must contain 33 and 67')
 
-    logger.debug('33 is at index {}'.format(find_nearest_index(ptiles, 33)))
-
     below = 1 - poe[find_nearest_index(ptiles, 33), :]
     above = poe[find_nearest_index(ptiles, 67), :]
     near = 1 - (below + above)
