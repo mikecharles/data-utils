@@ -8,7 +8,7 @@ import matplotlib.pyplot
 import matplotlib.colors
 import matplotlib.cm
 import matplotlib.colorbar
-import numpy
+import numpy as np
 
 import data_utils.gridded.grid
 
@@ -40,18 +40,18 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
     Examples
     --------
 
-    >>> import numpy
+    >>> import numpy as np
     >>> from data_utils.gridded.plotting import plot_to_screen
     >>> grid = data_utils.gridded.grid.Grid('1deg_global')
-    >>> A = numpy.fromfile('tmax_01d_20130101.bin','float32')
-    >>> A = numpy.reshape(A, (grid.num_y, grid.num_x))
-    >>> A[A == -999] = numpy.nan
+    >>> A = np.fromfile('tmax_01d_20130101.bin','float32')
+    >>> A = np.reshape(A, (grid.num_y, grid.num_x))
+    >>> A[A == -999] = np.nan
     >>> plot_to_screen(A, grid, lat_range=(20, 75), lon_range=(180, 310))
     """
 
     # Reshape array if necessary
     if data.ndim == 1:
-        data = numpy.reshape(data, (grid.num_y, grid.num_x))
+        data = np.reshape(data, (grid.num_y, grid.num_x))
     elif data.ndim != 2:
         raise ValueError('data array must have 1 or 2 dimensions')
 
@@ -92,18 +92,18 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
 
     Examples
     --------
-    >>> import numpy
+    >>> import numpy as np
     >>> from data_utils.gridded.plotting import plot_to_file
     >>> grid = data_utils.gridded.grid.Grid('1deg_global')
-    >>> A = numpy.fromfile('tmax_01d_20130101.bin','float32')
-    >>> A = numpy.reshape(A, (grid.num_y, grid.num_x))
-    >>> A[A == -999] = numpy.nan
+    >>> A = np.fromfile('tmax_01d_20130101.bin','float32')
+    >>> A = np.reshape(A, (grid.num_y, grid.num_x))
+    >>> A[A == -999] = np.nan
     >>> plot_to_file(A, grid, 'test.png', lat_range=(20, 75), lon_range=(180, 310))
     """
 
     # Reshape array if necessary
     if data.ndim == 1:
-        data = numpy.reshape(data, (grid.num_y, grid.num_x))
+        data = np.reshape(data, (grid.num_y, grid.num_x))
     elif data.ndim != 2:
         raise ValueError('data array must have 1 or 2 dimensions')
 
@@ -141,11 +141,11 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(-90, 
     # Convert the ll_corner and res to arrays of lons and lats
     start_lat, start_lon = grid.ll_corner
     end_lat, end_lon = grid.ur_corner
-    lats = numpy.arange(start_lat, end_lat + grid.res, grid.res)
-    lons = numpy.arange(start_lon, end_lon + grid.res, grid.res)
+    lats = np.arange(start_lat, end_lat + grid.res, grid.res)
+    lons = np.arange(start_lon, end_lon + grid.res, grid.res)
 
     # Create a 2-d mesh array of lons and lats for pyplot
-    lons, lats = numpy.meshgrid(lons, lats)
+    lons, lats = np.meshgrid(lons, lats)
 
     # Create Basemap
     fig, ax = matplotlib.pyplot.subplots()
@@ -157,8 +157,8 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(-90, 
                                      ax=ax,
                                      resolution='l')
     m.drawcoastlines(linewidth=1)
-    m.drawparallels(numpy.arange(lat_range[0], lat_range[1]+1, 10), labels=[1, 1, 0, 0])
-    m.drawmeridians(numpy.arange(lon_range[0], lon_range[1]+1, 10), labels=[0, 0, 0, 1])
+    m.drawparallels(np.arange(lat_range[0], lat_range[1]+1, 10), labels=[1, 1, 0, 0])
+    m.drawmeridians(np.arange(lon_range[0], lon_range[1]+1, 10), labels=[0, 0, 0, 1])
     m.drawmapboundary(fill_color='#DDDDDD')
     m.drawstates()
     m.drawcountries()
@@ -175,16 +175,16 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(-90, 
         cmap = matplotlib.pyplot.cm.jet
         cmaplist = [cmap(i) for i in range(cmap.N)]
         cmap = cmap.from_list('Custom cmap', cmaplist, cmap.N)
-        bounds = numpy.linspace(levels[0],levels[-1],levels[-1]+1)
+        bounds = np.linspace(levels[0],levels[-1],levels[-1]+1)
         norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
-        plot = m.pcolormesh(lons - grid.res / 2, lats - grid.res / 2, numpy.ma.masked_invalid(data), latlon=True, cmap=cmap, norm=norm)
+        plot = m.pcolormesh(lons - grid.res / 2, lats - grid.res / 2, np.ma.masked_invalid(data), latlon=True, cmap=cmap, norm=norm)
 #        cb = matplotlib.colorbar.ColorbarBase(plot, cmap=cmap, norm=norm, spacing='proportional', ticks=bounds, boundaries=bounds, format='%1i')
 #        cb.set_label('TEST')
-        # plot = m.pcolormesh(lons - grid.res / 2, lats - grid.res / 2, numpy.ma.masked_invalid(data), latlon=True, cmap=matplotlib.cm.get_cmap('jet'), norm=matplotlib.colors.BoundaryNorm(levels, ncolors=len(levels), clip=False))
+        # plot = m.pcolormesh(lons - grid.res / 2, lats - grid.res / 2, np.ma.masked_invalid(data), latlon=True, cmap=matplotlib.cm.get_cmap('jet'), norm=matplotlib.colors.BoundaryNorm(levels, ncolors=len(levels), clip=False))
     else:
         plot = m.contourf(lons, lats, data, latlon=True)
-        # data[numpy.isnan(data)] = -999
-        # plot = m.pcolormesh(lons-grid.res/2, lats-grid.res/2, numpy.ma.masked_invalid(data), latlon=True)
+        # data[np.isnan(data)] = -999
+        # plot = m.pcolormesh(lons-grid.res/2, lats-grid.res/2, np.ma.masked_invalid(data), latlon=True)
         # print(grid.ll_corner[1]-1, grid.ur_corner[1]+1, grid.ll_corner[0]-1, grid.ur_corner[0]+1)
         # plot = m.imshow(data, interpolation='none', aspect='auto')
 
