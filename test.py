@@ -2,16 +2,15 @@
 
 import numpy as np
 import math
-from mpp.poe import make_poe, poe_to_terciles
 import logging
+from time import time
 from data_utils.gridded.reading import read_grib
-import time
 from data_utils.gridded.grid import Grid
 from stats_utils.stats import poe_to_moments
-# from data_utils.gridded.plotting import plot_to_file
-# from stats_utils import stats
-
 from string_utils.strings import replace_vars_in_string
+from mpp.poe import make_poe, poe_to_terciles
+
+start_time = time()
 
 # ------------------------------------------------------------------------------
 # Config file options
@@ -21,7 +20,7 @@ ptiles = [ 1,  2,  5, 10, 15,
           20, 25, 33, 40, 50,
           60, 67, 75, 80, 85,
           90, 95, 98, 99]
-num_members = 5
+num_members = 21
 fhr_int = 6
 
 # ------------------------------------------------------------------------------
@@ -122,6 +121,9 @@ climo_mean, climo_std = poe_to_moments(climo_data, ptiles, axis=0)
 logger.info('Converting forecast data to standardized anomaly space...')
 fcst_data_z = (fcst_data - climo_mean) / climo_std
 
+# fcst_data_z = np.reshape(np.fromfile('fcst_data_z.bin', dtype='float32'),
+#                          (num_members, grid.num_x * grid.num_y))
+
 # ------------------------------------------------------------------------------
 # Use R_best to calculate the standard deviation of the kernels
 #
@@ -131,10 +133,20 @@ logger.info('Creating POEs from standardized anomaly forecasts...')
 R_best = 0.7  # correlation of best member
 kernel_std = math.sqrt(1 - R_best ** 2)
 # Loop over all gridpoints
+poe = np.empty((len(ptiles), fcst_data_z.shape[1]))
 for i in range(fcst_data_z.shape[1]):
-    poe = make_poe(fcst_data_z[:, i], ptiles, kernel_std)
+    poe[:, i] = make_poe(fcst_data_z[:, i], ptiles, kernel_std)
+
+# poe = np.reshape(np.fromfile('poe.bin', dtype='float32'), (len(ptiles),
+#                                                            grid.num_x *
+#                                                            grid.num_y))
 
 # ------------------------------------------------------------------------------
 # Convert the final POE to terciles for plotting
 #
-below, near, above = poe_to_terciles(fcst_data_z, ptiles)
+below, near, above = poe_to_terciles(poe, ptiles)
+
+end_time = time()
+
+logger.info('Process took {:.0f} seconds to complete'.format(end_time -
+                                                             start_time))
