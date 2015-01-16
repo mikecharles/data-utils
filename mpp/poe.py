@@ -60,9 +60,15 @@ def make_poe(ensemble_array, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     num_members = ensemble_array.shape[member_axis]
     # Create list of x values in standardized space
     x = np.linspace(-4, 4, num_xvals)
-    # Create kernels for all ensemble members
-    kernels = scipy.stats.norm.pdf(x, ensemble_array[:, np.newaxis],
-                                   kernel_std) / num_members
+    # Create an array to store all kernels
+    kernels = np.empty((ensemble_array.shape[0], x.shape[0],
+                        ensemble_array.shape[1]))
+    # Loop over each grid point and create a kernel
+    for g in range(ensemble_array.shape[1]):
+        print(g)
+        kernels[:, :, g] = scipy.stats.norm.pdf(x, ensemble_array[:, g,
+                                                np.newaxis],
+                                          kernel_std) / num_members
 
     # --------------------------------------------------------------------------
     # Sum all member kernels into a final PDF
@@ -72,14 +78,18 @@ def make_poe(ensemble_array, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     # --------------------------------------------------------------------------
     # Convert into a POE (1 - CDF)
     #
-    final_poe = 1 - np.cumsum(final_pdf) / np.max(np.cumsum(final_pdf))
+    final_poe = 1 - np.cumsum(final_pdf, axis=0) / np.max(np.cumsum(
+        final_pdf, axis=0), axis=0)
 
     # --------------------------------------------------------------------------
     # Return the POE at the given percentiles
     #
-    output = []
+    output = np.empty((len(ptiles), ensemble_array.shape[1]))
+    ptile_indexes = []
     for ptile in scipy.stats.norm.ppf(np.array(ptiles)/100):
-        output.append(final_poe[find_nearest_index(x, ptile)])
+        ptile_indexes.append(find_nearest_index(x, ptile))
+    for g in range(ensemble_array.shape[1]):
+        output[:, g] = final_poe[ptile_indexes, g]
 
     # --------------------------------------------------------------------------
     # Plot all ensemble members
@@ -150,21 +160,3 @@ def poe_to_terciles(poe, ptiles):
 
     return below, near, above
 
-
-if __name__ == '__main__':
-    x = np.linspace(-2, 2, 5)
-    mu = np.array([-1, 0, 1])
-    sigma = math.sqrt(1 - 0.7 ** 2)
-
-    poe1 = np.empty((mu.shape[0], x.shape[0]))
-    for m in range(mu.shape[0]):
-        poe1[m] = scipy.stats.norm.pdf(x, mu[m], sigma)
-
-    poe2 = scipy.stats.norm.pdf(x, mu[:, np.newaxis], sigma)
-
-    print(poe1)
-    print(poe2)
-
-    # A = np.array([-1, 1, 1.5, 0, -1, -2, -0.5, 1.5])
-    # print(scipy.stats.norm.ppf)
-    # print(normpdf(x, mu=A, sigma=math.sqrt(1 - 0.7 ** 2)))
