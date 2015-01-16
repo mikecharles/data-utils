@@ -3,6 +3,7 @@
 import numpy as np
 import math
 import logging
+from datetime import datetime, timedelta
 from time import time
 from data_utils.gridded.reading import read_grib
 from data_utils.gridded.grid import Grid
@@ -21,7 +22,7 @@ ptiles = [ 1,  2,  5, 10, 15,
           20, 25, 33, 40, 50,
           60, 67, 75, 80, 85,
           90, 95, 98, 99]
-num_members = 3
+num_members = 21
 fhr_int = 6
 
 # ------------------------------------------------------------------------------
@@ -31,18 +32,35 @@ model = 'gefsbc'
 cycle = '00'
 lead = 'd6-10'
 var = 'tmean'
-log_level = 'INFO'
+grid_res = '1deg'
+log_level = 'DEBUG'
+# Set a few vars that depend on lead
+if lead == 'd6-10':
+    # fhr range
+    if cycle == '00':
+        fhr1 = 150
+        fhr2 = 264
+    else:
+        raise ValueError('Currently only the 00z cycle is supported')
+    # ave window
+    ave_window = '05d'
+    # lead end
+    lead_end = 10
+elif lead == 'd8-14':
+    # fhr range
+    if cycle == '00':
+        fhr1 = 198
+        fhr2 = 360
+    else:
+        raise ValueError('Currently only the 00z cycle is supported')
+    # ave window
+    ave_window = '07d'
+    # lead end
+    lead_end = 14
 
-if lead == 'd6-10' and cycle == '00':
-    fhr1 = 150
-    fhr2 = 264
-elif lead == 'd8-14' and cycle == '00':
-    fhr1 = 198
-    fhr2 = 360
-else:
-    raise ValueError()
 fhrs = range(fhr1, fhr2 + 1, fhr_int)
 
+# Get list of members
 members = ['{:02d}'.format(m) for m in range(num_members)]
 
 # Setup logging
@@ -56,10 +74,15 @@ logger = logging.getLogger(__name__)
 # logger.setLevel(logging.DEBUG)
 
 # Should eventually be in a loop
-date = '20150101'
+date = '20150116'
+date_obj = datetime.strptime(date, '%Y%m%d')
+climo_mmdd = datetime.strftime(date_obj + timedelta(days=lead_end), '%m%d')
+
+logger.info('LEAD END: '+str(lead_end))
+
 yyyy, mm, dd = date[0:4], date[4:6], date[6:8]
 
-grid = Grid('1deg_global')
+grid = Grid('{}_global'.format(grid_res))
 
 # ------------------------------------------------------------------------------
 # Load ensemble forecast data
@@ -102,7 +125,16 @@ if var == 'tmean':
 # Load climo data
 #
 logger.info('Loading climatology data...')
-climo_file = '/export/cpc-lw-mcharles/mcharles/data/climatologies/land_air/short_range/global/merged_tmean_poe/1deg/05d/tmean_clim_poe_05d_1213.bin'
+climo_file_template = '/export/cpc-lw-mcharles/mcharles/data/climatologies/land_air/short_range/global/{climo_var}/{grid_res}/{ave_window}/{var}_clim_poe_{ave_window}_{climo_mmdd}.bin'
+if var == 'tmean':
+    climo_var = 'merged_tmean_poe'
+else:
+    climo_var = var
+# Establish fcst file name
+climo_file = replace_vars_in_string(climo_file_template, climo_var=climo_var,
+                                    grid_res=grid_res, ave_window=ave_window,
+                                    var=var, climo_mmdd=climo_mmdd)
+logger.debug('Climatology file: {}'.format(climo_file))
 climo_data = np.reshape(np.fromfile(climo_file, 'float32'), (len(ptiles),
                                                   grid.num_y*grid.num_x))
 
