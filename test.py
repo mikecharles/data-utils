@@ -6,6 +6,7 @@ import logging
 from time import time
 from data_utils.gridded.reading import read_grib
 from data_utils.gridded.grid import Grid
+from data_utils.gridded.plotting import plot_tercile_probs
 from stats_utils.stats import poe_to_moments
 from string_utils.strings import replace_vars_in_string
 from mpp.poe import make_poe, poe_to_terciles
@@ -20,7 +21,7 @@ ptiles = [ 1,  2,  5, 10, 15,
           20, 25, 33, 40, 50,
           60, 67, 75, 80, 85,
           90, 95, 98, 99]
-num_members = 21
+num_members = 5
 fhr_int = 6
 
 # ------------------------------------------------------------------------------
@@ -30,7 +31,7 @@ model = 'gefsbc'
 cycle = '00'
 lead = 'd6-10'
 var = 'temp'
-log_level = 'DEBUG'
+log_level = 'INFO'
 
 if lead == 'd6-10' and cycle == '00':
     fhr1 = 150
@@ -121,9 +122,6 @@ climo_mean, climo_std = poe_to_moments(climo_data, ptiles, axis=0)
 logger.info('Converting forecast data to standardized anomaly space...')
 fcst_data_z = (fcst_data - climo_mean) / climo_std
 
-# fcst_data_z = np.reshape(np.fromfile('fcst_data_z.bin', dtype='float32'),
-#                          (num_members, grid.num_x * grid.num_y))
-
 # ------------------------------------------------------------------------------
 # Use R_best to calculate the standard deviation of the kernels
 #
@@ -137,14 +135,16 @@ poe = np.empty((len(ptiles), fcst_data_z.shape[1]))
 for i in range(fcst_data_z.shape[1]):
     poe[:, i] = make_poe(fcst_data_z[:, i], ptiles, kernel_std)
 
-# poe = np.reshape(np.fromfile('poe.bin', dtype='float32'), (len(ptiles),
-#                                                            grid.num_x *
-#                                                            grid.num_y))
-
 # ------------------------------------------------------------------------------
 # Convert the final POE to terciles for plotting
 #
 below, near, above = poe_to_terciles(poe, ptiles)
+
+levels = [-100, -90, -80, -70, -60, -50, -40, -33,
+          33, 40, 50, 60, 70, 80, 90, 100]
+
+plot_tercile_probs(below, near, above, grid=grid, levels=levels,
+                   colors='temp_colors')
 
 end_time = time()
 
