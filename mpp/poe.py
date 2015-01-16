@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import division
+
 import numpy as np
 import scipy.stats
 from stats_utils.stats import find_nearest_index
@@ -13,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
-             make_plot=False):
+             make_plot=False, axis=0):
     """ Converts a set of discrete ensemble members into a continuous
     Probability of Exceedance (POE) distribution. The members are each "dressed"
     with a "kernel" (small Gaussian PDF), and then the kernels are all averaged
@@ -23,7 +25,7 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     Parameters
     ----------
     discrete_members : array_like
-        1-dimensional Numpy array of discrete member values
+        N-dimensional Numpy array of discrete member values
     ptiles : list
         List of percentiles at which to return the POE
     kernel_std : real, optional
@@ -31,6 +33,8 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
         member has a 0.7 correlation with observations.
     make_plot : boolean
         Whether to make a plot of the PDFs and POE. Defaults to False
+    axis : int, optional
+        Axis over which the POE is calculated. Defaults to 0
 
     Returns
     -------
@@ -52,15 +56,13 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     # --------------------------------------------------------------------------
     # Create kernels for all members
     #
-    num_members = discrete_members.shape[0]
+    num_members = discrete_members.shape[axis]
     # Create list of x values in standardized space
     x = np.linspace(-4, 4, num_xvals)
-    # Create an empty NumPy array to store the kernels
-    kernels = np.empty(shape=(num_members, num_xvals))
-    # Loop over all ensemble members and create their kernels
-    for m in range(num_members):
-        kernels[m] = scipy.stats.norm.pdf(x, discrete_members[m],
-                                          kernel_std) / num_members
+    # Create kernels for all ensemble members
+    kernels = scipy.stats.norm.pdf(x,
+                                   discrete_members[:, np.newaxis],
+                                   kernel_std) / num_members
 
     # --------------------------------------------------------------------------
     # Sum all member kernels into a final PDF
@@ -147,3 +149,22 @@ def poe_to_terciles(poe, ptiles):
     near = 1 - (below + above)
 
     return below, near, above
+
+
+if __name__ == '__main__':
+    x = np.linspace(-2, 2, 5)
+    mu = np.array([-1, 0, 1])
+    sigma = math.sqrt(1 - 0.7 ** 2)
+
+    poe1 = np.empty((mu.shape[0], x.shape[0]))
+    for m in range(mu.shape[0]):
+        poe1[m] = scipy.stats.norm.pdf(x, mu[m], sigma)
+
+    poe2 = scipy.stats.norm.pdf(x, mu[:, np.newaxis], sigma)
+
+    print(poe1)
+    print(poe2)
+
+    # A = np.array([-1, 1, 1.5, 0, -1, -2, -0.5, 1.5])
+    # print(scipy.stats.norm.ppf)
+    # print(normpdf(x, mu=A, sigma=math.sqrt(1 - 0.7 ** 2)))
