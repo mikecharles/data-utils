@@ -221,7 +221,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
 
 
 def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
-                                 colors='temp_colors', title=None,
+                                 colors='tmean_colors', title=None,
                                  lat_range=(-90, 90), lon_range=(0, 360)):
     # Get colors
     colors = get_colors(colors)
@@ -252,7 +252,7 @@ def put_terciles_in_one_array(below, near, above):
 
 def get_colors(colors):
     # Colors should be set to '[var]_colors'
-    if colors == 'temp_colors':
+    if colors == 'tmean_colors':
         return [
             # Below normal (blues)
             [0.03, 0.27, 0.58],
@@ -275,4 +275,4 @@ def get_colors(colors):
         ]
     else:
         raise ValueError('Supported vars for default color scales (colors=['
-                         'var]_colors): temp, precip')
+                         'var]_colors): tmean, precip')
