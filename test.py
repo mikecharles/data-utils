@@ -30,7 +30,7 @@ fhr_int = 6
 model = 'gefsbc'
 cycle = '00'
 lead = 'd6-10'
-var = 'temp'
+var = 'tmean'
 log_level = 'INFO'
 
 if lead == 'd6-10' and cycle == '00':
@@ -87,7 +87,7 @@ for m in range(len(members)):
         logger.debug('Loading data from {}...'.format(fcst_file))
         temp_data[f] = read_grib(fcst_file, 'grib2', 'TMP', '2 m above ground')
     # Create average or accumulation over fhrs
-    if var == 'temp':
+    if var == 'tmean':
         fcst_data[m] = np.nanmean(temp_data, axis=0)
     elif var == 'precip':
         fcst_data[m] = np.nansum(temp_data, axis=0)
@@ -95,7 +95,7 @@ for m in range(len(members)):
     #     fcst_data[m].astype('float32').tofile('test_m{}.bin'.format(member))
 
 # Convert fcst data from Kelvin to Celsius
-if var == 'temp':
+if var == 'tmean':
     fcst_data -= 273.15
 
 # ------------------------------------------------------------------------------
@@ -144,7 +144,7 @@ levels = [-100, -90, -80, -70, -60, -50, -40, -33,
 plot_file = 'test.png'
 
 plot_tercile_probs_to_file(below, near, above, grid, plot_file, levels=levels,
-                           colors='temp_colors')
+                           colors='tmean_colors')
 
 end_time = time()
 
