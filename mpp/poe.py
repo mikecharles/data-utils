@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import numpy
+import numpy as np
 import scipy.stats
 from stats_utils.stats import find_nearest_index
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 import math
 import logging
 
@@ -54,9 +54,9 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     #
     num_members = discrete_members.shape[0]
     # Create list of x values in standardized space
-    x = numpy.linspace(-4, 4, num_xvals)
+    x = np.linspace(-4, 4, num_xvals)
     # Create an empty NumPy array to store the kernels
-    kernels = numpy.empty(shape=(num_members, num_xvals))
+    kernels = np.empty(shape=(num_members, num_xvals))
     # Loop over all ensemble members and create their kernels
     for m in range(num_members):
         kernels[m] = scipy.stats.norm.pdf(x, discrete_members[m],
@@ -65,27 +65,27 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     # --------------------------------------------------------------------------
     # Sum all member kernels into a final PDF
     #
-    final_pdf = numpy.sum(kernels, axis=0)
+    final_pdf = np.sum(kernels, axis=0)
 
     # --------------------------------------------------------------------------
     # Convert into a POE (1 - CDF)
     #
-    final_poe = 1 - numpy.cumsum(final_pdf) / numpy.max(numpy.cumsum(final_pdf))
+    final_poe = 1 - np.cumsum(final_pdf) / np.max(np.cumsum(final_pdf))
 
     # --------------------------------------------------------------------------
     # Return the POE at the given percentiles
     #
     output = []
-    for ptile in scipy.stats.norm.ppf(numpy.array(ptiles)/100):
+    for ptile in scipy.stats.norm.ppf(np.array(ptiles)/100):
         output.append(final_poe[find_nearest_index(x, ptile)])
 
     # --------------------------------------------------------------------------
     # Plot all ensemble members
     #
     if make_plot:
-        matplotlib.rcParams['font.size'] = 10
+        plt.rcParams['font.size'] = 10
         # Create a figure
-        fig, ax1 = matplotlib.pyplot.subplots(1, 1)
+        fig, ax1 = plt.subplots(1, 1)
         # Loop over all standardized ensemble members and plot their kernel
         for member in range(num_members):
             if member == 0:
@@ -98,14 +98,14 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
         ax2 = ax1.twinx()
         ax2.plot(x, final_poe, 'k', label='Ensemble POE')
         # Plot X's at each percentile on the POE
-        for ptile in scipy.stats.norm.ppf(numpy.array(ptiles)/100):
-            matplotlib.pyplot.text(ptile, final_poe[find_nearest_index(x, ptile)], '+', horizontalalignment='center', verticalalignment='center', color='r')
+        for ptile in scipy.stats.norm.ppf(np.array(ptiles)/100):
+            plt.text(ptile, final_poe[find_nearest_index(x, ptile)], '+', horizontalalignment='center', verticalalignment='center', color='r')
         # Create legends
         leg1 = ax1.legend(loc="upper left")
         ax2.add_artist(leg1)
         leg2 = ax2.legend(loc="upper right")
         # Save the plot
-        matplotlib.pyplot.savefig('output.png')
+        plt.savefig('output.png')
 
     return output
 
