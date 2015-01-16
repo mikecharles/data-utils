@@ -204,12 +204,56 @@ def save_plot(file, dpi=200):
     matplotlib.pyplot.savefig(file, dpi=dpi, bbox_inches='tight')
 
 
-def plot_tercile_probs(below, near, above, grid, var='temp',levels=None,
-                       colors=None, title=None, lat_range=(-90, 90),
+def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
+                       colors='temp_colors', title=None, lat_range=(-90, 90),
                        lon_range=(0, 360)):
-    # If colors set to '[var]_colors', use one of these default color scales
+    # Get colors
+    colors = get_colors(colors)
+
+    # Put terciles into a single array for plotting
+    all_probs = put_terciles_in_one_array(below, near, above)
+
+    # Convert all_probs into probabilities from 0-100
+    all_probs *= 100
+    # Plot
+    plot_to_screen(all_probs, grid, levels=levels, colors=colors,
+                   title=title, lat_range=(20, 70), lon_range=(200, 300))
+
+
+def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
+                                 colors='temp_colors', title=None,
+                                 lat_range=(-90, 90), lon_range=(0, 360)):
+    # Get colors
+    colors = get_colors(colors)
+
+    # Put terciles into a single array for plotting
+    all_probs = put_terciles_in_one_array(below, near, above)
+
+    # Convert all_probs into probabilities from 0-100
+    all_probs *= 100
+    # Plot
+    plot_to_file(all_probs, grid, file, levels=levels, colors=colors,
+                 title=title, lat_range=(20, 70), lon_range=(200, 300))
+
+
+def put_terciles_in_one_array(below, near, above):
+    # Make an empty array to store above, near, and below
+    all_probs = np.empty(below.shape)
+    all_probs[:] = np.nan
+    # Insert belows where they are the winning category and above 33%
+    all_probs = np.where((below > 0.333) & (below > above), -1*below, all_probs)
+    # Insert aboves where they are the winning category and above 33%
+    all_probs = np.where((above > 0.333) & (above > below), above, all_probs)
+    # Insert nears where neither above or below are above 33%
+    all_probs = np.where((below <= 0.333) & (above <= 0.333), 0, all_probs)
+    # Return all_probs
+    return all_probs
+
+
+def get_colors(colors):
+    # Colors should be set to '[var]_colors'
     if colors == 'temp_colors':
-        colors = [
+        return [
             # Below normal (blues)
             [0.03, 0.27, 0.58],
             [0.13, 0.44, 0.71],
@@ -232,18 +276,3 @@ def plot_tercile_probs(below, near, above, grid, var='temp',levels=None,
     else:
         raise ValueError('Supported vars for default color scales (colors=['
                          'var]_colors): temp, precip')
-
-    # Make an empty array to store above, near, and below
-    all_probs = np.empty(below.shape)
-    all_probs[:] = np.nan
-    # Insert belows where they are the winning category and above 33%
-    all_probs = np.where((below > 0.333) & (below > above), -1*below, all_probs)
-    # Insert aboves where they are the winning category and above 33%
-    all_probs = np.where((above > 0.333) & (above > below), above, all_probs)
-    # Insert nears where neither above or below are above 33%
-    all_probs = np.where((below <= 0.333) & (above <= 0.333), 0, all_probs)
-    # Convert all_probs into probabilities from 0-100
-    all_probs *= 100
-    # Plot
-    plot_to_screen(all_probs, grid, levels=levels, colors=colors,
-                   title=title, lat_range=(20, 70), lon_range=(200, 300))
