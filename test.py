@@ -6,7 +6,7 @@ import logging
 from time import time
 from data_utils.gridded.reading import read_grib
 from data_utils.gridded.grid import Grid
-from data_utils.gridded.plotting import plot_tercile_probs
+from data_utils.gridded.plotting import plot_tercile_probs_to_file
 from stats_utils.stats import poe_to_moments
 from string_utils.strings import replace_vars_in_string
 from mpp.poe import make_poe, poe_to_terciles
@@ -21,7 +21,7 @@ ptiles = [ 1,  2,  5, 10, 15,
           20, 25, 33, 40, 50,
           60, 67, 75, 80, 85,
           90, 95, 98, 99]
-num_members = 5
+num_members = 3
 fhr_int = 6
 
 # ------------------------------------------------------------------------------
@@ -102,9 +102,7 @@ if var == 'temp':
 # Load climo data
 #
 logger.info('Loading climatology data...')
-climo_file = '/export/cpc-lw-mcharles/mcharles/data/climatologies/land_air' \
-             '/short_range/global/merged_tmean_poe/1deg/05d' \
-             '/tmean_clim_poe_05d_1213.bin'
+climo_file = '/export/cpc-lw-mcharles/mcharles/data/climatologies/land_air/short_range/global/merged_tmean_poe/1deg/05d/tmean_clim_poe_05d_1213.bin'
 climo_data = np.reshape(np.fromfile(climo_file, 'float32'), (len(ptiles),
                                                   grid.num_y*grid.num_x))
 
@@ -143,8 +141,10 @@ below, near, above = poe_to_terciles(poe, ptiles)
 levels = [-100, -90, -80, -70, -60, -50, -40, -33,
           33, 40, 50, 60, 70, 80, 90, 100]
 
-plot_tercile_probs(below, near, above, grid=grid, levels=levels,
-                   colors='temp_colors')
+plot_file = 'test.png'
+
+plot_tercile_probs_to_file(below, near, above, grid, plot_file, levels=levels,
+                           colors='temp_colors')
 
 end_time = time()
 
