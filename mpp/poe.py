@@ -14,8 +14,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
-             make_plot=False, axis=0):
+def make_poe(ensemble_array, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
+             make_plot=False, member_axis=0):
     """ Converts a set of discrete ensemble members into a continuous
     Probability of Exceedance (POE) distribution. The members are each "dressed"
     with a "kernel" (small Gaussian PDF), and then the kernels are all averaged
@@ -24,7 +24,7 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
 
     Parameters
     ----------
-    discrete_members : array_like
+    data : array_like
         N-dimensional Numpy array of discrete member values
     ptiles : list
         List of percentiles at which to return the POE
@@ -33,8 +33,9 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
         member has a 0.7 correlation with observations.
     make_plot : boolean
         Whether to make a plot of the PDFs and POE. Defaults to False
-    axis : int, optional
-        Axis over which the POE is calculated. Defaults to 0
+    member_axis : int, optional
+        Axis containing the varying members, over which the POE is calculated.
+        Defaults to 0
 
     Returns
     -------
@@ -56,12 +57,11 @@ def make_poe(discrete_members, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     # --------------------------------------------------------------------------
     # Create kernels for all members
     #
-    num_members = discrete_members.shape[axis]
+    num_members = ensemble_array.shape[member_axis]
     # Create list of x values in standardized space
     x = np.linspace(-4, 4, num_xvals)
     # Create kernels for all ensemble members
-    kernels = scipy.stats.norm.pdf(x,
-                                   discrete_members[:, np.newaxis],
+    kernels = scipy.stats.norm.pdf(x, ensemble_array[:, np.newaxis],
                                    kernel_std) / num_members
 
     # --------------------------------------------------------------------------
