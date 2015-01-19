@@ -24,6 +24,17 @@ ptiles = [ 1,  2,  5, 10, 15,
           90, 95, 98, 99]
 num_members = 21
 fhr_int = 6
+fcst_file_template = '/cpc/model_realtime/raw/{model}/06h/{yyyy}/{mm}/{dd}/{' \
+                     'cycle}/{model}_{yyyy}{mm}{dd}_{cycle}z_f{fhr}_m{' \
+                     'member}.grb2'
+climo_file_template = '/export/cpc-lw-mcharles/mcharles/data/climatologies' \
+                      '/land_air/short_range/global/{climo_var}/{grid_res}/{' \
+                      'ave_window}/{var}_clim_poe_{ave_window}_{' \
+                      'climo_mmdd}.bin'
+out_file_prefix_template = '{model}_{var}_{date}_{cycle}z_{lead}'
+# Define R_best and the kernel standard deviation (currently arbitrary)
+R_best = 0.7  # correlation of best member
+grid_res = '1deg'
 
 # ------------------------------------------------------------------------------
 # Command line args
@@ -32,7 +43,6 @@ model = 'gefsbc'
 cycle = '00'
 lead = 'd6-10'
 var = 'tmean'
-grid_res = '1deg'
 log_level = 'INFO'
 # Set a few vars that depend on lead
 if lead == 'd6-10':
@@ -86,12 +96,12 @@ grid = Grid('{}_global'.format(grid_res))
 # Load ensemble forecast data
 #
 logger.info('Loading ensemble forecast data...')
-fcst_file_template = '/cpc/model_realtime/raw/{model}/06h/{yyyy}/{mm}/{dd}/{cycle}/{model}_{yyyy}{mm}{dd}_{cycle}z_f{fhr}_m{member}.grb2'
 
 # Initialize data NumPy arrays
-fcst_data = np.empty((num_members, grid.num_x * grid.num_y)) # all
-# members/gridpoints
-temp_data = np.empty((len(fhrs), grid.num_x * grid.num_y)) # all fhrs/gridpoints
+fcst_data = np.empty((num_members, grid.num_x * grid.num_y))  # all
+# members/grid points
+temp_data = np.empty((len(fhrs), grid.num_x * grid.num_y))  # all fhrs/grid
+# points
 
 # Loop over members
 for m in range(len(members)):
@@ -123,7 +133,6 @@ if var == 'tmean':
 # Load climo data
 #
 logger.info('Loading climatology data...')
-climo_file_template = '/export/cpc-lw-mcharles/mcharles/data/climatologies/land_air/short_range/global/{climo_var}/{grid_res}/{ave_window}/{var}_clim_poe_{ave_window}_{climo_mmdd}.bin'
 if var == 'tmean':
     climo_var = 'merged_tmean_poe'
 else:
@@ -158,8 +167,6 @@ fcst_data_z = (fcst_data - climo_mean) / climo_std
 #
 logger.info('Creating POEs from standardized anomaly forecasts...')
 
-# Define R_best and the kernel standard deviation (currently arbitrary)
-R_best = 0.7  # correlation of best member
 kernel_std = math.sqrt(1 - R_best ** 2)
 # Loop over all grid points
 poe = make_poe(fcst_data_z, ptiles, kernel_std, member_axis=0)
@@ -172,10 +179,13 @@ below, near, above = poe_to_terciles(poe, ptiles)
 levels = [-100, -90, -80, -70, -60, -50, -40, -33,
           33, 40, 50, 60, 70, 80, 90, 100]
 
-plot_file = 'test.png'
+# Establish output file name prefix
+out_file_prefix = replace_vars_in_string(out_file_prefix_template, model=model,
+                                   var=var, date=date, cycle=cycle, lead=lead)
 
-plot_tercile_probs_to_file(below, near, above, grid, plot_file, levels=levels,
-                           colors='tmean_colors')
+plot_tercile_probs_to_file(below, near, above, grid,
+                           out_file_prefix_template+'.png',
+                           levels=levels, colors='tmean_colors')
 
 end_time = time()
 
