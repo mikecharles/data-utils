@@ -33,7 +33,7 @@ cycle = '00'
 lead = 'd6-10'
 var = 'tmean'
 grid_res = '1deg'
-log_level = 'DEBUG'
+log_level = 'INFO'
 # Set a few vars that depend on lead
 if lead == 'd6-10':
     # fhr range
@@ -74,11 +74,9 @@ logger = logging.getLogger(__name__)
 # logger.setLevel(logging.DEBUG)
 
 # Should eventually be in a loop
-date = '20150116'
+date = '20150119'
 date_obj = datetime.strptime(date, '%Y%m%d')
 climo_mmdd = datetime.strftime(date_obj + timedelta(days=lead_end), '%m%d')
-
-logger.info('LEAD END: '+str(lead_end))
 
 yyyy, mm, dd = date[0:4], date[4:6], date[6:8]
 
@@ -152,6 +150,9 @@ climo_mean, climo_std = poe_to_moments(climo_data, ptiles, axis=0)
 logger.info('Converting forecast data to standardized anomaly space...')
 fcst_data_z = (fcst_data - climo_mean) / climo_std
 
+# fcst_data_z = np.reshape(np.fromfile('fcst_data_z.bin', dtype='float32'),
+#                          (num_members, grid.num_x*grid.num_y))
+
 # ------------------------------------------------------------------------------
 # Use R_best to calculate the standard deviation of the kernels
 #
@@ -160,10 +161,8 @@ logger.info('Creating POEs from standardized anomaly forecasts...')
 # Define R_best and the kernel standard deviation (currently arbitrary)
 R_best = 0.7  # correlation of best member
 kernel_std = math.sqrt(1 - R_best ** 2)
-# Loop over all gridpoints
-poe = np.empty((len(ptiles), fcst_data_z.shape[1]))
-for i in range(fcst_data_z.shape[1]):
-    poe[:, i] = make_poe(fcst_data_z[:, i], ptiles, kernel_std)
+# Loop over all grid points
+poe = make_poe(fcst_data_z, ptiles, kernel_std, member_axis=0)
 
 # ------------------------------------------------------------------------------
 # Convert the final POE to terciles for plotting
