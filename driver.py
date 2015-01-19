@@ -24,7 +24,7 @@ cycle = '00'
 lead = 'd6-10'
 var = 'tmean'
 log_level = 'INFO'
-config_file = 'config.ini'
+config_file = 'library/config.ini'
 # Set a few vars that depend on lead
 if lead == 'd6-10':
     # fhr range
