@@ -15,28 +15,6 @@ from mpp.poe import make_poe, poe_to_terciles
 start_time = time()
 
 # ------------------------------------------------------------------------------
-# Config file options
-#
-# Define ptiles
-ptiles = [ 1,  2,  5, 10, 15,
-          20, 25, 33, 40, 50,
-          60, 67, 75, 80, 85,
-          90, 95, 98, 99]
-num_members = 21
-fhr_int = 6
-fcst_file_template = '/cpc/model_realtime/raw/{model}/06h/{yyyy}/{mm}/{dd}/{' \
-                     'cycle}/{model}_{yyyy}{mm}{dd}_{cycle}z_f{fhr}_m{' \
-                     'member}.grb2'
-climo_file_template = '/export/cpc-lw-mcharles/mcharles/data/climatologies' \
-                      '/land_air/short_range/global/{climo_var}/{grid_res}/{' \
-                      'ave_window}/{var}_clim_poe_{ave_window}_{' \
-                      'climo_mmdd}.bin'
-out_file_prefix_template = '{model}_{var}_{date}_{cycle}z_{lead}'
-# Define R_best and the kernel standard deviation (currently arbitrary)
-R_best = 0.7  # correlation of best member
-grid_res = '1deg'
-
-# ------------------------------------------------------------------------------
 # Command line args
 #
 model = 'gefsbc'
@@ -67,6 +45,26 @@ elif lead == 'd8-14':
     ave_window = '07d'
     # lead end
     lead_end = 14
+
+# ------------------------------------------------------------------------------
+# Config file options
+#
+# Define ptiles
+ptiles = [1, 2, 5, 10, 15, 20, 25, 33, 40, 50, 60, 67, 75, 80, 85, 90, 95,
+          98, 99]
+num_members = 21
+fhr_int = 6
+fcst_file_template = '/cpc/model_realtime/raw/{model}/06h/{yyyy}/{mm}/{dd}/{' \
+                     'cycle}/{model}_{yyyy}{mm}{dd}_{cycle}z_f{fhr}_m{' \
+                     'member}.grb2'
+climo_file_template = '/export/cpc-lw-mcharles/mcharles/data/climatologies' \
+                      '/land_air/short_range/global/{climo_var}/{grid_res}/{' \
+                      'ave_window}/{var}_clim_poe_{ave_window}_{' \
+                      'climo_mmdd}.bin'
+out_file_prefix_template = '{model}_{var}_{date}_{cycle}z_{lead}'
+# Define R_best and the kernel standard deviation (currently arbitrary)
+R_best = 0.7  # correlation of best member
+grid_res = '1deg'
 
 fhrs = range(fhr1, fhr2 + 1, fhr_int)
 
