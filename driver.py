@@ -184,8 +184,8 @@ out_file_prefix = replace_vars_in_string(out_file_prefix_template, model=model,
                                    var=var, date=date, cycle=cycle, lead=lead)
 
 plot_tercile_probs_to_file(below, near, above, grid,
-                           out_file_prefix_template+'.png',
-                           levels=levels, colors='tmean_colors')
+                           out_file_prefix+'.png', levels=levels,
+                           colors='tmean_colors')
 
 end_time = time()
 
