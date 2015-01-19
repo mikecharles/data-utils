@@ -3,6 +3,8 @@
 import numpy as np
 import math
 import logging
+import sys
+from configobj import *
 from datetime import datetime, timedelta
 from time import time
 from data_utils.gridded.reading import read_grib
@@ -15,25 +17,14 @@ from mpp.poe import make_poe, poe_to_terciles
 start_time = time()
 
 # ------------------------------------------------------------------------------
-# Config file options
-#
-# Define ptiles
-ptiles = [ 1,  2,  5, 10, 15,
-          20, 25, 33, 40, 50,
-          60, 67, 75, 80, 85,
-          90, 95, 98, 99]
-num_members = 21
-fhr_int = 6
-
-# ------------------------------------------------------------------------------
 # Command line args
 #
 model = 'gefsbc'
 cycle = '00'
 lead = 'd6-10'
 var = 'tmean'
-grid_res = '1deg'
 log_level = 'INFO'
+config_file = 'config.ini'
 # Set a few vars that depend on lead
 if lead == 'd6-10':
     # fhr range
@@ -58,20 +49,42 @@ elif lead == 'd8-14':
     # lead end
     lead_end = 14
 
-fhrs = range(fhr1, fhr2 + 1, fhr_int)
+# ------------------------------------------------------------------------------
+# Config file options
+#
+# Read options from config file
+try:
+    config = ConfigObj(config_file, file_error=True, unrepr=True)
+except Exception as e:
+    raise Exception('Could not parse config file {}: {} Make sure you\'ve '
+                    'copied config.ini.example to config.ini'.format(
+        config_file, e))
+try:
+    ptiles = config['ptiles']
+    fcst_file_template = config['fcst-data']['file-template']
+    climo_file_template = config['climo-data']['file-template']
+    out_file_prefix_template = config['output']['file-prefix-template']
+    num_members = config['fcst-data']['gefsbc']['num-members']
+    fhr_int = config['fcst-data']['gefsbc']['fhr-int']
+    R_best = config['fcst-data']['gefsbc']['r-best']
+    grid_name = config['fcst-data']['gefsbc']['grid-name']
+except KeyError as e:
+    raise KeyError('One of the config keys is missing or invalid...')
 
+# ------------------------------------------------------------------------------
+# Setup a few more things that depend on config and command-line settings
+#
+# Create a new grid definition
+grid = Grid(grid_name)
+# Get a list of fhrs
+fhrs = range(fhr1, fhr2 + 1, fhr_int)
 # Get list of members
 members = ['{:02d}'.format(m) for m in range(num_members)]
-
 # Setup logging
 logging.basicConfig(format='%(levelname)s - %(module)s - %(message)s',
                     level=getattr(logging, log_level))
-
-# Initialize a logging object
 logger = logging.getLogger(__name__)
 
-# Set logging level
-# logger.setLevel(logging.DEBUG)
 
 # Should eventually be in a loop
 date = '20150119'
@@ -80,18 +93,16 @@ climo_mmdd = datetime.strftime(date_obj + timedelta(days=lead_end), '%m%d')
 
 yyyy, mm, dd = date[0:4], date[4:6], date[6:8]
 
-grid = Grid('{}_global'.format(grid_res))
-
 # ------------------------------------------------------------------------------
 # Load ensemble forecast data
 #
 logger.info('Loading ensemble forecast data...')
-fcst_file_template = '/cpc/model_realtime/raw/{model}/06h/{yyyy}/{mm}/{dd}/{cycle}/{model}_{yyyy}{mm}{dd}_{cycle}z_f{fhr}_m{member}.grb2'
 
 # Initialize data NumPy arrays
-fcst_data = np.empty((num_members, grid.num_x * grid.num_y)) # all
-# members/gridpoints
-temp_data = np.empty((len(fhrs), grid.num_x * grid.num_y)) # all fhrs/gridpoints
+fcst_data = np.empty((num_members, grid.num_x * grid.num_y))  # all
+# members/grid points
+temp_data = np.empty((len(fhrs), grid.num_x * grid.num_y))  # all fhrs/grid
+# points
 
 # Loop over members
 for m in range(len(members)):
@@ -123,18 +134,17 @@ if var == 'tmean':
 # Load climo data
 #
 logger.info('Loading climatology data...')
-climo_file_template = '/export/cpc-lw-mcharles/mcharles/data/climatologies/land_air/short_range/global/{climo_var}/{grid_res}/{ave_window}/{var}_clim_poe_{ave_window}_{climo_mmdd}.bin'
 if var == 'tmean':
     climo_var = 'merged_tmean_poe'
 else:
     climo_var = var
 # Establish fcst file name
 climo_file = replace_vars_in_string(climo_file_template, climo_var=climo_var,
-                                    grid_res=grid_res, ave_window=ave_window,
+                                    grid_name=grid_name, ave_window=ave_window,
                                     var=var, climo_mmdd=climo_mmdd)
 logger.debug('Climatology file: {}'.format(climo_file))
 climo_data = np.reshape(np.fromfile(climo_file, 'float32'), (len(ptiles),
-                                                  grid.num_y*grid.num_x))
+                                                             grid.num_y*grid.num_x))
 
 # ------------------------------------------------------------------------------
 # Obtain the climatological mean and standard deviation at each gridpoint
@@ -158,8 +168,6 @@ fcst_data_z = (fcst_data - climo_mean) / climo_std
 #
 logger.info('Creating POEs from standardized anomaly forecasts...')
 
-# Define R_best and the kernel standard deviation (currently arbitrary)
-R_best = 0.7  # correlation of best member
 kernel_std = math.sqrt(1 - R_best ** 2)
 # Loop over all grid points
 poe = make_poe(fcst_data_z, ptiles, kernel_std, member_axis=0)
@@ -172,9 +180,12 @@ below, near, above = poe_to_terciles(poe, ptiles)
 levels = [-100, -90, -80, -70, -60, -50, -40, -33,
           33, 40, 50, 60, 70, 80, 90, 100]
 
-plot_file = 'test.png'
+# Establish output file name prefix
+out_file_prefix = replace_vars_in_string(out_file_prefix_template, model=model,
+                                   var=var, date=date, cycle=cycle, lead=lead)
 
-plot_tercile_probs_to_file(below, near, above, grid, plot_file, levels=levels,
+plot_tercile_probs_to_file(below, near, above, grid,
+                           out_file_prefix+'.png', levels=levels,
                            colors='tmean_colors')
 
 end_time = time()
