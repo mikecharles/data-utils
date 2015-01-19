@@ -81,6 +81,7 @@ def read_grib(file, grib_type, variable, level):
         logger.debug('Command to extract grib data: ' + wgrib_call)
         output = subprocess.check_output(shlex.split(wgrib_call))
     except Exception as e:
+        os.remove(temp_file)
         raise IOError('Couldn\'t read {} file: {}'.format(grib_type, str(e)))
     # Read in the binary data
     data = numpy.fromfile(temp_file, dtype=numpy.float32)
