@@ -3,7 +3,7 @@ ptiles = [1, 2, 5, 10, 15, 20, 25, 33, 40, 50, 60, 67, 75, 80, 85, 90, 95, 98, 9
 
 [fcst-data]
 
-file-template = '/path/to/data/{model}/06h/{yyyy}/{mm}/{dd}/{cycle}/{model}_{yyyy}{mm}{dd}_{cycle}z_f{fhr}_m{member}.grb2'
+file-template = '/path/to/data/{model}/06h/{yyyy}/{mm}/{dd}/{cycle_num}/{model}_{yyyy}{mm}{dd}_{cycle}_f{fhr}_m{member}.grb2'
 
     [[gefsbc]]
 
@@ -18,4 +18,4 @@ file-template = '/path/to/data/climatologies/land_air/short_range/global/{climo_
 
 [output]
 
-file-prefix-template = '{model}_{var}_{date}_{cycle}z_{lead}'
+file-prefix-template = '{model}_{var}_{date}_{cycle}_{lead}'
