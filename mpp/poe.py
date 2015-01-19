@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def make_poe(ensemble_array, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
-             make_plot=False, member_axis=0):
+             member_axis=0):
     """ Converts a set of discrete ensemble members into a continuous
     Probability of Exceedance (POE) distribution. The members are each "dressed"
     with a "kernel" (small Gaussian PDF), and then the kernels are all averaged
@@ -31,8 +31,6 @@ def make_poe(ensemble_array, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     kernel_std : real, optional
         Standard deviation of the kernels. Defaults to a PDF in which the best
         member has a 0.7 correlation with observations.
-    make_plot : boolean
-        Whether to make a plot of the PDFs and POE. Defaults to False
     member_axis : int, optional
         Axis containing the varying members, over which the POE is calculated.
         Defaults to 0
@@ -52,7 +50,7 @@ def make_poe(ensemble_array, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     # --------------------------------------------------------------------------
     # Options
     #
-    num_xvals = 1000  # Number of discrete X values for generating PDFs
+    num_xvals = 500  # Number of discrete X values for generating PDFs
 
     # --------------------------------------------------------------------------
     # Create kernels for all members
@@ -60,26 +58,23 @@ def make_poe(ensemble_array, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     num_members = ensemble_array.shape[member_axis]
     # Create list of x values in standardized space
     x = np.linspace(-4, 4, num_xvals)
-    # Create an array to store all kernels
-    kernels = np.empty((ensemble_array.shape[0], x.shape[0],
-                        ensemble_array.shape[1]))
-    # Loop over each grid point and create a kernel
+    # Create an array to store all pdfs
+    final_pdf = np.empty((x.shape[0], ensemble_array.shape[1]))
+    # Loop over each grid point
     for g in range(ensemble_array.shape[1]):
-        print(g)
-        kernels[:, :, g] = scipy.stats.norm.pdf(x, ensemble_array[:, g,
-                                                np.newaxis],
-                                          kernel_std) / num_members
-
-    # --------------------------------------------------------------------------
-    # Sum all member kernels into a final PDF
-    #
-    final_pdf = np.sum(kernels, axis=0)
+        # Create kernels around ensemble members and sum over all members
+        final_pdf[:, g] = np.sum(
+            scipy.stats.norm.pdf(x,
+                                 ensemble_array[:, g, np.newaxis],
+                                 kernel_std) / num_members, axis=0
+        )
 
     # --------------------------------------------------------------------------
     # Convert into a POE (1 - CDF)
     #
     final_poe = 1 - np.cumsum(final_pdf, axis=0) / np.max(np.cumsum(
         final_pdf, axis=0), axis=0)
+    del final_pdf
 
     # --------------------------------------------------------------------------
     # Return the POE at the given percentiles
@@ -90,34 +85,6 @@ def make_poe(ensemble_array, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
         ptile_indexes.append(find_nearest_index(x, ptile))
     for g in range(ensemble_array.shape[1]):
         output[:, g] = final_poe[ptile_indexes, g]
-
-    # --------------------------------------------------------------------------
-    # Plot all ensemble members
-    #
-    if make_plot:
-        plt.rcParams['font.size'] = 10
-        # Create a figure
-        fig, ax1 = plt.subplots(1, 1)
-        # Loop over all standardized ensemble members and plot their kernel
-        for member in range(num_members):
-            if member == 0:
-                ax1.plot(x, kernels[member], 'b', label='Ensemble member')
-            else:
-                ax1.plot(x, kernels[member], 'b')
-        # Plot the average of all kernels (final PDF)
-        ax1.plot(x, final_pdf, 'r', label='Ensemble PDF')
-        # Plot the average of all kernels in POE form
-        ax2 = ax1.twinx()
-        ax2.plot(x, final_poe, 'k', label='Ensemble POE')
-        # Plot X's at each percentile on the POE
-        for ptile in scipy.stats.norm.ppf(np.array(ptiles)/100):
-            plt.text(ptile, final_poe[find_nearest_index(x, ptile)], '+', horizontalalignment='center', verticalalignment='center', color='r')
-        # Create legends
-        leg1 = ax1.legend(loc="upper left")
-        ax2.add_artist(leg1)
-        leg2 = ax2.legend(loc="upper right")
-        # Save the plot
-        plt.savefig('output.png')
 
     return output
 
