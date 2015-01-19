@@ -1,0 +1,21 @@
+
+ptiles = [1, 2, 5, 10, 15, 20, 25, 33, 40, 50, 60, 67, 75, 80, 85, 90, 95, 98, 99]
+
+[fcst-data]
+
+file-template = '/path/to/data/{model}/06h/{yyyy}/{mm}/{dd}/{cycle}/{model}_{yyyy}{mm}{dd}_{cycle}z_f{fhr}_m{member}.grb2'
+
+    [[gefsbc]]
+
+        num-members = 21
+        fhr-int = 6
+        r-best = 0.7
+        grid-name = '1deg_global'
+
+[climo-data]
+
+file-template = '/path/to/data/climatologies/land_air/short_range/global/{climo_var}/{grid_name}/{ave_window}/{var}_clim_poe_{ave_window}_{climo_mmdd}.bin'
+
+[output]
+
+file-prefix-template = '{model}_{var}_{date}_{cycle}z_{lead}'
