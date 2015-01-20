@@ -83,6 +83,14 @@ group.add_argument(
     metavar='<LEAD>', choices=['d6-10', 'd8-14'],
     required=True,
 )
+group.add_argument(
+    '-p',
+    '--processing-type',
+    dest='processing_type',
+    help='type of post-processing to perform',
+    metavar='<TYPE>', choices=['make-poe'],
+    required=True,
+)
 
 # Add an optional argument group
 group = parser.add_argument_group('optional arguments')
@@ -252,66 +260,71 @@ for date in generate_date_list(args.start_date, args.end_date):
         fcst_data -= 273.15
 
     # --------------------------------------------------------------------------
-    # Load climo data
+    # Perform post-processing
     #
-    logger.info('Loading climatology data...')
-    if args.var == 'tmean':
-        climo_var = 'merged_tmean_poe'
-    else:
-        climo_var = args.var
-    # Establish fcst file name
-    climo_file = replace_vars_in_string(climo_file_template,
-                                        climo_var=climo_var,
-                                        grid_name=grid_name,
-                                        ave_window=ave_window,
-                                        var=args.var, climo_mmdd=climo_mmdd)
-    logger.debug('Climatology file: {}'.format(climo_file))
-    climo_data = np.reshape(
-        np.fromfile(climo_file, 'float32'), (len(ptiles), grid.num_y*grid.num_x)
-    )
+    if args.processing_type == 'make-poe':
 
-    # --------------------------------------------------------------------------
-    # Obtain the climatological mean and standard deviation at each gridpoint
-    #
-    # Use stats_utils.stats.poe_to_moments()
-    logger.info('Converting climatologies from percentile to mean/standard '
-                'deviation...')
-    climo_mean, climo_std = poe_to_moments(climo_data, ptiles, axis=0)
+        # --------------------------------------------------------------------------
+        # Load climo data
+        #
+        logger.info('Loading climatology data...')
+        if args.var == 'tmean':
+            climo_var = 'merged_tmean_poe'
+        else:
+            climo_var = args.var
+        # Establish fcst file name
+        climo_file = replace_vars_in_string(climo_file_template,
+                                            climo_var=climo_var,
+                                            grid_name=grid_name,
+                                            ave_window=ave_window,
+                                            var=args.var, climo_mmdd=climo_mmdd)
+        logger.debug('Climatology file: {}'.format(climo_file))
+        climo_data = np.reshape(
+            np.fromfile(climo_file, 'float32'), (len(ptiles), grid.num_y*grid.num_x)
+        )
 
-    # --------------------------------------------------------------------------
-    # Anomalize all ensemble members
-    #
-    logger.info('Converting forecast data to standardized anomaly space...')
-    fcst_data_z = (fcst_data - climo_mean) / climo_std
+        # --------------------------------------------------------------------------
+        # Obtain the climatological mean and standard deviation at each gridpoint
+        #
+        # Use stats_utils.stats.poe_to_moments()
+        logger.info('Converting climatologies from percentile to mean/standard '
+                    'deviation...')
+        climo_mean, climo_std = poe_to_moments(climo_data, ptiles, axis=0)
 
-    # fcst_data_z = np.reshape(np.fromfile('fcst_data_z.bin', dtype='float32'),
-    #                          (num_members, grid.num_x*grid.num_y))
+        # --------------------------------------------------------------------------
+        # Anomalize all ensemble members
+        #
+        logger.info('Converting forecast data to standardized anomaly space...')
+        fcst_data_z = (fcst_data - climo_mean) / climo_std
 
-    # --------------------------------------------------------------------------
-    # Use R_best to calculate the standard deviation of the kernels
-    #
-    logger.info('Creating POEs from standardized anomaly forecasts...')
+        # fcst_data_z = np.reshape(np.fromfile('fcst_data_z.bin', dtype='float32'),
+        #                          (num_members, grid.num_x*grid.num_y))
 
-    kernel_std = math.sqrt(1 - R_best ** 2)
-    # Loop over all grid points
-    poe = make_poe(fcst_data_z, ptiles, kernel_std, member_axis=0)
+        # --------------------------------------------------------------------------
+        # Use R_best to calculate the standard deviation of the kernels
+        #
+        logger.info('Creating POEs from standardized anomaly forecasts...')
 
-    # --------------------------------------------------------------------------
-    # Convert the final POE to terciles for plotting
-    #
-    below, near, above = poe_to_terciles(poe, ptiles)
+        kernel_std = math.sqrt(1 - R_best ** 2)
+        # Loop over all grid points
+        poe = make_poe(fcst_data_z, ptiles, kernel_std, member_axis=0)
 
-    levels = [-100, -90, -80, -70, -60, -50, -40, -33,
-              33, 40, 50, 60, 70, 80, 90, 100]
+        # --------------------------------------------------------------------------
+        # Convert the final POE to terciles for plotting
+        #
+        below, near, above = poe_to_terciles(poe, ptiles)
 
-    # Establish output file name prefix
-    out_file_prefix = replace_vars_in_string(out_file_prefix_template,
-                                             model=args.model, var=args.var,
-                                             date=date, cycle=args.cycle,
-                                             lead=args.lead)
-    plot_tercile_probs_to_file(below, near, above, grid,
-                               out_file_prefix+'.png', levels=levels,
-                               colors='tmean_colors')
+        levels = [-100, -90, -80, -70, -60, -50, -40, -33,
+                  33, 40, 50, 60, 70, 80, 90, 100]
+
+        # Establish output file name prefix
+        out_file_prefix = replace_vars_in_string(out_file_prefix_template,
+                                                 model=args.model, var=args.var,
+                                                 date=date, cycle=args.cycle,
+                                                 lead=args.lead)
+        plot_tercile_probs_to_file(below, near, above, grid,
+                                   out_file_prefix+'.png', levels=levels,
+                                   colors='tmean_colors')
 
 end_time = time()
 
