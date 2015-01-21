@@ -14,6 +14,7 @@ import numpy
 # Initialize a logging object specific to this module
 logger = logging.getLogger(__name__)
 
+
 def read_grib(file, grib_type, variable, level):
     """Reads a record from a grib file
 
@@ -69,7 +70,8 @@ def read_grib(file, grib_type, variable, level):
     # Set the name of the wgrib program to call
     if grib_type == 'grib1':
         wgrib_call = 'wgrib "{}" | grep "{}" | grep "{}" | wgrib -i "{}" -nh ' \
-                     '-bin -o "{}"'.format(file, variable, level, temp_file)
+                     '-bin -o "{}"'.format(file, variable, level, file,
+                                           temp_file)
     elif grib_type == 'grib2':
         wgrib_call = 'wgrib2 "{}" -match "{}" -match "{}" -end -order we:sn ' \
                      '-no_header -bin "{}"'.format(file, variable, level,
@@ -79,7 +81,7 @@ def read_grib(file, grib_type, variable, level):
     # Generate a wgrib call
     try:
         logger.debug('Command to extract grib data: ' + wgrib_call)
-        output = subprocess.check_output(shlex.split(wgrib_call))
+        output = subprocess.check_output(wgrib_call, shell=True)
     except Exception as e:
         raise IOError('Couldn\'t read {} file: {}'.format(grib_type, str(e)))
     # Read in the binary data
