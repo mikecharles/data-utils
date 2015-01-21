@@ -11,6 +11,29 @@ file-template = '/path/to/data/{model}/06h/{yyyy}/{mm}/{dd}/{cycle_num}/{model}_
         fhr-int = 6
         r-best = 0.7
         grid-name = '1deg_global'
+        data-type = 'grib2'
+
+        [[[vars]]]
+
+            [[[[tmean]]]]
+
+                name = 'TMP'
+                level = '2 m above ground'
+
+    [[cmcebc]]
+
+        num-members = 21
+        fhr-int = 6
+        r-best = 0.7
+        grid-name = '1deg_global'
+        data-type = 'grib1'
+
+        [[[vars]]]
+
+           [[[[tmean]]]]
+
+                name = 'TMP'
+                level = '2 m above gnd'
 
 [climo-data]
 
