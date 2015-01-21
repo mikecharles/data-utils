@@ -262,6 +262,8 @@ for date in generate_date_list(args.start_date, args.end_date):
     # --------------------------------------------------------------------------
     # Loop over models
     #
+    # Keep a count of the member across all models
+    m_total = 0
     for model in models:
         # Read model-related options from config file
         try:
@@ -279,8 +281,8 @@ for date in generate_date_list(args.start_date, args.end_date):
         members = ['{:02d}'.format(m) for m in range(num_members)]
 
         # Loop over members
-        for m in range(len(members)):
-            member = members[m]
+        for m_single in range(len(members)):
+            member = members[m_single]
             logger.debug('Loading member {}'.format(member))
             # Loop over fhrs
             for f in range(len(fhrs)):
@@ -300,9 +302,12 @@ for date in generate_date_list(args.start_date, args.end_date):
 
             # Create average or accumulation over fhrs
             if args.var == 'tmean':
-                fcst_data[m] = np.nanmean(temp_data, axis=0)
+                fcst_data[m_total] = np.nanmean(temp_data, axis=0)
             elif args.var == 'precip':
-                fcst_data[m] = np.nansum(temp_data, axis=0)
+                fcst_data[m_total] = np.nansum(temp_data, axis=0)
+
+            # Increment total member count
+            m_total += 1
 
             # fcst_data[m].astype('float32').tofile('test_m{}.bin'.format(member))
 
