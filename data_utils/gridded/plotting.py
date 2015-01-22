@@ -184,7 +184,8 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
                                      ax=ax,
                                      resolution='l')
     m.drawcoastlines(linewidth=1)
-    m.drawparallels(np.arange(lat_range[0], lat_range[1]+1, 10), labels=[1, 1, 0, 0])
+    m.drawparallels(np.arange(lat_range[0], lat_range[1]+1, 10),
+                    labels=[1, 1, 0, 0], fontsize=10)
     m.drawmeridians(np.arange(lon_range[0], lon_range[1]+1, 10), labels=[0, 0, 0, 1])
     m.drawmapboundary(fill_color='#DDDDDD')
     m.drawstates()
@@ -217,16 +218,17 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
     cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
                                     ticks=levels, cax=cax)
     # Add colorbar labels
+    fontsize=9
     tercile_type = tercile_type.capitalize()
     cb.ax.text(0.24, 1.2, 'Probability of Below {}'.format(tercile_type),
                horizontalalignment='center', transform=cb.ax.transAxes,
-               fontsize=10, fontstyle='italic')
+               fontsize=fontsize, fontstyle='italic')
     cb.ax.text(0.5, 1.2, '{}'.format(tercile_type),
                horizontalalignment='center', transform=cb.ax.transAxes,
-               fontsize=10, fontstyle='italic')
+               fontsize=fontsize, fontstyle='italic')
     cb.ax.text(0.76, 1.2, 'Probability of Above {}'.format(tercile_type),
                horizontalalignment='center', transform=cb.ax.transAxes,
-               fontsize=10, fontstyle='italic')
+               fontsize=fontsize, fontstyle='italic')
 
 
 def show_plot():
@@ -317,7 +319,7 @@ def get_colors(colors):
             [0.78, 0.86, 0.94],
             [0.94, 0.95, 1.00],
             # Near normal (grey)
-            [0.85, 0.85, 0.85],
+            [0.75, 0.75, 0.75],
             # Above normal (reds)
             [1.00, 0.9, 0.85],
             [0.99, 0.73, 0.63],
