@@ -14,7 +14,8 @@ import data_utils.gridded.grid
 
 
 def plot_to_screen(data, grid, levels=None, colors=None, title=None,
-                   lat_range=(-90, 90), lon_range=(0, 360)):
+                   lat_range=(-90, 90), lon_range=(0, 360),
+                   cbar_ends='triangular'):
     """Plots the given data and displays on-screen.
 
     Essentially makes calls to :func:`make_plot` and :func:`show_plot` to do
@@ -36,6 +37,10 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
         Range of latitude values to plot
     lon_range : tuple, optional
         Range of longitude values to plot
+    cbar_ends : str, optional
+        Shape of the ends of the colorbar ('square' or 'triangular'). If
+        'square', levels should contain the endpoints. If 'triangular',
+        the levels should not contain the endpoints.
 
     Examples
     --------
@@ -56,13 +61,14 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
         raise ValueError('data array must have 1 or 2 dimensions')
 
     make_plot(data, grid, levels=levels, colors=colors, title=title,
-              lat_range=lat_range, lon_range=lon_range)
+              lat_range=lat_range, lon_range=lon_range, cbar_ends=cbar_ends)
     show_plot()
     matplotlib.pyplot.close("all")
 
 
 def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
-                 title=None, lat_range=(-90, 90), lon_range=(0, 360)):
+                 title=None, lat_range=(-90, 90), lon_range=(0, 360),
+                 cbar_ends='triangular'):
     """Plots the given data and saves to a file.
 
     Essentially makes calls to :func:`make_plot` and :func:`save_plot` to do
@@ -89,6 +95,10 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
         Range of latitude values to plot
     lon_range : tuple, optional
         Range of longitude values to plot
+    cbar_ends : str, optional
+        Shape of the ends of the colorbar ('square' or 'triangular'). If
+        'square', levels should contain the endpoints. If 'triangular',
+        the levels should not contain the endpoints.
 
     Examples
     --------
@@ -107,12 +117,14 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
     elif data.ndim != 2:
         raise ValueError('data array must have 1 or 2 dimensions')
 
-    make_plot(data, grid, levels=levels, colors=colors, title=title, lat_range=lat_range, lon_range=lon_range)
+    make_plot(data, grid, levels=levels, colors=colors, title=title,
+              lat_range=lat_range, lon_range=lon_range, cbar_ends=cbar_ends)
     save_plot(file, dpi)
     matplotlib.pyplot.close("all")
 
 
-def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(-90, 90), lon_range=(0, 360)):
+def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
+        -90, 90), lon_range=(0, 360), cbar_ends='triangular'):
     """Creates a plot object using
     `mpl_toolkits.basemap <http://matplotlib.org/basemap/users/examples.html>`_.
     Nothing is actually plotted. Usually you'd want to call :func:`show_plot`
@@ -134,6 +146,10 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(-90, 
         Range of latitude values to plot
     lon_range : tuple, optional
         Range of longitude values to plot
+    cbar_ends : str, optional
+        Shape of the ends of the colorbar ('square' or 'triangular'). If
+        'square', levels should contain the endpoints. If 'triangular',
+        the levels should not contain the endpoints.
     """
     # Check args
     if (colors and not levels) or (levels and not colors):
@@ -165,10 +181,18 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(-90, 
     m.drawcountries()
 
     # Plot data
-    if levels:
-        plot = m.contourf(lons, lats, data, levels, latlon=True, colors=colors)
+    if cbar_ends == 'triangular':
+        extend='both'
+    elif cbar_ends == 'square':
+        extend='neither'
     else:
-        plot = m.contourf(lons, lats, data, latlon=True)
+        raise ValueError('cbar_ends must be either \'triangular\' or '
+                         '\'square\'')
+    if levels:
+        plot = m.contourf(lons, lats, data, levels, latlon=True,
+                          colors=colors, extend=extend)
+    else:
+        plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
 
     # Add labels
     fontsize = 14
@@ -206,7 +230,7 @@ def save_plot(file, dpi=200):
 
 def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
                        colors='temp_colors', title=None, lat_range=(-90, 90),
-                       lon_range=(0, 360)):
+                       lon_range=(0, 360), cbar_ends='triangular'):
     # Get colors
     colors = get_colors(colors)
 
@@ -217,12 +241,14 @@ def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
     all_probs *= 100
     # Plot
     plot_to_screen(all_probs, grid, levels=levels, colors=colors,
-                   title=title, lat_range=(20, 70), lon_range=(200, 300))
+                   title=title, lat_range=(20, 70), lon_range=(200, 300),
+                   cbar_ends=cbar_ends)
 
 
 def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
                                  colors='tmean_colors', title=None,
-                                 lat_range=(-90, 90), lon_range=(0, 360)):
+                                 lat_range=(-90, 90), lon_range=(0, 360),
+                                 cbar_ends='triangular'):
     # Get colors
     colors = get_colors(colors)
 
@@ -233,7 +259,8 @@ def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
     all_probs *= 100
     # Plot
     plot_to_file(all_probs, grid, file, levels=levels, colors=colors,
-                 title=title, lat_range=(20, 70), lon_range=(200, 300))
+                 title=title, lat_range=(20, 70), lon_range=(200, 300),
+                 cbar_ends=cbar_ends)
 
 
 def put_terciles_in_one_array(below, near, above):
