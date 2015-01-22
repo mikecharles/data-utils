@@ -175,7 +175,7 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(-90, 
     matplotlib.pyplot.title(title, fontsize=fontsize)
 
     # Add a colorbar
-    matplotlib.pyplot.colorbar(plot, orientation="horizontal")
+    matplotlib.pyplot.colorbar(plot, orientation="horizontal", ticks=levels)
     # cb = matplotlib.colorbar.ColorbarBase(plot, norm=norm, boundaries=[-10]+bounds+[10], extend='both', extendfrac='auto', ticks=bounds, spacing='uniform', orientation='horizontal')
     # cb.set_label('TEST')
 
