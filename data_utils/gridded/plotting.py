@@ -175,6 +175,7 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
     lons, lats = np.meshgrid(lons, lats)
 
     # Create Basemap
+
     fig, ax = matplotlib.pyplot.subplots()
     m = mpl_toolkits.basemap.Basemap(llcrnrlon=lon_range[0],
                                      llcrnrlat=lat_range[0],
@@ -185,8 +186,9 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
                                      resolution='l')
     m.drawcoastlines(linewidth=1)
     m.drawparallels(np.arange(lat_range[0], lat_range[1]+1, 10),
-                    labels=[1, 1, 0, 0], fontsize=10)
-    m.drawmeridians(np.arange(lon_range[0], lon_range[1]+1, 10), labels=[0, 0, 0, 1])
+                    labels=[1, 1, 0, 0], fontsize=9)
+    m.drawmeridians(np.arange(lon_range[0], lon_range[1]+1, 10),
+                    labels=[0, 0, 0, 1], fontsize=9)
     m.drawmapboundary(fill_color='#DDDDDD')
     m.drawstates()
     m.drawcountries()
@@ -206,7 +208,7 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
 
     # Add labels
-    matplotlib.pyplot.title(title, fontsize=14)
+    matplotlib.pyplot.title(title, fontsize=12)
 
     # --------------------------------------------------------------------------
     # Add a colorbar
@@ -217,6 +219,7 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
     cax = divider.append_axes("bottom", size="5%", pad=0.5)
     cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
                                     ticks=levels, cax=cax)
+    cb.ax.tick_params(labelsize=9)
     # Add colorbar labels
     fontsize=9
     tercile_type = tercile_type.capitalize()
