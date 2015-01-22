@@ -50,7 +50,7 @@ def make_poe(ensemble_array, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     # --------------------------------------------------------------------------
     # Options
     #
-    num_xvals = 500  # Number of discrete X values for generating PDFs
+    num_xvals = 250  # Number of discrete X values for generating PDFs
 
     # --------------------------------------------------------------------------
     # Create kernels for all members
