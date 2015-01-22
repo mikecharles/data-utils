@@ -6,7 +6,7 @@ import logging
 import sys
 import argparse
 import re
-from configobj import *
+import yaml
 from datetime import datetime, timedelta
 from time import time
 from data_utils.gridded.reading import read_grib
@@ -141,7 +141,7 @@ group.add_argument(
     dest='config_file',
     help='config file to parse',
     metavar='<FILE>',
-    default='library/config.ini',
+    default='library/config.yml',
 )
 
 # If no options are set, print help and exit, otherwise parse args
@@ -200,10 +200,11 @@ models = args.model.split(',')
 #
 # Read some options from config file
 try:
-    config = ConfigObj(args.config_file, file_error=True, unrepr=True)
+    with open(args.config_file) as f:
+        config = yaml.load(f)
 except Exception as e:
     raise Exception('Could not parse config file {}: {} Make sure you\'ve '
-                    'copied config.ini.example to config.ini'.format(
+                    'copied config.yml.example to config.yml'.format(
         args.config_file, e))
 try:
     ptiles = config['ptiles']
