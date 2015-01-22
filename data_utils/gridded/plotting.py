@@ -132,7 +132,7 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
 
 def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         -90, 90), lon_range=(0, 360), cbar_ends='triangular',
-              tercile_type='normal'):
+              tercile_type='normal', projection='lcc'):
     """Creates a plot object using
     `mpl_toolkits.basemap <http://matplotlib.org/basemap/users/examples.html>`_.
     Nothing is actually plotted. Usually you'd want to call :func:`show_plot`
@@ -175,23 +175,39 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
     lons, lats = np.meshgrid(lons, lats)
 
     # Create Basemap
-
     fig, ax = matplotlib.pyplot.subplots()
-    m = mpl_toolkits.basemap.Basemap(llcrnrlon=lon_range[0],
-                                     llcrnrlat=lat_range[0],
-                                     urcrnrlon=lon_range[1],
-                                     urcrnrlat=lat_range[1],
-                                     projection='mill',
-                                     ax=ax,
-                                     resolution='l')
-    m.drawcoastlines(linewidth=1)
-    m.drawparallels(np.arange(lat_range[0], lat_range[1]+1, 10),
-                    labels=[1, 1, 0, 0], fontsize=9)
-    m.drawmeridians(np.arange(lon_range[0], lon_range[1]+1, 10),
-                    labels=[0, 0, 0, 1], fontsize=9)
-    m.drawmapboundary(fill_color='#DDDDDD')
-    m.drawstates()
-    m.drawcountries()
+    if projection == 'mercator':
+        m = mpl_toolkits.basemap.Basemap(llcrnrlon=lon_range[0],
+                                         llcrnrlat=lat_range[0],
+                                         urcrnrlon=lon_range[1],
+                                         urcrnrlat=lat_range[1],
+                                         projection='mill',
+                                         ax=ax,
+                                         resolution='l')
+        m.drawcoastlines(linewidth=1)
+        m.drawparallels(np.arange(lat_range[0], lat_range[1]+1, 10),
+                        labels=[1, 1, 0, 0], fontsize=9)
+        m.drawmeridians(np.arange(lon_range[0], lon_range[1]+1, 10),
+                        labels=[0, 0, 0, 1], fontsize=9)
+        m.drawmapboundary(fill_color='#DDDDDD')
+        m.drawstates()
+        m.drawcountries()
+    elif projection == 'lcc':
+        m = mpl_toolkits.basemap.Basemap(width=8000000, height=6600000,
+                                         lat_0=53., lon_0=-100.,
+                                         projection='lcc', ax=ax,
+                                         resolution='l')
+        m.drawcoastlines(linewidth=1)
+        m.drawparallels(np.arange(lat_range[0], lat_range[1] + 1, 10),
+                        labels=[1, 1, 0, 0], fontsize=9)
+        m.drawmeridians(np.arange(lon_range[0], lon_range[1] + 1, 10),
+                        labels=[0, 0, 0, 1], fontsize=9)
+        m.drawmapboundary(fill_color='#DDDDDD')
+        m.drawstates()
+        m.drawcountries()
+
+    else:
+        raise ValueError('Supported projections: \'mercator\', \'stereo\'')
 
     # Plot data
     if cbar_ends == 'triangular':
@@ -272,8 +288,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
     all_probs *= 100
     # Plot
     plot_to_screen(all_probs, grid, levels=levels, colors=colors,
-                   title=title, lat_range=(20, 70), lon_range=(200, 300),
-                   cbar_ends=cbar_ends, tercile_type=tercile_type)
+                   title=title, cbar_ends=cbar_ends, tercile_type=tercile_type)
 
 
 def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
@@ -291,8 +306,7 @@ def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
     all_probs *= 100
     # Plot
     plot_to_file(all_probs, grid, file, levels=levels, colors=colors,
-                 title=title, lat_range=(20, 70), lon_range=(200, 300),
-                 cbar_ends=cbar_ends, tercile_type=tercile_type)
+                 title=title, cbar_ends=cbar_ends, tercile_type=tercile_type)
 
 
 def put_terciles_in_one_array(below, near, above):
