@@ -288,7 +288,6 @@ for date in generate_date_list(args.start_date, args.end_date):
             for f in range(len(fhrs)):
                 fhr = fhrs[f]
                 # Establish fcst file name
-                model_file_str = '-'.join(sorted(args.model.split(',')))
                 fcst_file = replace_vars_in_string(fcst_file_template,
                                                    model=model, yyyy=yyyy,
                                                    mm=mm, dd=dd,
@@ -374,12 +373,12 @@ for date in generate_date_list(args.start_date, args.end_date):
                   33, 40, 50, 60, 70, 80, 90, 100]
 
         # Establish output file name prefix
+        model_file_str = '-'.join(sorted(args.model.split(',')))
         out_file_prefix = replace_vars_in_string(out_file_prefix_template,
-                                                 model=args.model, var=args.var,
-                                                 date=date, cycle=args.cycle,
+                                                 model=model_file_str,
+                                                 var=args.var, date=date,
+                                                 cycle=args.cycle,
                                                  lead=args.lead)
-        # Remove any commas in the file name (from multi.models, etc.)
-        out_file_prefix = out_file_prefix.replace(',', '-')
 
         # Plot terciles to a file
         plot_tercile_probs_to_file(below, near, above, grid,
