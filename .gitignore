@@ -4,6 +4,7 @@
 /*.bin
 /*.png
 /.idea
+/work
 # Other specific files/dirs 
 /library/config.yml
 # Files/dirs anywhere in this repo
