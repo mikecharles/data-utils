@@ -309,8 +309,6 @@ for date in generate_date_list(args.start_date, args.end_date):
             # Increment total member count
             m_total += 1
 
-            # fcst_data[m].astype('float32').tofile('test_m{}.bin'.format(member))
-
     # Convert fcst data from Kelvin to Celsius
     if args.var == 'tmean':
         fcst_data -= 273.15
@@ -320,7 +318,7 @@ for date in generate_date_list(args.start_date, args.end_date):
     #
     if args.processing_type == 'make-poe':
 
-        # --------------------------------------------------------------------------
+        # ----------------------------------------------------------------------
         # Load climo data
         #
         logger.info('Loading climatology data...')
@@ -336,27 +334,25 @@ for date in generate_date_list(args.start_date, args.end_date):
                                             var=args.var, climo_mmdd=climo_mmdd)
         logger.debug('Climatology file: {}'.format(climo_file))
         climo_data = np.reshape(
-            np.fromfile(climo_file, 'float32'), (len(ptiles), grid.num_y*grid.num_x)
+            np.fromfile(climo_file, 'float32'),
+            (len(ptiles), grid.num_y*grid.num_x)
         )
 
-        # --------------------------------------------------------------------------
-        # Obtain the climatological mean and standard deviation at each gridpoint
+        # ----------------------------------------------------------------------
+        # Obtain climatological mean and standard deviation at each gridpoint
         #
         # Use stats_utils.stats.poe_to_moments()
         logger.info('Converting climatologies from percentile to mean/standard '
                     'deviation...')
         climo_mean, climo_std = poe_to_moments(climo_data, ptiles, axis=0)
 
-        # --------------------------------------------------------------------------
+        # ----------------------------------------------------------------------
         # Anomalize all ensemble members
         #
         logger.info('Converting forecast data to standardized anomaly space...')
         fcst_data_z = (fcst_data - climo_mean) / climo_std
 
-        # fcst_data_z = np.reshape(np.fromfile('fcst_data_z.bin', dtype='float32'),
-        #                          (num_members, grid.num_x*grid.num_y))
-
-        # --------------------------------------------------------------------------
+        # ----------------------------------------------------------------------
         # Use R_best to calculate the standard deviation of the kernels
         #
         logger.info('Creating POEs from standardized anomaly forecasts...')
@@ -365,7 +361,7 @@ for date in generate_date_list(args.start_date, args.end_date):
         # Loop over all grid points
         poe = make_poe(fcst_data_z, ptiles, kernel_std, member_axis=0)
 
-        # --------------------------------------------------------------------------
+        # ----------------------------------------------------------------------
         # Convert the final POE to terciles for plotting
         #
         below, near, above = poe_to_terciles(poe, ptiles)
