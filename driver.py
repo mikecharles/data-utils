@@ -151,12 +151,13 @@ if len(sys.argv) <= 1:
 else:
     args = parser.parse_args()
 
+# ------------------------------------------------------------------------------
+# Setup some options (TODO: maybe these can be in the config file somehow?)
+#
 # Remove 'z' from cycle
 cycle_num = args.cycle.strip('z')
-
 # Capitalize logging level
 args.log_level = args.log_level.upper()
-
 # Convert date of "today" into YYYYMMDD
 if args.date == 'today':
     temp_date = datetime.now()
@@ -165,13 +166,11 @@ if args.date == 'today':
 elif args.date == 'yesterday':
     temp_date = datetime.now() - timedelta(days=1)
     args.date = "{:%Y%m%d}".format(temp_date)
-
 # Convert date of YYYYMMDD-YYYYMMDD into start and end dates
 if re.match('\d{8}-\d{8}', args.date):
     args.start_date, args.end_date = args.date.split('-')
 else:
     args.start_date = args.end_date = args.date
-
 # Set a few vars that depend on lead
 if args.lead == 'd6-10':
     # fhr range
@@ -182,6 +181,8 @@ if args.lead == 'd6-10':
     ave_window = '05d'
     # lead end
     lead_end = 10
+    # Title string
+    title_lead = 'Days 6-10'
 elif args.lead == 'd8-14':
     # fhr range
     if args.cycle == '00z':
@@ -191,7 +192,26 @@ elif args.lead == 'd8-14':
     ave_window = '07d'
     # lead end
     lead_end = 14
+    # Title string
+    title_lead = 'Days 8-14'
+# Set a few vars that depend on the model
+if args.model == 'gefsbc,cmcebc' or args.model == 'cmcebc,gefsbc':
+    title_model = 'NAEFS'
+    file_model = 'naefs'
+else:
+    title_model = args.model.upper()
+    file_model = '-'.join(sorted(args.model.split(',')))
 
+# Set a few vars that depend on the processing-type
+if args.processing_type == 'make-poe':
+    title_processing_type = 'Bias-Corrected'
+else:
+    title_processing_type = args.processing_type
+# Set a few vars that depend on the var
+if args.var == 'tmean':
+    title_var = 'Temperature'
+else:
+    title_var = args.var
 # Get a list of models
 models = args.model.split(',')
 
@@ -366,21 +386,34 @@ for date in generate_date_list(args.start_date, args.end_date):
         #
         below, near, above = poe_to_terciles(poe, ptiles)
 
-        levels = [-100, -90, -80, -70, -60, -50, -40, -33,
-                  33, 40, 50, 60, 70, 80, 90, 100]
+        levels = [-90, -80, -70, -60, -50, -40, -33,
+                  33, 40, 50, 60, 70, 80, 90]
 
         # Establish output file name prefix
-        model_file_str = '-'.join(sorted(args.model.split(',')))
         out_file_prefix = replace_vars_in_string(out_file_prefix_template,
-                                                 model=model_file_str,
+                                                 model=file_model,
                                                  var=args.var, date=date,
                                                  cycle=args.cycle,
                                                  lead=args.lead)
 
+        # Establish plot title
+        title = replace_vars_in_string(config['output']['title-template'],
+                                       date='-'.join([yyyy, mm, dd]),
+                                       model=title_model,
+                                       processing_type=title_processing_type,
+                                       var=title_var,
+                                       lead=title_lead
+                                       )
+
         # Plot terciles to a file
         plot_tercile_probs_to_file(below, near, above, grid,
                                    out_file_prefix+'.png', levels=levels,
-                                   colors='tmean_colors')
+                                   colors='tmean_colors',
+                                   cbar_ends='triangular',
+                                   tercile_type='normal', title=title,
+                                   lat_range=config['output']['lat-range'],
+                                   lon_range=config['output']['lon-range'],
+                                   smoothing_factor=0.5)
 
 # Print time taken to finish
 end_time = time()
