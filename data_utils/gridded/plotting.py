@@ -10,6 +10,7 @@ import matplotlib.cm
 import matplotlib.colorbar
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
+import scipy.ndimage
 import math
 
 import data_utils.gridded.grid
@@ -17,7 +18,8 @@ import data_utils.gridded.grid
 
 def plot_to_screen(data, grid, levels=None, colors=None, title=None,
                    lat_range=(-90, 90), lon_range=(0, 360),
-                   cbar_ends='triangular', tercile_type='normal'):
+                   cbar_ends='triangular', tercile_type='normal',
+                   smoothing_factor=0):
     """Plots the given data and displays on-screen.
 
     Essentially makes calls to :func:`make_plot` and :func:`show_plot` to do
@@ -45,6 +47,9 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
         the levels should not contain the endpoints.
     tercile_type : str, optional
         Type of tercile ('normal' or 'median')
+    smoothing_factor : float, optional
+        Level of smoothing (gaussian filter, this represents the kernel width -
+        may need to experiment with value)
 
     Examples
     --------
@@ -66,14 +71,15 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
 
     make_plot(data, grid, levels=levels, colors=colors, title=title,
               lat_range=lat_range, lon_range=lon_range, cbar_ends=cbar_ends,
-              tercile_type=tercile_type)
+              tercile_type=tercile_type, smoothing_factor=smoothing_factor)
     show_plot()
     matplotlib.pyplot.close("all")
 
 
 def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
                  title=None, lat_range=(-90, 90), lon_range=(0, 360),
-                 cbar_ends='triangular', tercile_type='normal'):
+                 cbar_ends='triangular', tercile_type='normal',
+                 smoothing_factor=0):
     """Plots the given data and saves to a file.
 
     Essentially makes calls to :func:`make_plot` and :func:`save_plot` to do
@@ -106,6 +112,9 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
         the levels should not contain the endpoints.
     tercile_type : str, optional
         Type of tercile ('normal' or 'median')
+    smoothing_factor : float, optional
+        Level of smoothing (gaussian filter, this represents the kernel width -
+        may need to experiment with value)
 
     Examples
     --------
@@ -126,14 +135,14 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
 
     make_plot(data, grid, levels=levels, colors=colors, title=title,
               lat_range=lat_range, lon_range=lon_range, cbar_ends=cbar_ends,
-              tercile_type=tercile_type)
+              tercile_type=tercile_type, smoothing_factor=smoothing_factor)
     save_plot(file, dpi)
     matplotlib.pyplot.close("all")
 
 
 def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         -90, 90), lon_range=(0, 360), cbar_ends='triangular',
-              tercile_type='normal', projection='lcc'):
+              tercile_type='normal', projection='lcc', smoothing_factor=0):
     """Creates a plot object using
     `mpl_toolkits.basemap <http://matplotlib.org/basemap/users/examples.html>`_.
     Nothing is actually plotted. Usually you'd want to call :func:`show_plot`
@@ -161,6 +170,9 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         the levels should not contain the endpoints.
     tercile_type : str, optional
         Type of tercile ('normal' or 'median')
+    smoothing_factor : float, optional
+        Level of smoothing (gaussian filter, this represents the kernel width -
+        may need to experiment with value)
     """
     # Check args
     if (colors and not levels) or (levels and not colors):
@@ -210,6 +222,9 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
     else:
         raise ValueError('Supported projections: \'mercator\', \'stereo\'')
 
+    # Smooth data
+    data = scipy.ndimage.filters.gaussian_filter(data, smoothing_factor)
+
     # Plot data
     if cbar_ends == 'triangular':
         extend='both'
@@ -219,8 +234,8 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         raise ValueError('cbar_ends must be either \'triangular\' or '
                          '\'square\'')
     if levels:
-        plot = m.contourf(lons, lats, data, levels, latlon=True,
-                          colors=colors, extend=extend)
+        plot = m.contourf(lons, lats, data, levels, latlon=True, colors=colors,
+                          extend=extend)
     else:
         plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
 
@@ -281,7 +296,7 @@ def save_plot(file, dpi=200):
 def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
                        colors='temp_colors', title=None, lat_range=(-90, 90),
                        lon_range=(0, 360), cbar_ends='triangular',
-                       tercile_type='normal'):
+                       tercile_type='normal', smoothing_factor=0):
     # Get colors
     colors = get_colors(colors)
 
@@ -292,14 +307,15 @@ def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
     all_probs *= 100
     # Plot
     plot_to_screen(all_probs, grid, levels=levels, colors=colors,
-                   title=title, cbar_ends=cbar_ends, tercile_type=tercile_type)
+                   title=title, cbar_ends=cbar_ends,
+                   tercile_type=tercile_type, smoothing_factor=smoothing_factor)
 
 
 def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
                                  colors='tmean_colors', title=None,
                                  lat_range=(-90, 90), lon_range=(0, 360),
                                  cbar_ends='triangular',
-                                 tercile_type='normal'):
+                                 tercile_type='normal', smoothing_factor=0):
     # Get colors
     colors = get_colors(colors)
 
@@ -310,7 +326,8 @@ def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
     all_probs *= 100
     # Plot
     plot_to_file(all_probs, grid, file, levels=levels, colors=colors,
-                 title=title, cbar_ends=cbar_ends, tercile_type=tercile_type)
+                 title=title, cbar_ends=cbar_ends, tercile_type=tercile_type,
+                 smoothing_factor=smoothing_factor)
 
 
 def put_terciles_in_one_array(below, near, above):
