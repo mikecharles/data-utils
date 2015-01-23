@@ -4,6 +4,8 @@ import numpy as np
 import math
 import logging
 import sys
+import os
+import shutil
 import argparse
 import re
 import yaml
@@ -19,6 +21,12 @@ from mpp.poe import make_poe, poe_to_terciles
 
 start_time = time()
 
+# Change into the work dir
+try:
+    os.chdir(os.path.dirname(os.path.abspath(__file__)) + '/work')
+except:
+    print('No ./work directory found relative to {}'.format(__file__))
+    sys.exit(1)
 
 # Function to see if all list elements are the same
 def all_same(items):
@@ -121,6 +129,7 @@ group.add_argument(
     action='help',
     help='show this help message and exit'
 )
+# TODO: Add transmission
 # group.add_argument(
 #     '--transmit',
 #     dest='transmit',
@@ -141,7 +150,7 @@ group.add_argument(
     dest='config_file',
     help='config file to parse',
     metavar='<FILE>',
-    default='library/config.yml',
+    default='../library/config.yml',
 )
 
 # If no options are set, print help and exit, otherwise parse args
@@ -407,13 +416,15 @@ for date in generate_date_list(args.start_date, args.end_date):
 
         # Plot terciles to a file
         plot_tercile_probs_to_file(below, near, above, grid,
-                                   out_file_prefix+'.png', levels=levels,
-                                   colors='tmean_colors',
+                                   '../output/'+out_file_prefix+'.png',
+                                   levels=levels, colors='tmean_colors',
                                    cbar_ends='triangular',
                                    tercile_type='normal', title=title,
                                    lat_range=config['output']['lat-range'],
                                    lon_range=config['output']['lon-range'],
                                    smoothing_factor=0.5)
+
+# TODO: Clean work dir
 
 # Print time taken to finish
 end_time = time()
