@@ -42,6 +42,10 @@ def interpolate(orig_data, orig_grid, new_grid):
     ...                                                         new_grid)
     """
 
+    # If data is 1-dimensional, reshape to 2 dimensions
+    if orig_data.ndim == 1:
+        orig_data = numpy.reshape(orig_data, (orig_grid.num_y, orig_grid.num_x))
+
     # Generate arrays of longitude and latitude values for the original grid
     num_lats, num_lons = (orig_grid.num_y, orig_grid.num_x)
     orig_start_lat, orig_start_lon = orig_grid.ll_corner

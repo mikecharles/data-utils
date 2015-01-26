@@ -65,6 +65,9 @@ def read_grib(file, grib_type, variable, level):
     array([ 246.3999939 ,  246.3999939 ,  246.3999939 , ...,  242.74000549,
             242.74000549,  242.74000549], dtype=float32)
     """
+    # Make sure grib file exists first
+    if not os.path.isfile(file):
+        raise IOError('Grib file not found')
     # Generate a temporary file name
     temp_file = str(uuid.uuid4()) + '.bin'
     # Set the name of the wgrib program to call
