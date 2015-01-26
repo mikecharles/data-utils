@@ -63,12 +63,12 @@ def make_poe(ensemble_array, ptiles, kernel_std=math.sqrt(1 - 0.7 ** 2),
     # Loop over each grid point
     for g in range(ensemble_array.shape[1]):
         # Create kernels around ensemble members and sum over all members
+        # TODO: Add nan-removal
         final_pdf[:, g] = np.sum(
             scipy.stats.norm.pdf(x,
                                  ensemble_array[:, g, np.newaxis],
                                  kernel_std) / num_members, axis=0
         )
-
     # --------------------------------------------------------------------------
     # Convert into a POE (1 - CDF)
     #

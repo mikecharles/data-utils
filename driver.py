@@ -5,7 +5,7 @@ import math
 import logging
 import sys
 import os
-import shutil
+import warnings
 import argparse
 import re
 import yaml
@@ -13,11 +13,17 @@ from datetime import datetime, timedelta
 from time import time
 from data_utils.gridded.reading import read_grib
 from data_utils.gridded.grid import Grid
+from data_utils.gridded.interpolation import interpolate
 from data_utils.gridded.plotting import plot_tercile_probs_to_file
+from data_utils.gridded.writing import terciles_to_txt
 from stats_utils.stats import poe_to_moments
 from string_utils.strings import replace_vars_in_string
 from string_utils.dates import generate_date_list
 from mpp.poe import make_poe, poe_to_terciles
+
+
+# Turn Python warnings into Errors
+warnings.simplefilter("error")
 
 start_time = time()
 
@@ -284,10 +290,8 @@ for date in generate_date_list(args.start_date, args.end_date):
     for model in models:
         total_num_members += config['fcst-data'][model]['num-members']
     # Initialize data NumPy arrays
-    fcst_data = np.empty((total_num_members, grid.num_x * grid.num_y))  # all
-    # members/grid points
-    temp_data = np.empty((len(fhrs), grid.num_x * grid.num_y))  # all fhrs/grid
-    # points
+    fcst_data = np.empty((total_num_members, grid.num_x * grid.num_y))
+    fcst_data[:] = np.NaN
 
     # --------------------------------------------------------------------------
     # Loop over models
@@ -314,6 +318,10 @@ for date in generate_date_list(args.start_date, args.end_date):
         for m_single in range(len(members)):
             member = members[m_single]
             logger.debug('Loading member {}'.format(member))
+            # Initialize temp data array (fhrs x grid points)
+            temp_data = np.empty((len(fhrs), grid.num_x * grid.num_y))
+            temp_data[:] = np.nan
+
             # Loop over fhrs
             for f in range(len(fhrs)):
                 fhr = fhrs[f]
@@ -326,21 +334,35 @@ for date in generate_date_list(args.start_date, args.end_date):
                                                    member=member)
                 # Load data from fcst file
                 logger.debug('Loading data from {}...'.format(fcst_file))
-                temp_data[f] = read_grib(fcst_file, data_type, var_name,
-                                         var_level)
+                try:
+                    temp_data[f] = read_grib(fcst_file, data_type, var_name,
+                                             var_level)
+                except Exception as e:
+                    logger.error('Skipping {}: {}'.format(fcst_file, e))
+                    continue
 
             # Create average or accumulation over fhrs
-            if args.var == 'tmean':
-                fcst_data[m_total] = np.nanmean(temp_data, axis=0)
-            elif args.var == 'precip':
-                fcst_data[m_total] = np.nansum(temp_data, axis=0)
+            try:
+                if args.var == 'tmean':
+                    fcst_data[m_total] = np.nanmean(temp_data, axis=0) - 273.15
+                elif args.var == 'precip':
+                    fcst_data[m_total] = np.nansum(temp_data, axis=0)
+            except:
+                logger.warning('No data found for member {}'.format(m_single))
 
             # Increment total member count
             m_total += 1
 
-    # Convert fcst data from Kelvin to Celsius
-    if args.var == 'tmean':
-        fcst_data -= 273.15
+    # --------------------------------------------------------------------------
+    # QC fcst data
+    #
+    # Ensure at least x% of members have non-NaN fcst
+    # TODO: Make the percentage a config option
+    pcnt_fcst_data_req = 100
+    pcnt_memb_loaded = 100 * (np.sum(~np.isnan(fcst_data[:, 0]))) / total_num_members
+    if pcnt_memb_loaded < pcnt_fcst_data_req:
+        logger.fatal('Not enough fcst data was loaded, exiting...')
+        sys.exit(1)
 
     # --------------------------------------------------------------------------
     # Perform post-processing
@@ -362,10 +384,17 @@ for date in generate_date_list(args.start_date, args.end_date):
                                             ave_window=ave_window,
                                             var=args.var, climo_mmdd=climo_mmdd)
         logger.debug('Climatology file: {}'.format(climo_file))
-        climo_data = np.reshape(
-            np.fromfile(climo_file, 'float32'),
-            (len(ptiles), grid.num_y*grid.num_x)
-        )
+        try:
+            climo_data = np.reshape(
+                np.fromfile(climo_file, 'float32'),
+                (len(ptiles), grid.num_y*grid.num_x)
+            )
+        except FileNotFoundError as e:
+            logger.fatal('Climatology file {} was not found, '
+                         'exiting...'.format(climo_file))
+            sys.exit(1)
+        except Exception as e:
+            logger.fatal('Couldn\'t load climatology data: {}'.format(e))
 
         # ----------------------------------------------------------------------
         # Obtain climatological mean and standard deviation at each gridpoint
@@ -414,15 +443,25 @@ for date in generate_date_list(args.start_date, args.end_date):
                                        lead=title_lead
                                        )
 
-        # Plot terciles to a file
+        # Plot terciles to a PNG
         plot_tercile_probs_to_file(below, near, above, grid,
                                    '../output/'+out_file_prefix+'.png',
-                                   levels=levels, colors='tmean_colors',
+                                   levels=levels,
+                                   colors=args.var+'_colors',
                                    cbar_ends='triangular',
                                    tercile_type='normal', title=title,
                                    lat_range=config['output']['lat-range'],
                                    lon_range=config['output']['lon-range'],
                                    smoothing_factor=0.5)
+
+        # Save 2-deg conus terciles to a text file
+        # TODO: Make 2deg_conus a variable in the config file
+        grid_interp = Grid('2deg_conus')
+        below_interp = interpolate(below, grid, grid_interp)
+        near_interp = interpolate(near, grid, grid_interp)
+        above_interp = interpolate(above, grid, grid_interp)
+        terciles_to_txt(below_interp, near_interp, above_interp, grid_interp,
+                        '../output/'+out_file_prefix+'_2deg_conus.txt')
 
 # TODO: Clean work dir
 
