@@ -81,7 +81,9 @@ def read_grib(file, grib_type, variable, level):
     # Generate a wgrib call
     try:
         logger.debug('Command to extract grib data: ' + wgrib_call)
-        output = subprocess.check_output(wgrib_call, shell=True)
+        output = subprocess.call(wgrib_call, shell=True,
+                                 stderr=subprocess.DEVNULL,
+                                 stdout=subprocess.DEVNULL)
     except Exception as e:
         os.remove(temp_file)
         raise IOError('Couldn\'t read {} file: {}'.format(grib_type, str(e)))
@@ -93,3 +95,4 @@ def read_grib(file, grib_type, variable, level):
     os.remove(temp_file)
     # Return data
     return data
+
