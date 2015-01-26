@@ -326,6 +326,7 @@ for date in generate_date_list(args.start_date, args.end_date):
                                                    member=member)
                 # Load data from fcst file
                 logger.debug('Loading data from {}...'.format(fcst_file))
+                # try:
                 temp_data[f] = read_grib(fcst_file, data_type, var_name,
                                          var_level)
 
@@ -362,10 +363,17 @@ for date in generate_date_list(args.start_date, args.end_date):
                                             ave_window=ave_window,
                                             var=args.var, climo_mmdd=climo_mmdd)
         logger.debug('Climatology file: {}'.format(climo_file))
-        climo_data = np.reshape(
-            np.fromfile(climo_file, 'float32'),
-            (len(ptiles), grid.num_y*grid.num_x)
-        )
+        try:
+            climo_data = np.reshape(
+                np.fromfile(climo_file, 'float32'),
+                (len(ptiles), grid.num_y*grid.num_x)
+            )
+        except FileNotFoundError as e:
+            logger.fatal('Climatology file {} was not found, '
+                         'exiting...'.format(climo_file))
+            sys.exit(1)
+        except Exception as e:
+            logger.fatal('Couldn\'t load climatology data: {}'.format(e))
 
         # ----------------------------------------------------------------------
         # Obtain climatological mean and standard deviation at each gridpoint
