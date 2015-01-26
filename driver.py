@@ -13,7 +13,9 @@ from datetime import datetime, timedelta
 from time import time
 from data_utils.gridded.reading import read_grib
 from data_utils.gridded.grid import Grid
+from data_utils.gridded.interpolation import interpolate
 from data_utils.gridded.plotting import plot_tercile_probs_to_file
+from data_utils.gridded.writing import terciles_to_txt
 from stats_utils.stats import poe_to_moments
 from string_utils.strings import replace_vars_in_string
 from string_utils.dates import generate_date_list
@@ -441,15 +443,25 @@ for date in generate_date_list(args.start_date, args.end_date):
                                        lead=title_lead
                                        )
 
-        # Plot terciles to a file
+        # Plot terciles to a PNG
         plot_tercile_probs_to_file(below, near, above, grid,
                                    '../output/'+out_file_prefix+'.png',
-                                   levels=levels, colors='tmean_colors',
+                                   levels=levels,
+                                   colors=args.var+'_colors',
                                    cbar_ends='triangular',
                                    tercile_type='normal', title=title,
                                    lat_range=config['output']['lat-range'],
                                    lon_range=config['output']['lon-range'],
                                    smoothing_factor=0.5)
+
+        # Save 2-deg conus terciles to a text file
+        # TODO: Make 2deg_conus a variable in the config file
+        grid_interp = Grid('2deg_conus')
+        below_interp = interpolate(below, grid, grid_interp)
+        near_interp = interpolate(near, grid, grid_interp)
+        above_interp = interpolate(above, grid, grid_interp)
+        terciles_to_txt(below_interp, near_interp, above_interp, grid_interp,
+                        '../output/'+out_file_prefix+'_2deg_conus.txt')
 
 # TODO: Clean work dir
 
