@@ -18,11 +18,11 @@ def terciles_to_txt(below, near, above, grid, output_file):
     # Open output file
     f = open(output_file, 'w')
     # Loop over all grid points
-    f.write('XXYY   below   near   above\n'.format())
+    f.write('XXYY   below    near   above\n'.format())
     for x in range(grid.num_x):
         for y in range(grid.num_y):
             # TODO: Make the num X and Y sizes dynamic - ex. XXYY vs XXXYYY
-            f.write('{:02.0f}{:02.0f}   {:4.3f}  {:4.3f}   {:4.3f}\n'.format(
+            f.write('{:02.0f}{:02.0f}   {:4.3f}   {:4.3f}   {:4.3f}\n'.format(
                 x+1, y+1,
                 below[y, x],
                 near[y, x],
