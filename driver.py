@@ -22,8 +22,8 @@ from string_utils.dates import generate_date_list
 from mpp.poe import make_poe, poe_to_terciles
 
 
-# Turn Python warnings into Errors
-warnings.simplefilter("error")
+# Ignore RuntimeWarning messages from NumPy
+warnings.filterwarnings("ignore", 'Mean of empty slice')
 
 start_time = time()
 
@@ -342,13 +342,10 @@ for date in generate_date_list(args.start_date, args.end_date):
                     continue
 
             # Create average or accumulation over fhrs
-            try:
-                if args.var == 'tmean':
-                    fcst_data[m_total] = np.nanmean(temp_data, axis=0) - 273.15
-                elif args.var == 'precip':
-                    fcst_data[m_total] = np.nansum(temp_data, axis=0)
-            except:
-                logger.warning('No data found for member {}'.format(m_single))
+            if args.var == 'tmean':
+                fcst_data[m_total] = np.nanmean(temp_data, axis=0) - 273.15
+            elif args.var == 'precip':
+                fcst_data[m_total] = np.nansum(temp_data, axis=0)
 
             # Increment total member count
             m_total += 1
