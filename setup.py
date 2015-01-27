@@ -20,7 +20,10 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Atmospheric Science",
     ],
-    requires=['numpy', 'matplotlib']
+    requires=['numpy', 'matplotlib'],
+    data_files={
+        'data_utils': ['library/station-list*.csv'],
+    }
 )
 
 
