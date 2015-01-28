@@ -71,6 +71,8 @@ class Grid:
         # Calculate additional attributes
         self.num_y = int(((self.ur_corner[0] - self.ll_corner[0]) / self.res) + 1)
         self.num_x = int(((self.ur_corner[1] - self.ll_corner[1]) / self.res) + 1)
+        self.lats = range(self.ll_corner[0], self.ur_corner[0] + 1, self.res)
+        self.lons = range(self.ll_corner[1], self.ur_corner[1] + 1, self.res)
 
     def print_info(self):
         print('Grid info:')
