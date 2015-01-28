@@ -9,13 +9,16 @@ import warnings
 import argparse
 import re
 import yaml
+from pkg_resources import resource_filename
 from datetime import datetime, timedelta
 from time import time
 from data_utils.gridded.reading import read_grib
 from data_utils.gridded.grid import Grid
 from data_utils.gridded.interpolation import interpolate
 from data_utils.gridded.plotting import plot_tercile_probs_to_file
-from data_utils.gridded.writing import terciles_to_txt
+import data_utils.gridded.writing
+import data_utils.station.writing
+from data_utils.station.interpolation import grid_to_stn
 from stats_utils.stats import poe_to_moments
 from string_utils.strings import replace_vars_in_string
 from string_utils.dates import generate_date_list
@@ -424,13 +427,18 @@ for date in generate_date_list(args.start_date, args.end_date):
         levels = [-90, -80, -70, -60, -50, -40, -33,
                   33, 40, 50, 60, 70, 80, 90]
 
+        # ----------------------------------------------------------------------
         # Establish output file name prefix
+        #
         out_file_prefix = replace_vars_in_string(out_file_prefix_template,
                                                  model=file_model,
                                                  var=args.var, date=date,
                                                  cycle=args.cycle,
                                                  lead=args.lead)
 
+        # ----------------------------------------------------------------------
+        # Plot
+        #
         # Establish plot title
         title = replace_vars_in_string(config['output']['title-template'],
                                        date='-'.join([yyyy, mm, dd]),
@@ -451,14 +459,53 @@ for date in generate_date_list(args.start_date, args.end_date):
                                    lon_range=config['output']['lon-range'],
                                    smoothing_factor=0.5)
 
+        # ----------------------------------------------------------------------
+        # Save data interpolated to stations as a text file
+        #
+        stn_ids = []
+        stn_lats = []
+        stn_lons = []
+        # Open the station list (packaged with data-utils pkg)
+        with open(
+                resource_filename('data_utils',
+                                  'library/station-list-tmean.csv'), 'r'
+        ) as file:
+            # Skip header line
+            next(file)
+            # Loop over lines
+            for line in file:
+                # Split line into columns
+                columns = line.replace('\n', '').split(',')
+                # Append id, lat, and lon to lists
+                stn_ids.append(columns[0])
+                stn_lats.append(float(columns[6]))
+                if float(columns[7]) < 0:  # convert to positive lons
+                    stn_lons.append(float(columns[7]) + 360)
+                else:
+                    stn_lons.append(float(columns[7]))
+        # Convert gridded data to station
+        below_stn = grid_to_stn(below, grid, stn_ids, stn_lats, stn_lons)
+        near_stn = grid_to_stn(near, grid, stn_ids, stn_lats, stn_lons)
+        above_stn = grid_to_stn(above, grid, stn_ids, stn_lats, stn_lons)
+        # Write to text file
+        data_utils.station.writing.terciles_to_txt(
+            below_stn, near_stn, above_stn, stn_ids,
+            '../output/{}_stn.txt'.format(out_file_prefix)
+        )
+
+        # ----------------------------------------------------------------------
         # Save 2-deg conus terciles to a text file
+        #
         # TODO: Make 2deg_conus a variable in the config file
+        #
         grid_interp = Grid('2deg_conus')
         below_interp = interpolate(below, grid, grid_interp)
         near_interp = interpolate(near, grid, grid_interp)
         above_interp = interpolate(above, grid, grid_interp)
-        terciles_to_txt(below_interp, near_interp, above_interp, grid_interp,
+        data_utils.gridded.writing.terciles_to_txt(
+            below_interp, near_interp, above_interp, grid_interp,
                         '../output/'+out_file_prefix+'_2deg_conus.txt')
+
 
 # TODO: Clean work dir
 
