@@ -1,3 +1,5 @@
+import numpy as np
+from stats_utils.stats import find_nearest_index
 
 
 """
@@ -31,7 +33,20 @@ def grid_to_stn(gridded_data, grid, stn_ids, stn_lats, stn_lons):
     --------
 
     """
-    for i in len(stn_ids):
+    # Reshape gridded data to 2 dimensions if necessary
+    if gridded_data.ndim == 1:
+        gridded_data = np.reshape(gridded_data, (grid.num_y, grid.num_x))
+    # Create empty list to store station vals
+    stn_val = []
+    # Loop over all stations
+    for i in range(len(stn_ids)):
+        # Find closest grid point to station
+        x_index = find_nearest_index(grid.lons, stn_lons[i])
+        y_index = find_nearest_index(grid.lats, stn_lats[i])
+        # Assign station val
+        stn_val.append(gridded_data[y_index, x_index])
+
+    return stn_val
 
 
 
@@ -63,3 +78,7 @@ if __name__ == '__main__':
                 stn_lons.append(float(columns[7]))
 
     below_stn = grid_to_stn(below, grid, stn_ids, stn_lats, stn_lons)
+    near_stn = grid_to_stn(near, grid, stn_ids, stn_lats, stn_lons)
+    above_stn = grid_to_stn(above, grid, stn_ids, stn_lats, stn_lons)
+
+    print('DONE')
