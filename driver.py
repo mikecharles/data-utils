@@ -361,8 +361,8 @@ for date in generate_date_list(args.start_date, args.end_date):
     pcnt_fcst_data_req = 100
     pcnt_memb_loaded = 100 * (np.sum(~np.isnan(fcst_data[:, 0]))) / total_num_members
     if pcnt_memb_loaded < pcnt_fcst_data_req:
-        logger.fatal('Not enough fcst data was loaded, exiting...')
-        sys.exit(1)
+        logger.error('Not enough fcst data was loaded, skipping this day...')
+        continue
 
     # --------------------------------------------------------------------------
     # Perform post-processing
