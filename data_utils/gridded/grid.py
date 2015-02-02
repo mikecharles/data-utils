@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class Grid:
     """
     Grid definition storing attributes of a grid.
@@ -71,6 +74,10 @@ class Grid:
         # Calculate additional attributes
         self.num_y = int(((self.ur_corner[0] - self.ll_corner[0]) / self.res) + 1)
         self.num_x = int(((self.ur_corner[1] - self.ll_corner[1]) / self.res) + 1)
+        self.lats = np.arange(self.ll_corner[0], self.ur_corner[0] + 1,
+                              self.res).tolist()
+        self.lons = np.arange(self.ll_corner[1], self.ur_corner[1] + 1,
+                              self.res).tolist()
 
     def print_info(self):
         print('Grid info:')
