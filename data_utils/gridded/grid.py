@@ -80,6 +80,9 @@ class Grid:
                               self.res).tolist()
 
     def print_info(self):
+        """
+        Prints all attributes of a given Grid.
+        """
         print('Grid info:')
         for key, val in vars(self).items():
             print('\t{}: {}'.format(key, val))

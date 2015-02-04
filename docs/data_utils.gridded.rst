@@ -52,6 +52,22 @@ data_utils.gridded.reading module
     :undoc-members:
     :show-inheritance:
 
+data_utils.gridded.test module
+------------------------------
+
+.. automodule:: data_utils.gridded.test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+data_utils.gridded.writing module
+---------------------------------
+
+.. automodule:: data_utils.gridded.writing
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
