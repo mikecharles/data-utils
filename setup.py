@@ -12,18 +12,20 @@ setup(
     author_email='mike.charles@noaa.gov',
     description='Set of utilities for manipulating gridded data',
     classifiers=[
-        "Development Status :: 1 - Planning",
-        "Environment :: Console",
-        "Intended Audience :: Science/Research",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Operating System :: OS Independent",
-        "Topic :: Scientific/Engineering :: Atmospheric Science",
+        'Development Status :: 1 - Planning',
+        'Environment :: Console',
+        'Intended Audience :: Science/Research',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Operating System :: OS Independent',
+        'Topic :: Scientific/Engineering :: Atmospheric Science',
     ],
-    requires=['numpy',
-              'matplotlib',
-              'scipy',
-              'sphinx_rtd_theme'],
+    requires=[
+        'numpy',
+        'matplotlib',
+        'scipy',
+        'sphinx_rtd_theme'
+    ],
     include_package_data=True,
 )
 
