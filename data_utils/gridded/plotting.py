@@ -54,13 +54,16 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
     Examples
     --------
 
+    >>> from pkg_resources import resource_filename
     >>> import numpy as np
     >>> from data_utils.gridded.plotting import plot_to_screen
-    >>> grid = data_utils.gridded.grid.Grid('1deg_global')
-    >>> A = np.fromfile('tmax_01d_20130101.bin','float32')
+    >>> from data_utils.gridded.grid import Grid
+    >>> grid = Grid('1deg_global')
+    >>> A = np.fromfile(resource_filename('data_utils', 'lib/tmax.bin'),
+    ... dtype='float32')
     >>> A = np.reshape(A, (grid.num_y, grid.num_x))
     >>> A[A == -999] = np.nan
-    >>> plot_to_screen(A, grid, lat_range=(20, 75), lon_range=(180, 310))
+    >>> plot_to_screen(A, grid)
     """
 
     # Reshape array if necessary
@@ -118,13 +121,16 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
 
     Examples
     --------
+    >>> from pkg_resources import resource_filename
     >>> import numpy as np
     >>> from data_utils.gridded.plotting import plot_to_file
-    >>> grid = data_utils.gridded.grid.Grid('1deg_global')
-    >>> A = np.fromfile('tmax_01d_20130101.bin','float32')
+    >>> from data_utils.gridded.grid import Grid
+    >>> grid = Grid('1deg_global')
+    >>> A = np.fromfile(resource_filename('data_utils', 'lib/tmax.bin'),
+    ... dtype='float32')
     >>> A = np.reshape(A, (grid.num_y, grid.num_x))
     >>> A[A == -999] = np.nan
-    >>> plot_to_file(A, grid, 'test.png', lat_range=(20, 75), lon_range=(180, 310))
+    >>> plot_to_file(A, grid, 'test.png')
     """
 
     # Reshape array if necessary
@@ -238,9 +244,12 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
                           extend=extend)
     else:
         plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
+        levels = plot._levels
 
     # Add labels
     matplotlib.pyplot.title(title, fontsize=10)
+
+
 
     # --------------------------------------------------------------------------
     # Add a colorbar
