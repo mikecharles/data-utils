@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
+from data_utils import __version__
 from setuptools import setup, find_packages
 
 setup(
     name='data-utils',
-    version='0.1',
+    version=__version__,
     packages=find_packages(),
     url='http://vm-lnx-ncep-gitlab.ncep.noaa.gov/mike.charles/data-utils',
     author='Mike Charles',
