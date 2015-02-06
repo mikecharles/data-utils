@@ -468,7 +468,7 @@ for date in generate_date_list(args.start_date, args.end_date):
         # Open the station list (packaged with data-utils pkg)
         with open(
                 resource_filename('data_utils',
-                                  'library/station-list-tmean.csv'), 'r'
+                                  'lib/station-list-tmean.csv'), 'r'
         ) as file:
             # Skip header line
             next(file)
