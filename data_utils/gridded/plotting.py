@@ -185,6 +185,9 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         may need to experiment with value)
     """
     # Check args
+    if colors and not levels:
+        raise ValueError('The "levels" argument must be set if the "colors" '
+                         'argument is set')
 
     # Convert the ll_corner and res to arrays of lons and lats
     start_lat, start_lon = grid.ll_corner
