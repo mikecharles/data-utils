@@ -19,7 +19,7 @@ import data_utils.gridded.grid
 def plot_to_screen(data, grid, levels=None, colors=None, title=None,
                    lat_range=(-90, 90), lon_range=(0, 360),
                    cbar_ends='triangular', tercile_type='normal',
-                   smoothing_factor=0):
+                   smoothing_factor=0, cbar_type='normal'):
     """Plots the given data and displays on-screen.
 
     Essentially makes calls to :func:`make_plot` and :func:`show_plot` to do
@@ -45,6 +45,9 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
         Shape of the ends of the colorbar ('square' or 'triangular'). If
         'square', levels should contain the endpoints. If 'triangular',
         the levels should not contain the endpoints.
+    cbar_type : strin, optional
+        Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
+        tercile colorbar with 3 color ranges)
     tercile_type : str, optional
         Type of tercile ('normal' or 'median')
     smoothing_factor : float, optional
@@ -82,7 +85,7 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
 def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
                  title=None, lat_range=(-90, 90), lon_range=(0, 360),
                  cbar_ends='triangular', tercile_type='normal',
-                 smoothing_factor=0):
+                 smoothing_factor=0, cbar_type='normal'):
     """Plots the given data and saves to a file.
 
     Essentially makes calls to :func:`make_plot` and :func:`save_plot` to do
@@ -113,6 +116,9 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
         Shape of the ends of the colorbar ('square' or 'triangular'). If
         'square', levels should contain the endpoints. If 'triangular',
         the levels should not contain the endpoints.
+    cbar_type : strin, optional
+        Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
+        tercile colorbar with 3 color ranges)
     tercile_type : str, optional
         Type of tercile ('normal' or 'median')
     smoothing_factor : float, optional
@@ -148,7 +154,8 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
 
 def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         -90, 90), lon_range=(0, 360), cbar_ends='triangular',
-              tercile_type='normal', projection='lcc', smoothing_factor=0):
+              tercile_type='normal', projection='lcc', smoothing_factor=0,
+              cbar_type='normal'):
     """Creates a plot object using
     `mpl_toolkits.basemap <http://matplotlib.org/basemap/users/examples.html>`_.
     Nothing is actually plotted. Usually you'd want to call :func:`show_plot`
@@ -174,6 +181,9 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         Shape of the ends of the colorbar ('square' or 'triangular'). If
         'square', levels should contain the endpoints. If 'triangular',
         the levels should not contain the endpoints.
+    cbar_type : strin, optional
+        Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
+        tercile colorbar with 3 color ranges)
     tercile_type : str, optional
         Type of tercile ('normal' or 'median')
     smoothing_factor : float, optional
@@ -181,9 +191,10 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         may need to experiment with value)
     """
     # Check args
-    if (colors and not levels) or (levels and not colors):
-        raise ValueError('The "levels" and "colors" parameters must both be '
-                         'defined together or not at all')
+    if colors and not levels:
+        raise ValueError('The "levels" argument must be set if the "colors" '
+                         'argument is set')
+
     # Convert the ll_corner and res to arrays of lons and lats
     start_lat, start_lon = grid.ll_corner
     end_lat, end_lon = grid.ur_corner
@@ -240,7 +251,7 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         raise ValueError('cbar_ends must be either \'triangular\' or '
                          '\'square\'')
     if levels:
-        plot = m.contourf(lons, lats, data, levels, latlon=True, colors=colors,
+        plot = m.contourf(lons, lats, data, levels, latlon=True,
                           extend=extend)
     else:
         plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
@@ -254,28 +265,33 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
     # --------------------------------------------------------------------------
     # Add a colorbar
     #
-    # Generate probability tick labels
-    labels = ['{:.0f}%'.format(math.fabs(level)) for level in levels]
-    # Add the colorbar (attached to figure above)
-    divider = make_axes_locatable(ax)
-
-    cax = divider.append_axes("bottom", size="4%", pad=0.3)
-    cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
-                                    ticks=levels, cax=cax)
-    cb.ax.set_xticklabels(labels)
-    cb.ax.tick_params(labelsize=8)
-    # Add colorbar labels
-    fontsize=8
-    tercile_type = tercile_type.capitalize()
-    cb.ax.text(0.24, 1.2, 'Probability of Below {}'.format(tercile_type),
-               horizontalalignment='center', transform=cb.ax.transAxes,
-               fontsize=fontsize, fontstyle='normal')
-    cb.ax.text(0.5, 1.2, '{}'.format(tercile_type),
-               horizontalalignment='center', transform=cb.ax.transAxes,
-               fontsize=fontsize, fontstyle='normal')
-    cb.ax.text(0.76, 1.2, 'Probability of Above {}'.format(tercile_type),
-               horizontalalignment='center', transform=cb.ax.transAxes,
-               fontsize=fontsize, fontstyle='normal')
+    if cbar_type == 'tercile':
+        # Generate probability tick labels
+        labels = ['{:.0f}%'.format(math.fabs(level)) for level in levels]
+        # Add the colorbar (attached to figure above)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("bottom", size="4%", pad=0.3)
+        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
+                                        ticks=levels, cax=cax)
+        cb.ax.set_xticklabels(labels)
+        cb.ax.tick_params(labelsize=8)
+        # Add colorbar labels
+        fontsize=8
+        tercile_type = tercile_type.capitalize()
+        cb.ax.text(0.24, 1.2, 'Probability of Below {}'.format(tercile_type),
+                   horizontalalignment='center', transform=cb.ax.transAxes,
+                   fontsize=fontsize, fontstyle='normal')
+        cb.ax.text(0.5, 1.2, '{}'.format(tercile_type),
+                   horizontalalignment='center', transform=cb.ax.transAxes,
+                   fontsize=fontsize, fontstyle='normal')
+        cb.ax.text(0.76, 1.2, 'Probability of Above {}'.format(tercile_type),
+                   horizontalalignment='center', transform=cb.ax.transAxes,
+                   fontsize=fontsize, fontstyle='normal')
+    else:
+        # Add the colorbar (attached to figure above)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("bottom", size="4%", pad=0.3)
+        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax)
 
 
 def show_plot():
@@ -305,7 +321,8 @@ def save_plot(file, dpi=200):
 def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
                        colors='temp_colors', title=None, lat_range=(-90, 90),
                        lon_range=(0, 360), cbar_ends='triangular',
-                       tercile_type='normal', smoothing_factor=0):
+                       tercile_type='normal', smoothing_factor=0,
+                       cbar_type='tercile'):
     # Get colors
     colors = get_colors(colors)
 
@@ -324,7 +341,8 @@ def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
                                  colors='tmean_colors', title=None,
                                  lat_range=(-90, 90), lon_range=(0, 360),
                                  cbar_ends='triangular',
-                                 tercile_type='normal', smoothing_factor=0):
+                                 tercile_type='normal', smoothing_factor=0,
+                                 cbar_type='tercile'):
     # Get colors
     colors = get_colors(colors)
 
