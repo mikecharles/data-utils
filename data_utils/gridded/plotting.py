@@ -4,10 +4,7 @@ Contains methods for plotting gridded data.
 
 from __future__ import print_function
 import mpl_toolkits.basemap
-import matplotlib.pyplot
-import matplotlib.colors
-import matplotlib.cm
-import matplotlib.colorbar
+import matplotlib
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import scipy.ndimage
@@ -138,6 +135,9 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
     >>> A[A == -999] = np.nan
     >>> plot_to_file(A, grid, 'test.png')
     """
+
+    # Set backend to Agg which won't require X11
+    matplotlib.pyplot.switch_backend('Agg')
 
     # Reshape array if necessary
     if data.ndim == 1:
