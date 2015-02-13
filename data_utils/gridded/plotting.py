@@ -334,7 +334,8 @@ def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
     # Plot
     plot_to_screen(all_probs, grid, levels=levels, colors=colors,
                    title=title, cbar_ends=cbar_ends,
-                   tercile_type=tercile_type, smoothing_factor=smoothing_factor)
+                   tercile_type=tercile_type,
+                   smoothing_factor=smoothing_factor, cbar_type=cbar_type)
 
 
 def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
@@ -354,7 +355,7 @@ def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
     # Plot
     plot_to_file(all_probs, grid, file, levels=levels, colors=colors,
                  title=title, cbar_ends=cbar_ends, tercile_type=tercile_type,
-                 smoothing_factor=smoothing_factor)
+                 smoothing_factor=smoothing_factor, cbar_type=cbar_type)
 
 
 def put_terciles_in_one_array(below, near, above):
