@@ -15,68 +15,73 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
                     desired_output_thresholds, txt_file,
                     output_threshold_type='ptile', terciles=False,
                     output_grid=None):
-    """Converts a forecast binary file to a text file
+    """
+    Converts a forecast binary file to a text file
 
     The forecast binary file must contain probabilities of exceeding certain
     percentiles (AKA a POE file), where the percentiles are ascending in the
-    file. The dimensions of the file should be (P x L)
-
-      where
+    file. The dimensions of the file should be (P x L), where:
 
       - P is the percentile
       - L is the location
 
-    If output_threshold_type is set to 'ptile' ('raw'), then the probability of
-    exceeding the given ptiles (raw values) will be written to the output file
-    under the headers ptileXX, ptileYY (rawvalXX, rawvalYY), etc.
+    If `output_threshold_type` is set to 'ptile' ('raw'), then the
+    probability  of exceeding the given ptiles (raw values) will be written
+    to the output file under the headers ptileXX, ptileYY (rawvalXX,
+    rawvalYY), etc.
 
-    If terciles=True, then headers will be different (see the Parameters section
+    If `terciles=True`, then headers will be different (see the Parameters
+    section
     below)
 
     Parameters
     ----------
-    bin_file : string
-        Binary file containing the forecast, with the dimensions (ptile x Y x
+
+    - bin_file (string)
+        - Binary file containing the forecast, with the dimensions (ptile x Y x
         X)
-    grid : Grid
-        Grid that the binary file maps to
-    fcst_ptiles : list
-        1-dimensional list of ptiles found in the forecast file
-    desired_output_thresholds : list
-        1-dimensional list of ptiles or raw values to include in the output file
-    txt_file : string
-        Text file to write data to (will be overwritten)
-    output_threshold_type : string (optional)
-        Type of thresholds to write out ('ptile' or 'raw')
-    terciles : bool, optional
+    - grid (Grid)
+        - Grid that the binary file maps to
+    - fcst_ptiles (list)
+        - 1-dimensional list of ptiles found in the forecast file
+    - desired_output_thresholds (list)
+        - 1-dimensional list of ptiles or raw values to include in the output
+        file
+    - txt_file (string)
+        - Text file to write data to (will be overwritten)
+    - output_threshold_type (string, optional)
+        - Type of thresholds to write out ('ptile' or 'raw')
+    - terciles (bool, optional)
         - If True, will output tercile probabilities (with headers below, normal
           , and above)
         - If False (default), will output probabilities of exceeding percentiles
           (with headers ptileXX, ptileYY, etc.)
         - Can only be set when 2 percentiles are supplied
-    output_grid : Grid (optional)
-        :class:`~data_utils.gridded.grid.Grid` to interpolate to before
-        converting to a txt file
+    - output_grid (Grid, optional))
+        - `data_utils.gridded.grid` to interpolate to before converting to a
+        txt file
 
     Raises
     ------
-    ValueError
-        If arguments are incorrect
+
+    - ValueError
+        - If arguments are incorrect
 
     Examples
     --------
 
-    >>> import data_utils.gridded.conversion
-    >>> bin_file = 'gefs_temp_2m_20140611_00z_d08_d14_poe_ER.bin'
-    >>> grid = data_utils.gridded.grid.Grid('1deg_global')
-    >>> fcst_ptiles = [ 1,  2,  5, 10, 15,
-    ...                20, 25, 33, 40, 50,
-    ...                60, 67, 75, 80, 85,
-    ...                90, 95, 98, 99]
-    >>> desired_output_thresholds = [33, 67]
-    >>> data_utils.gridded.conversion.fcst_bin_to_txt(
-    ...    bin_file, grid, fcst_ptiles, desired_output_thresholds,
-    ...    'out.txt', terciles=True)
+        #!python
+        >>> import data_utils.gridded.conversion
+        >>> bin_file = 'gefs_temp_2m_20140611_00z_d08_d14_poe_ER.bin'
+        >>> grid = data_utils.gridded.grid.Grid('1deg_global')
+        >>> fcst_ptiles = [ 1,  2,  5, 10, 15,
+        ...                20, 25, 33, 40, 50,
+        ...                60, 67, 75, 80, 85,
+        ...                90, 95, 98, 99]
+        >>> desired_output_thresholds = [33, 67]
+        >>> data_utils.gridded.conversion.fcst_bin_to_txt(
+        ...    bin_file, grid, fcst_ptiles, desired_output_thresholds,
+        ...    'out.txt', terciles=True)
     """
 
     # If terciles=True, make sure there are only 2 percentiles
@@ -171,7 +176,8 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
 def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
                    output_threshold_type='ptile', climo_file=None,
                    climo_ptiles=None, output_grid=None):
-    """Converts an observation binary file to a text file
+    """
+    Converts an observation binary file to a text file
 
     The observation binary file must contain raw values of the given variable.
     The file should be a single dimension (locations).
@@ -179,9 +185,7 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
     A climatology file is necessary if output_threshold_type='ptile', in which
     case the raw values in the observation file needs to first be converted to
     ptiles. The climatology file must have probabilities of exceeding a given
-    set of percentiles, and be of dimensions (P x L)
-
-      where
+    set of percentiles, and be of dimensions (P x L) where:
 
       - P is the percentile
       - L is the location
@@ -190,44 +194,49 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
 
     Parameters
     ----------
-    bin_file : string
-        Binary file containing the observation, with the dimensions (Y x X)
-    grid : Grid
-        :class:`~data_utils.gridded.grid.Grid` that the binary file maps to
-    desired_output_thresholds : list
-        1-dimensional list of thresholds (either ptiles or raw values) to
+
+    - bin_file (string)
+        - Binary file containing the observation, with the dimensions (Y x X)
+    - grid (Grid)
+        - `data_utils.gridded.grid.Grid` that the binary file maps to
+    - desired_output_thresholds (list)
+        - 1-dimensional list of thresholds (either ptiles or raw values) to
         include in the output file
-    txt_file : string
-        Text file to write data to (will be overwritten)
-    output_threshold_type : string (optional)
-        Type of thresholds to write out ('ptile' or 'raw')
-    climo_file : string (optional)
-        Binary file containing the observation, with the dimensions (Y x X)
-    climo_ptiles : list (optional)
-        List of percentiles found in the climatology file
-    output_grid : Grid (optional)
-        :class:`~data_utils.gridded.grid.Grid` to interpolate to before
+    - txt_file (string)
+        - Text file to write data to (will be overwritten)
+    - output_threshold_type (string, optional)
+        - Type of thresholds to write out ('ptile' or 'raw')
+    - climo_file (string, optional)
+        - Binary file containing the observation, with the dimensions (Y x X)
+    - climo_ptiles (list, optional)
+        - List of percentiles found in the climatology file
+    - output_grid (Grid, optional)
+        - `data_utils.gridded.grid.Grid` to interpolate to before
         converting to a txt file
 
     Raises
     ------
-    ValueError
-        If arguments are incorrect
+
+    - ValueError
+        - If arguments are incorrect
 
     Examples
     --------
 
-    >>> import numpy
-    >>> import data_utils.gridded.conversion
-    >>> grid = data_utils.gridded.grid.Grid('1deg_global')
-    >>> climo_file = '/cpc/data/climatologies/land_air/short_range/global/merged_tmean_poe/1deg/07d/tmean_clim_poe_07d_0625.bin'
-    >>> climo_ptiles = numpy.array([ 1,  2,  5, 10, 15,
-    ...                             20, 25, 33, 40, 50,
-    ...                             60, 67, 75, 80, 85,
-    ...                             90, 95, 98, 99])
-    >>> bin_file = '/cpc/efsr_realtime/merged_tmean/1deg/07d/2014/06/25/tmean_07d_20140625.bin'
-    >>> desired_output_thresholds = [33, 67]
-    >>> data_utils.gridded.conversion.obs_bin_to_txt(bin_file, grid, desired_output_thresholds, 'obs.txt', climo_file=climo_file, climo_ptiles=climo_ptiles)
+        #!python
+        >>> import numpy
+        >>> from data_utils.gridded.conversion import obs_bin_to_txt
+        >>> grid = data_utils.gridded.grid.Grid('1deg_global')
+        >>> climo_file = 'tmean_clim_poe_07d_0625.bin'
+        >>> climo_ptiles = numpy.array([ 1,  2,  5, 10, 15,
+        ...                             20, 25, 33, 40, 50,
+        ...                             60, 67, 75, 80, 85,
+        ...                             90, 95, 98, 99])
+        >>> bin_file = 'tmean_07d_20140625.bin'
+        >>> desired_output_thresholds = [33, 67]
+        >>> obs_bin_to_txt(bin_file, grid,desired_output_thresholds,
+                           'obs.txt', climo_file=climo_file,
+                           climo_ptiles=climo_ptiles)
     """
 
     # Currently only supports 3 categories
