@@ -74,7 +74,8 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
 
     make_plot(data, grid, levels=levels, colors=colors, title=title,
               lat_range=lat_range, lon_range=lon_range, cbar_ends=cbar_ends,
-              tercile_type=tercile_type, smoothing_factor=smoothing_factor)
+              tercile_type=tercile_type, smoothing_factor=smoothing_factor,
+              cbar_type=cbar_type)
     show_plot()
     matplotlib.pyplot.close("all")
 
@@ -147,7 +148,8 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
 
     make_plot(data, grid, levels=levels, colors=colors, title=title,
               lat_range=lat_range, lon_range=lon_range, cbar_ends=cbar_ends,
-              tercile_type=tercile_type, smoothing_factor=smoothing_factor)
+              tercile_type=tercile_type, smoothing_factor=smoothing_factor,
+              cbar_type=cbar_type)
     save_plot(file, dpi)
     matplotlib.pyplot.close("all")
 
