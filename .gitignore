@@ -2,7 +2,9 @@
 docs/_build
 __pycache__
 *.egg-info
+*.pyc
 /build
 /dist
 /*.bin
+/docs
 test.py

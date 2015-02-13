@@ -6,7 +6,8 @@ import numpy
 
 
 def stack_datasets(bottom, top, mask=None):
-    """Stacks one dataset on top of another.
+    """
+    Stacks one dataset on top of another.
 
     If a mask argument is provided, then the final dataset will be equal to the
     top dataset wherever mask=1, and the bottom dataset everywhere else.
@@ -17,41 +18,21 @@ def stack_datasets(bottom, top, mask=None):
 
     Parameters
     ----------
-    bottom : 2-d array
-        2-dimensional (lat x lon) Numpy array of data to serve as the bottom
-        dataset
-    top : 2-d array
-        2-dimensional (lat x lon) Numpy array of data to serve as the top
-        dataset
-    mask : 2-day array, optional
-        2-dimensional (lat x lon) Numpy array, set to 1 wherever you would
-        like the top dataset to be selected
+
+    - bottom (2-d array)
+        - 2-dimensional (lat x lon) Numpy array of data to serve as the bottom
+          dataset
+    - top (2-d array)
+        - 2-dimensional (lat x lon) Numpy array of data to serve as the top
+          dataset
+    - mask (2-day array, optional)
+        - 2-dimensional (lat x lon) Numpy array, set to 1 wherever you would
+          like the top dataset to be selected
 
     Examples
     --------
 
-    Stack Wei Shi's data on top of a d0 GEFS field
 
-    >>> grib = pygrib.open('/cpc/efsr_realtime/raw/gefs/06h/2013/01/01/00/\
-gefs_tmp_2m_20130101_00z_f006_m00.grb2')
-    >>> rec = grib.select(name='2 metre temperature', \
-typeOfLevel='heightAboveGround', \
-level=2)[0]
-    >>> bottom = numpy.flipud(rec.values) - 273.15 # Kelvin
-    >>> bottom -= 273.15
-    >>> top = numpy.fromfile('/cpc/sfc_temp/GLOBAL-T/OUTPUT/y2013/\
-CPC_GLOBAL_T_V0.x_10min.lnx.20131220','float32')
-    >>> top[top <= -999] = numpy.nan # Set missing values to NaN
-    >>> top = numpy.reshape(top, (6, 1080, 2160))
-    >>> top = top[4] # Extract one variable
-    >>> orig_ll_corner = ((-90 + 1 / 12.0), (1 / 12.0)) # Interpolate to 1 deg
-    >>> top = data_utils.gridded.interpolation.interpolate(top, \
-orig_ll_corner, \
-1/6.0, \
-(-90, 0), \
-(90, 359), \
-1)
-    >>> merged_data = data_utils.gridded.merging.stack_datasets(bottom, top)
     """
     if mask:
         # Wherever the mask is 1, set final_grid to the top dataset, bottom
