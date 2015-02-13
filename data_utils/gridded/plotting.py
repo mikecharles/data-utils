@@ -253,8 +253,12 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         raise ValueError('cbar_ends must be either \'triangular\' or '
                          '\'square\'')
     if levels:
-        plot = m.contourf(lons, lats, data, levels, latlon=True,
-                          extend=extend)
+        if colors:
+            plot = m.contourf(lons, lats, data, levels, latlon=True,
+                              extend=extend, colors=colors)
+        else:
+            plot = m.contourf(lons, lats, data, levels, latlon=True,
+                              extend=extend)
     else:
         plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
         levels = plot._levels
