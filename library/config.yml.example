@@ -9,7 +9,7 @@ fcst-data:
         r-best: 0.7
         grid-name: '1deg_global'
         data-type: 'grib2'
-        file-template: '/path/to/data/raw/{model}/06h/{yyyy}/{mm}/{dd}/{cycle_num}/{model}_{yyyy}{mm}{dd}_{cycle}_f{fhr}_m{member}.grb2'
+        file-template: '/path/to/model-data/raw/{model}/06h/{yyyy}/{mm}/{dd}/{cycle-num}/{model}_{yyyy}{mm}{dd}_{cycle}_f{fhr}_m{member}.grb2'
         vars:
             tmean:
                 name: 'TMP'
@@ -20,7 +20,7 @@ fcst-data:
         r-best: 0.7
         grid-name: '1deg_global'
         data-type: 'grib1'
-        file-template: '/path/to/data/raw/{model}/06h/{yyyy}/{mm}/{dd}/{cycle_num}/{model}_{yyyy}{mm}{dd}_{cycle}_f{fhr}_m{member}.grb'
+        file-template: '/path/to/model-data/raw/{model}/06h/{yyyy}/{mm}/{dd}/{cycle-num}/{model}_{yyyy}{mm}{dd}_{cycle}_f{fhr}_m{member}.grb'
         vars:
             tmean:
                 name: 'TMP'
@@ -28,12 +28,13 @@ fcst-data:
 
 climo-data:
 
-    file-template: '/path/to/data/climatologies/land_air/short_range/global/{climo_var}/{grid_name}/{ave_window}/{var}_clim_poe_{ave_window}_{climo_mmdd}.bin'
+    file-template: '/path/to/climatologies/{climo-var}/{grid-name}/{ave-window}/{var}_clim_poe_{ave-window}_{climo-mmdd}.bin'
 
 output:
 
+    file-dir-template: '{data-out}/forecasts/models/all_ranges/global/post-processed/{model}/{yyyy}/{mm}/{dd}/{cycle}'
     file-prefix-template: '{model}_{var}_{date}_{cycle}_{lead}'
-    title-template: '{date} {model} {processing_type} {var} Forecast for {lead}'
+    title-template: '{date} {model} {processing-type} {var} Forecast for {lead}'
     lat-range: (20, 70)
     lon-range: (200, 300)
 

@@ -139,12 +139,12 @@ group.add_argument(
     help='show this help message and exit'
 )
 # TODO: Add transmission
-# group.add_argument(
-#     '--transmit',
-#     dest='transmit',
-#     help='transmit the output to the destination in the config file',
-#     action='store_true'
-# )
+group.add_argument(
+    '--transmit',
+    dest='transmit',
+    help='transmit the output to the destination in the config file',
+    action='store_true'
+)
 group.add_argument(
     '--log-level',
     dest='log_level',
@@ -247,6 +247,7 @@ except Exception as e:
 try:
     ptiles = config['ptiles']
     climo_file_template = config['climo-data']['file-template']
+    out_dir_template = config['output']['file-dir-template']
     out_file_prefix_template = config['output']['file-prefix-template']
 except KeyError as e:
     raise KeyError('One of the config keys is missing or invalid...')
@@ -329,12 +330,17 @@ for date in generate_date_list(args.start_date, args.end_date):
             for f in range(len(fhrs)):
                 fhr = fhrs[f]
                 # Establish fcst file name
-                fcst_file = replace_vars_in_string(fcst_file_template,
-                                                   model=model, yyyy=yyyy,
-                                                   mm=mm, dd=dd,
-                                                   cycle_num=cycle_num,
-                                                   cycle=args.cycle, fhr=fhr,
-                                                   member=member)
+                vars = {
+                    'model': model,
+                    'yyyy': yyyy,
+                    'mm': mm,
+                    'dd': dd,
+                    'cycle-num': cycle_num,
+                    'cycle': args.cycle,
+                    'fhr': fhr,
+                    'member': member
+                }
+                fcst_file = replace_vars_in_string(fcst_file_template, **vars)
                 # Load data from fcst file
                 logger.debug('Loading data from {}...'.format(fcst_file))
                 try:
@@ -378,11 +384,14 @@ for date in generate_date_list(args.start_date, args.end_date):
         else:
             climo_var = args.var
         # Establish fcst file name
-        climo_file = replace_vars_in_string(climo_file_template,
-                                            climo_var=climo_var,
-                                            grid_name=grid_name,
-                                            ave_window=ave_window,
-                                            var=args.var, climo_mmdd=climo_mmdd)
+        vars = {
+            'climo-var': climo_var,
+            'grid-name': grid_name,
+            'ave-window': ave_window,
+            'var': args.var,
+            'climo-mmdd': climo_mmdd
+        }
+        climo_file = replace_vars_in_string(climo_file_template, **vars)
         logger.debug('Climatology file: {}'.format(climo_file))
         try:
             climo_data = np.reshape(
@@ -428,29 +437,58 @@ for date in generate_date_list(args.start_date, args.end_date):
                   33, 40, 50, 60, 70, 80, 90]
 
         # ----------------------------------------------------------------------
+        # Establish output directory
+        #
+        if args.transmit:
+            vars = {
+                'data-out': os.environ['DATA_OUT'],
+                'model': file_model,
+                'yyyy': yyyy,
+                'mm': mm,
+                'dd': dd,
+                'cycle': args.cycle
+            }
+            out_dir = replace_vars_in_string(out_dir_template, **vars)
+            # Try to create this out dir
+            try:
+                logger.debug('Creating output directory {}...'.format(out_dir))
+                os.makedirs(out_dir, exist_ok=True)
+            except OSError as e:
+                logger.fatal('Can\'t create {}: {}'.format(out_dir, str(e)))
+
+        else:
+            out_dir = '../output'
+
+        # ----------------------------------------------------------------------
         # Establish output file name prefix
         #
+        vars = {
+            'model': file_model,
+            'var': args.var,
+            'date': date,
+            'cycle': args.cycle,
+            'lead': args.lead
+        }
         out_file_prefix = replace_vars_in_string(out_file_prefix_template,
-                                                 model=file_model,
-                                                 var=args.var, date=date,
-                                                 cycle=args.cycle,
-                                                 lead=args.lead)
+                                                 **vars)
 
         # ----------------------------------------------------------------------
         # Plot
         #
         # Establish plot title
+        vars = {
+            'date': '-'.join([yyyy, mm, dd]),
+            'model': title_model,
+            'processing-type': title_processing_type,
+            'var': title_var,
+            'lead': title_lead
+        }
         title = replace_vars_in_string(config['output']['title-template'],
-                                       date='-'.join([yyyy, mm, dd]),
-                                       model=title_model,
-                                       processing_type=title_processing_type,
-                                       var=title_var,
-                                       lead=title_lead
-                                       )
+                                       **vars)
 
         # Plot terciles to a PNG
         plot_tercile_probs_to_file(below, near, above, grid,
-                                   '../output/'+out_file_prefix+'.png',
+                                   '{}/{}.png'.format(out_dir, out_file_prefix),
                                    levels=levels,
                                    colors=args.var+'_colors',
                                    cbar_ends='triangular',
@@ -490,7 +528,7 @@ for date in generate_date_list(args.start_date, args.end_date):
         # Write to text file
         data_utils.station.writing.terciles_to_txt(
             below_stn, near_stn, above_stn, stn_ids,
-            '../output/{}_stn.txt'.format(out_file_prefix)
+            '{}/{}_stn.txt'.format(out_dir, out_file_prefix)
         )
 
         # ----------------------------------------------------------------------
@@ -504,7 +542,7 @@ for date in generate_date_list(args.start_date, args.end_date):
         above_interp = interpolate(above, grid, grid_interp)
         data_utils.gridded.writing.terciles_to_txt(
             below_interp, near_interp, above_interp, grid_interp,
-                        '../output/'+out_file_prefix+'_2deg_conus.txt')
+                        '{}/{}_2deg_conus.txt'.format(out_dir, out_file_prefix))
 
 
 # TODO: Clean work dir
