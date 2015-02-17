@@ -247,6 +247,7 @@ except Exception as e:
 try:
     ptiles = config['ptiles']
     climo_file_template = config['climo-data']['file-template']
+    out_dir_template = config['output']['file-dir-template']
     out_file_prefix_template = config['output']['file-prefix-template']
 except KeyError as e:
     raise KeyError('One of the config keys is missing or invalid...')
@@ -329,12 +330,17 @@ for date in generate_date_list(args.start_date, args.end_date):
             for f in range(len(fhrs)):
                 fhr = fhrs[f]
                 # Establish fcst file name
-                fcst_file = replace_vars_in_string(fcst_file_template,
-                                                   model=model, yyyy=yyyy,
-                                                   mm=mm, dd=dd,
-                                                   cycle_num=cycle_num,
-                                                   cycle=args.cycle, fhr=fhr,
-                                                   member=member)
+                vars = {
+                    'model': model,
+                    'yyyy': yyyy,
+                    'mm': mm,
+                    'dd': dd,
+                    'cycle_num': cycle_num,
+                    'cycle': args.cycle,
+                    'fhr': fhr,
+                    'member': member
+                }
+                fcst_file = replace_vars_in_string(fcst_file_template, **vars)
                 # Load data from fcst file
                 logger.debug('Loading data from {}...'.format(fcst_file))
                 try:
@@ -378,11 +384,14 @@ for date in generate_date_list(args.start_date, args.end_date):
         else:
             climo_var = args.var
         # Establish fcst file name
-        climo_file = replace_vars_in_string(climo_file_template,
-                                            climo_var=climo_var,
-                                            grid_name=grid_name,
-                                            ave_window=ave_window,
-                                            var=args.var, climo_mmdd=climo_mmdd)
+        vars = {
+            'climo_var': climo_var,
+            'grid_name': grid_name,
+            'ave_window': ave_window,
+            'var': args.var,
+            'climo_mmdd': climo_mmdd
+        }
+        climo_file = replace_vars_in_string(climo_file_template, **vars)
         logger.debug('Climatology file: {}'.format(climo_file))
         try:
             climo_data = np.reshape(
@@ -430,23 +439,29 @@ for date in generate_date_list(args.start_date, args.end_date):
         # ----------------------------------------------------------------------
         # Establish output file name prefix
         #
+        vars = {
+            'model': file_model,
+            'var': args.var,
+            'date': date,
+            'cycle': args.cycle,
+            'lead': args.lead
+        }
         out_file_prefix = replace_vars_in_string(out_file_prefix_template,
-                                                 model=file_model,
-                                                 var=args.var, date=date,
-                                                 cycle=args.cycle,
-                                                 lead=args.lead)
+                                                 **vars)
 
         # ----------------------------------------------------------------------
         # Plot
         #
         # Establish plot title
+        vars = {
+            'date': '-'.join([yyyy, mm, dd]),
+            'model': title_model,
+            'processing_type': title_processing_type,
+            'var': title_var,
+            'lead': title_lead
+        }
         title = replace_vars_in_string(config['output']['title-template'],
-                                       date='-'.join([yyyy, mm, dd]),
-                                       model=title_model,
-                                       processing_type=title_processing_type,
-                                       var=title_var,
-                                       lead=title_lead
-                                       )
+                                       **vars)
 
         # Plot terciles to a PNG
         plot_tercile_probs_to_file(below, near, above, grid,
@@ -468,7 +483,7 @@ for date in generate_date_list(args.start_date, args.end_date):
         # Open the station list (packaged with data-utils pkg)
         with open(
                 resource_filename('data_utils',
-                                  'library/station-list-tmean.csv'), 'r'
+                                  'lib/station-list-tmean.csv'), 'r'
         ) as file:
             # Skip header line
             next(file)
