@@ -12,22 +12,24 @@ def grid_to_stn(gridded_data, grid, stn_ids, stn_lats, stn_lons):
 
     Parameters
     ----------
-    gridded_data : array_like
-        Array of gridded data
-    grid : Grid
-        :class:`~data_utils.gridded.grid.Grid` that the gridded data is on
-    stn_ids : list
-        List of station ids
-    stn_lats : list
-        List of station lats
-    stn_lons : list
-        List of station lons
+
+    - gridded_data (array_like)
+        - Array of gridded data
+    - grid (Grid)
+        - `data_utils.gridded.grid.Grid` that the gridded data is on
+    - stn_ids (list)
+        - List of station ids
+    - stn_lats (list)
+        - List of station lats
+    - stn_lons (list)
+        - List of station lons
 
     Returns
     -------
-    array_like
-        Array of values representing the value of the gridded data
-        interpolated to the station locations
+
+    - array_like
+        - Array of values representing the value of the gridded data
+          interpolated to the station locations
 
     Examples
     --------

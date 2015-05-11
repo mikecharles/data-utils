@@ -17,53 +17,56 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
                    lat_range=(-90, 90), lon_range=(0, 360),
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal'):
-    """Plots the given data and displays on-screen.
+    """
+    Plots the given data and displays on-screen.
 
     Essentially makes calls to :func:`make_plot` and :func:`show_plot` to do
     the work
 
     Parameters
     ----------
-    data : array_like
-        1- or 2-dimensional (lat x lon) Numpy array of data to plot
-    grid : Grid
-        :class:`~data_utils.gridded.grid.Grid`
-    levels : list (optional)
-        List of levels to shade/contour.
-    colors : list of lists
-        List of colors, each color being a list of RGB values from 0 to 1
-    title : str, optional
-        Title of the resulting plot
-    lat_range : tuple, optional
-        Range of latitude values to plot
-    lon_range : tuple, optional
-        Range of longitude values to plot
-    cbar_ends : str, optional
-        Shape of the ends of the colorbar ('square' or 'triangular'). If
+
+    - data (array_like)
+        - 1- or 2-dimensional (lat x lon) Numpy array of data to plot
+    - grid (Grid
+        - `data_utils.gridded.grid.Grid`
+    - levels (list, optional)
+        - List of levels to shade/contour.
+    - colors (list of lists)
+        - List of colors, each color being a list of RGB values from 0 to 1
+    - title (str, optional)
+        - Title of the resulting plot
+    - lat_range (tuple, optional)
+        - Range of latitude values to plot
+    - lon_range (tuple, optional)
+        - Range of longitude values to plot
+    - cbar_ends (str, optional)
+        - Shape of the ends of the colorbar ('square' or 'triangular'). If
         'square', levels should contain the endpoints. If 'triangular',
         the levels should not contain the endpoints.
-    cbar_type : strin, optional
-        Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
+    - cbar_type (strin, optional)
+        - Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
         tercile colorbar with 3 color ranges)
-    tercile_type : str, optional
-        Type of tercile ('normal' or 'median')
-    smoothing_factor : float, optional
-        Level of smoothing (gaussian filter, this represents the kernel width -
-        may need to experiment with value)
+    - tercile_type (str, optional)
+        - Type of tercile ('normal' or 'median')
+    - smoothing_factor (float, optional)
+        - Level of smoothing (gaussian filter, this represents the kernel
+        width - may need to experiment with value)
 
     Examples
     --------
 
-    >>> from pkg_resources import resource_filename
-    >>> import numpy as np
-    >>> from data_utils.gridded.plotting import plot_to_screen
-    >>> from data_utils.gridded.grid import Grid
-    >>> grid = Grid('1deg_global')
-    >>> A = np.fromfile(resource_filename('data_utils', 'lib/tmax.bin'),
-    ... dtype='float32')
-    >>> A = np.reshape(A, (grid.num_y, grid.num_x))
-    >>> A[A == -999] = np.nan
-    >>> plot_to_screen(A, grid)
+        #!python
+        >>> from pkg_resources import resource_filename
+        >>> import numpy as np
+        >>> from data_utils.gridded.plotting import plot_to_screen
+        >>> from data_utils.gridded.grid import Grid
+        >>> grid = Grid('1deg_global')
+        >>> A = np.fromfile(resource_filename('data_utils', 'lib/tmax.bin'),
+        ... dtype='float32')
+        >>> A = np.reshape(A, (grid.num_y, grid.num_x))
+        >>> A[A == -999] = np.nan
+        >>> plot_to_screen(A, grid)
     """
 
     # Reshape array if necessary
@@ -74,7 +77,8 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
 
     make_plot(data, grid, levels=levels, colors=colors, title=title,
               lat_range=lat_range, lon_range=lon_range, cbar_ends=cbar_ends,
-              tercile_type=tercile_type, smoothing_factor=smoothing_factor)
+              tercile_type=tercile_type, smoothing_factor=smoothing_factor,
+              cbar_type=cbar_type)
     show_plot()
     matplotlib.pyplot.close("all")
 
@@ -83,57 +87,61 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
                  title=None, lat_range=(-90, 90), lon_range=(0, 360),
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal'):
-    """Plots the given data and saves to a file.
+    """
+    Plots the given data and saves to a file.
 
     Essentially makes calls to :func:`make_plot` and :func:`save_plot` to do
     the work
 
     Parameters
     ----------
-    data : array_like
-        1- or 2-dimensional (lat x lon) Numpy array of data to plot
-    grid : Grid
-        :class:`~data_utils.gridded.grid.Grid`
-    levels : list (optional)
-        List of levels to shade/contour.
-    colors : list of lists
-        List of colors, each color being a list of RGB values from 0 to 1
-    file : str
-        File name to save plot to
-    dpi : float, optional
-        dpi of the image (higher means higher resolution). By default `dpi =
+
+    - data (array_like)
+        - 1- or 2-dimensional (lat x lon) Numpy array of data to plot
+    - grid (Grid)
+        - :class:`~data_utils.gridded.grid.Grid`
+    - levels (list, optional)
+        - List of levels to shade/contour.
+    - colors (list of lists)
+        - List of colors, each color being a list of RGB values from 0 to 1
+    - file (str)
+        - File name to save plot to
+    - dpi (float, optional)
+        - dpi of the image (higher means higher resolution). By default `dpi =
         200`.
-    title : str, optional
-        Title of the resulting plot
-    lat_range : tuple, optional
-        Range of latitude values to plot
-    lon_range : tuple, optional
-        Range of longitude values to plot
-    cbar_ends : str, optional
-        Shape of the ends of the colorbar ('square' or 'triangular'). If
-        'square', levels should contain the endpoints. If 'triangular',
-        the levels should not contain the endpoints.
-    cbar_type : strin, optional
-        Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
-        tercile colorbar with 3 color ranges)
-    tercile_type : str, optional
-        Type of tercile ('normal' or 'median')
-    smoothing_factor : float, optional
-        Level of smoothing (gaussian filter, this represents the kernel width -
-        may need to experiment with value)
+    - title (str, optional)
+        - Title of the resulting plot
+    - lat_range (tuple, optional)
+        - Range of latitude values to plot
+    - lon_range (tuple, optional)
+        - Range of longitude values to plot
+    - cbar_ends (str, optional)
+        - Shape of the ends of the colorbar ('square' or 'triangular'). If
+          'square', levels should contain the endpoints. If 'triangular',
+          the levels should not contain the endpoints.
+    - cbar_type (strin, optional)
+        - Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
+          tercile colorbar with 3 color ranges)
+    - tercile_type (str, optional)
+        - Type of tercile ('normal' or 'median')
+    - smoothing_factor (float, optional)
+        - Level of smoothing (gaussian filter, this represents the kernel width -
+          may need to experiment with value)
 
     Examples
     --------
-    >>> from pkg_resources import resource_filename
-    >>> import numpy as np
-    >>> from data_utils.gridded.plotting import plot_to_file
-    >>> from data_utils.gridded.grid import Grid
-    >>> grid = Grid('1deg_global')
-    >>> A = np.fromfile(resource_filename('data_utils', 'lib/tmax.bin'),
-    ... dtype='float32')
-    >>> A = np.reshape(A, (grid.num_y, grid.num_x))
-    >>> A[A == -999] = np.nan
-    >>> plot_to_file(A, grid, 'test.png')
+
+        #!python
+        >>> from pkg_resources import resource_filename
+        >>> import numpy as np
+        >>> from data_utils.gridded.plotting import plot_to_file
+        >>> from data_utils.gridded.grid import Grid
+        >>> grid = Grid('1deg_global')
+        >>> A = np.fromfile(resource_filename('data_utils', 'lib/tmax.bin'),
+        ... dtype='float32')
+        >>> A = np.reshape(A, (grid.num_y, grid.num_x))
+        >>> A[A == -999] = np.nan
+        >>> plot_to_file(A, grid, 'test.png')
     """
 
     # Set backend to Agg which won't require X11
@@ -147,7 +155,8 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
 
     make_plot(data, grid, levels=levels, colors=colors, title=title,
               lat_range=lat_range, lon_range=lon_range, cbar_ends=cbar_ends,
-              tercile_type=tercile_type, smoothing_factor=smoothing_factor)
+              tercile_type=tercile_type, smoothing_factor=smoothing_factor,
+              cbar_type=cbar_type)
     save_plot(file, dpi)
     matplotlib.pyplot.close("all")
 
@@ -156,40 +165,44 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         -90, 90), lon_range=(0, 360), cbar_ends='triangular',
               tercile_type='normal', projection='lcc', smoothing_factor=0,
               cbar_type='normal'):
-    """Creates a plot object using
-    `mpl_toolkits.basemap <http://matplotlib.org/basemap/users/examples.html>`_.
-    Nothing is actually plotted. Usually you'd want to call :func:`show_plot`
-    or :func:`save_plot` after this.
+    """
+    Creates a plot object using `mpl_toolkits.basemap`
+
+    Nothing is actually plotted. Usually you'd want to call
+    `data_utils.gridded.plotting.show_plot` or
+    `data_utils.gridded.plotting.save_plot` after this.
 
     Parameters
     ----------
-    data : 2-d array
-        2-dimensional (lat x lon) Numpy array of data to plot
-    grid : Grid
-        :class:`~data_utils.gridded.grid.Grid`
-    levels : list (optional)
-        List of levels to shade/contour.
-    colors : list of lists
-        List of colors, each color being a list of RGB values from 0 to 1
-    title : str (optional)
-        Title of the resulting plot
-    lat_range : tuple, optional
-        Range of latitude values to plot
-    lon_range : tuple, optional
-        Range of longitude values to plot
-    cbar_ends : str, optional
-        Shape of the ends of the colorbar ('square' or 'triangular'). If
-        'square', levels should contain the endpoints. If 'triangular',
-        the levels should not contain the endpoints.
-    cbar_type : strin, optional
-        Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
-        tercile colorbar with 3 color ranges)
-    tercile_type : str, optional
-        Type of tercile ('normal' or 'median')
-    smoothing_factor : float, optional
-        Level of smoothing (gaussian filter, this represents the kernel width -
-        may need to experiment with value)
+
+    - data (2-d array)
+        - 2-dimensional (lat x lon) Numpy array of data to plot
+    - grid (Grid)
+        - `data_utils.gridded.grid.Grid`
+    - levels (list, optional)
+        - List of levels to shade/contour.
+    - colors (list of lists)
+        - List of colors, each color being a list of RGB values from 0 to 1
+    - title (str, optional)
+        - Title of the resulting plot
+    - lat_range (tuple, optional)
+        - Range of latitude values to plot
+    - lon_range (tuple, optional)
+        - Range of longitude values to plot
+    - cbar_ends (str, optional)
+        - Shape of the ends of the colorbar ('square' or 'triangular'). If
+          'square', levels should contain the endpoints. If 'triangular',
+          the levels should not contain the endpoints.
+    - cbar_type (str, optional)
+        - Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
+          tercile colorbar with 3 color ranges)
+    - tercile_type (str, optional)
+        - Type of tercile ('normal' or 'median')
+    - smoothing_factor (float, optional)
+        - Level of smoothing (gaussian filter, this represents the kernel
+        width - may need to experiment with value)
     """
+
     # Check args
     if colors and not levels:
         raise ValueError('The "levels" argument must be set if the "colors" '
@@ -251,8 +264,12 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         raise ValueError('cbar_ends must be either \'triangular\' or '
                          '\'square\'')
     if levels:
-        plot = m.contourf(lons, lats, data, levels, latlon=True,
-                          extend=extend)
+        if colors:
+            plot = m.contourf(lons, lats, data, levels, latlon=True,
+                              extend=extend, colors=colors)
+        else:
+            plot = m.contourf(lons, lats, data, levels, latlon=True,
+                              extend=extend)
     else:
         plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
         levels = plot._levels
@@ -295,25 +312,25 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
 
 
 def show_plot():
-    """Shows an existing plot that was created using
-    `mpl_toolkits.basemap <http://matplotlib.org/basemap/users/examples.html>`_
+    """
+    Shows an existing plot that was created using `mpl_toolkits.basemap`
     """
     # Plot data
     matplotlib.pyplot.show()
 
 
 def save_plot(file, dpi=200):
-    """Saves an existing plot that was created using
-    `mpl_toolkits.basemap <http://matplotlib.org/basemap/users/examples.html>`_
+    """Saves an existing plot that was created using `mpl_toolkits.basemap`
     to a file.
 
     Parameters
     ----------
-    file : str
-        File name to save plot to
-    dpi : float, optional
-        dpi of the image (higher means higher resolution). By default `dpi =
-        200`.
+
+    - file (str)
+        - File name to save plot to
+    - dpi (float, optional)
+        - dpi of the image (higher means higher resolution). By default `dpi =
+          200`.
     """
     matplotlib.pyplot.savefig(file, dpi=dpi, bbox_inches='tight')
 
@@ -334,7 +351,8 @@ def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
     # Plot
     plot_to_screen(all_probs, grid, levels=levels, colors=colors,
                    title=title, cbar_ends=cbar_ends,
-                   tercile_type=tercile_type, smoothing_factor=smoothing_factor)
+                   tercile_type=tercile_type,
+                   smoothing_factor=smoothing_factor, cbar_type=cbar_type)
 
 
 def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
@@ -354,7 +372,7 @@ def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
     # Plot
     plot_to_file(all_probs, grid, file, levels=levels, colors=colors,
                  title=title, cbar_ends=cbar_ends, tercile_type=tercile_type,
-                 smoothing_factor=smoothing_factor)
+                 smoothing_factor=smoothing_factor, cbar_type=cbar_type)
 
 
 def put_terciles_in_one_array(below, near, above):

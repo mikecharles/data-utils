@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 def read_grib(file, grib_type, variable, level):
-    """Reads a record from a grib file
+    """
+    Reads a record from a grib file
 
     Uses wgrib to convert a record to a temporary binary file, then reads that
     file in, and removes the temporary file.
@@ -24,46 +25,46 @@ def read_grib(file, grib_type, variable, level):
     A grib record string will be constructed using the arguments provide. For
     example:
 
-
-
     Parameters
     ----------
-    file : string
-        Name of the grib file to read from
-    grib_type : string
-        Type of grib file ('grib1', 'grib2')
-    variable : string
-        Name of the variable in the grib record (ex. TMP, UGRD, etc.)
-    level : string
-        Name of the level (ex. '2 m above ground', '850 mb', etc.)
+
+    - file (string)
+        - Name of the grib file to read from
+    - grib_type (string)
+        - Type of grib file ('grib1', 'grib2')
+    - variable (string)
+        - Name of the variable in the grib record (ex. TMP, UGRD, etc.)
+    - level (string)
+        - Name of the level (ex. '2 m above ground', '850 mb', etc.)
 
     Returns
     -------
-    data : array_like
-        A data array
+    - (array_like)
+        - A data array
 
     Raises
     ------
-    IOError
-        If wgrib has a problem reading the grib and/or writing the temp file
-    Exception
-        If no grib record is found
+    - IOError
+        - If wgrib has a problem reading the grib and/or writing the temp file
+    - Exception
+        - If no grib record is found
 
     Examples
     --------
 
-    >>> import data_utils.gridded.reading
-    >>>
-    >>> file = 'gefs_20140101_00z_f036_m05.grb2'
-    >>> grib_type = 'grib2'
-    >>> variable = 'TMP'
-    >>> level = '2 m above ground'
-    >>> data = data_utils.gridded.reading.read_grib(file, grib_type, variable, level)
-    >>> data.shape
-    (65160,)
-    >>> data
-    array([ 246.3999939 ,  246.3999939 ,  246.3999939 , ...,  242.74000549,
-            242.74000549,  242.74000549], dtype=float32)
+        #!python
+        >>> import data_utils.gridded.reading
+        >>>
+        >>> file = 'gefs_20140101_00z_f036_m05.grb2'
+        >>> grib_type = 'grib2'
+        >>> variable = 'TMP'
+        >>> level = '2 m above ground'
+        >>> data = data_utils.gridded.reading.read_grib(file, grib_type, variable, level)
+        >>> data.shape
+        (65160,)
+        >>> data
+        array([ 246.3999939 ,  246.3999939 ,  246.3999939 , ...,  242.74000549,
+                242.74000549,  242.74000549], dtype=float32)
     """
     # Make sure grib file exists first
     if not os.path.isfile(file):

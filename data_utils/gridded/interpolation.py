@@ -7,39 +7,42 @@ Contains methods for interpolating gridded data.
 
 
 def interpolate(orig_data, orig_grid, new_grid):
-    """Interpolates a grid from one resolution to another.
+    """
+    Interpolates a grid from one resolution to another.
 
     Parameters
     ----------
-    orig_data : array_like
-        Array of original data
-    orig_grid : Grid
-        Original :class:`~data_utils.gridded.grid.Grid`
-    new_grid : Grid
-        New :class:`~data_utils.gridded.grid.Grid`
+
+    - orig_data (array_like)
+        - Array of original data
+    - orig_grid (Grid)
+        - Original `data_utils.gridded.grid.Grid`
+    - new_grid : Grid
+        - New `data_utils.gridded.grid.Grid`
 
     Returns
     -------
-    new_data : array_like
-        A data array on the desired grid.
+
+    - new_data (array_like)
+        - A data array on the desired grid.
 
     Examples
     --------
 
     Interpolate Wei Shi's gridded temperature obs from 1/6th deg to 1 deg
 
-    >>> import numpy
-    >>> import data_utils.gridded.interpolation
-    >>> import data_utils.gridded.grid
-    >>> file = '/cpc/sfc_temp/GLOBAL-T/OUTPUT/y2013/CPC_GLOBAL_T_V0.x_10min.lnx.20131220'
-    >>> old_grid = data_utils.gridded.grid.Grid('1/6th_deg_global')
-    >>> new_grid = data_utils.gridded.grid.Grid('2deg_global')
-    >>> data = numpy.fromfile(file, 'float32')
-    >>> data[data <= -999] = numpy.nan
-    >>> data = numpy.reshape(data, (6, old_grid.num_y, old_grid.num_x))
-    >>> data = data[4]
-    >>> new_data = data_utils.gridded.interpolation.interpolate(data, old_grid,
-    ...                                                         new_grid)
+        #!python
+        >>> import numpy
+        >>> from data_utils.gridded.interpolation import interpolate
+        >>> from data_utils.gridded.grid import Grid
+        >>> file = 'CPC_GLOBAL_T_V0.x_10min.lnx.20131220'
+        >>> old_grid = Grid('1/6th_deg_global')
+        >>> new_grid = Grid('2deg_global')
+        >>> data = numpy.fromfile(file, 'float32')
+        >>> data[data <= -999] = numpy.nan
+        >>> data = numpy.reshape(data, (6, old_grid.num_y, old_grid.num_x))
+        >>> data = data[4]
+        >>> new_data = interpolate(data, old_grid, new_grid)
     """
 
     # If data is 1-dimensional, reshape to 2 dimensions
