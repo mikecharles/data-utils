@@ -1,10 +1,14 @@
-.idea
-docs/_build
-__pycache__
-*.egg-info
-*.pyc
-/build
-/dist
+# Specific top-level files/dirs
+/output
+/docs/_build
 /*.bin
-/docs
-test.py
+/*.png
+/.idea
+/work
+/logs
+# Other specific files/dirs 
+/library/config.yml
+# Files/dirs anywhere in this repo
+__pycache__
+# File/dir types
+*.egg-info

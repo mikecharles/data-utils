@@ -1,32 +1,35 @@
 #!/usr/bin/env python
 
-from data_utils import __version__
 from setuptools import setup, find_packages
 
 setup(
-    name='data-utils',
-    version=__version__,
+    name='model_post_processing',
+    version='0.1',
     packages=find_packages(),
-    url='http://vm-lnx-ncep-gitlab.ncep.noaa.gov/mike.charles/data-utils',
+    url='https://cpc-devtools.ncep.noaa.gov/trac/projects/model-post-processing',
+    license='',
     author='Mike Charles',
     author_email='mike.charles@noaa.gov',
-    description='Set of utilities for manipulating gridded data',
+    description='Set of utilities for post-processing gridded model data',
     classifiers=[
-        'Development Status :: 1 - Planning',
-        'Environment :: Console',
-        'Intended Audience :: Science/Research',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Operating System :: OS Independent',
-        'Topic :: Scientific/Engineering :: Atmospheric Science',
+        "Development Status :: 1 - Planning",
+        "Environment :: Console",
+        "Intended Audience :: Science/Research",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering :: Atmospheric Science",
     ],
     requires=[
         'numpy',
-        'matplotlib',
         'scipy',
-        'sphinx_rtd_theme'
-    ],
-    include_package_data=True,
+        'sphinx_rtd_theme',
+        'matplotlib',
+        'pyyaml',
+        'data-utils',
+        'string-utils',
+        'stats-utils'
+    ]
 )
 
 
