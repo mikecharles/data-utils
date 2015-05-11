@@ -319,7 +319,7 @@ def save_plot(file, dpi=200):
 
 
 def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
-                       colors='temp_colors', title=None, lat_range=(-90, 90),
+                       colors='tmean_colors', title=None, lat_range=(-90, 90),
                        lon_range=(0, 360), cbar_ends='triangular',
                        tercile_type='normal', smoothing_factor=0,
                        cbar_type='tercile'):
