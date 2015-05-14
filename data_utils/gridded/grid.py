@@ -10,8 +10,9 @@ class Grid:
 
     1. 1deg_global
     2. 2deg_global
-    3. 2deg_conus
-    4. 1/6th_deg_global
+    3. 2.5deg_global
+    4. 2deg_conus
+    5. 1/6th_deg_global
 
     or by providing the other attributes listed below
 
@@ -64,6 +65,12 @@ class Grid:
             self.ll_corner = (-90, 0)
             self.ur_corner = (90, 358)
             self.res = 2
+            self.type = 'latlon'
+        elif name == '2.5deg_global':
+            self.name = name
+            self.ll_corner = (-90, 0)
+            self.ur_corner = (90, 357.5)
+            self.res = 2.5
             self.type = 'latlon'
         elif name == '2deg_conus':
             self.name = name
