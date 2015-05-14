@@ -50,7 +50,9 @@ def interpolate(orig_data, orig_grid, new_grid):
         return orig_data
 
     # If data is 1-dimensional, reshape to 2 dimensions
+    reshape_back_to_1 = False
     if orig_data.ndim == 1:
+        reshape_back_to_1 = True
         orig_data = numpy.reshape(orig_data, (orig_grid.num_y, orig_grid.num_x))
 
     # Generate arrays of longitude and latitude values for the original grid
@@ -90,6 +92,10 @@ def interpolate(orig_data, orig_grid, new_grid):
     new_data_temp2 = mpl_toolkits.basemap.interp(orig_data, orig_lons, orig_lats,
                                                  new_lons, new_lats, order=1)
     new_data = numpy.where(new_data_temp2 == numpy.nan, new_data_temp1, new_data_temp2)
+
+    # If the original data was 1-dimensional, return to 1 dimension
+    if reshape_back_to_1:
+        new_data = numpy.reshape(new_data, (new_grid.num_y * new_grid.num_x))
 
     # May be faster, but so far doesn't work with missing data (ex. oceans)
     # f = interpolate.RectBivariateSpline(lats[:,1], lons[1,:], numpy.ma.masked_invalid(data), kx=1, ky=1)
