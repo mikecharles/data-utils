@@ -6,6 +6,8 @@
 /.idea
 /work
 /logs
+/dist
+/docs/api
 # Other specific files/dirs 
 /library/config.yml
 # Files/dirs anywhere in this repo
