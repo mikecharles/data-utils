@@ -45,6 +45,10 @@ def interpolate(orig_data, orig_grid, new_grid):
         >>> new_data = interpolate(data, old_grid, new_grid)
     """
 
+    # If orig and new grids are the same, we're done
+    if orig_grid.name == new_grid.name:
+        return orig_data
+
     # If data is 1-dimensional, reshape to 2 dimensions
     if orig_data.ndim == 1:
         orig_data = numpy.reshape(orig_data, (orig_grid.num_y, orig_grid.num_x))
