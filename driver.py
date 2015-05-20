@@ -161,6 +161,13 @@ group.add_argument(
     metavar='<FILE>',
     default='../library/config.yml',
 )
+group.add_argument(
+    '--cdf-xvals',
+    dest='cdf_xvals',
+    help='num xvals in the CDF',
+    metavar='<NUM>',
+    default='150',
+)
 
 # If no options are set, print help and exit, otherwise parse args
 if len(sys.argv) <= 1:
@@ -426,7 +433,8 @@ for date in generate_date_list(args.start_date, args.end_date):
 
         kernel_std = math.sqrt(1 - R_best ** 2)
         # Loop over all grid points
-        poe = make_poe(fcst_data_z, ptiles, kernel_std, member_axis=0)
+        poe = make_poe(fcst_data_z, ptiles, kernel_std, member_axis=0,
+                       num_xvals=args.cdf_xvals)
 
         # ----------------------------------------------------------------------
         # Convert the final POE to terciles for plotting
