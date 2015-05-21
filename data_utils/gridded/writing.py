@@ -30,16 +30,3 @@ def terciles_to_txt(below, near, above, grid, output_file):
             )
     # Close output file
     f.close()
-
-if __name__ == '__main__':
-    below_old = np.fromfile('../../below.bin', dtype='float32')
-    near_old = np.fromfile('../../near.bin', dtype='float32')
-    above_old = np.fromfile('../../above.bin', dtype='float32')
-    old_grid = Grid('1deg_global')
-    new_grid = Grid('2deg_conus')
-
-    below = interpolate(below_old, old_grid, new_grid)
-    near = interpolate(near_old, old_grid, new_grid)
-    above = interpolate(above_old, old_grid, new_grid)
-
-    terciles_to_txt(below, near, above, new_grid, 'test.txt')
