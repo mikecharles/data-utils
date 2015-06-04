@@ -20,15 +20,12 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Atmospheric Science",
     ],
-    requires=[
+    install_requires=[
         'numpy',
         'scipy',
         'sphinx_rtd_theme',
         'matplotlib',
         'pyyaml',
-        'data-utils',
-        'string-utils',
-        'stats-utils'
     ]
 )
 
