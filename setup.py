@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='model_post_processing',
+    name='data-utils',
     version='0.1',
     packages=find_packages(),
     url='https://cpc-devtools.ncep.noaa.gov/trac/projects/model-post-processing',
