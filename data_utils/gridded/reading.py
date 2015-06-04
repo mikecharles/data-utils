@@ -15,7 +15,7 @@ import numpy
 logger = logging.getLogger(__name__)
 
 
-def read_grib(file, grib_type, variable, level):
+def read_grib(file, grib_type, variable, level, yrev=False):
     """
     Reads a record from a grib file
 
@@ -36,6 +36,8 @@ def read_grib(file, grib_type, variable, level):
         - Name of the variable in the grib record (ex. TMP, UGRD, etc.)
     - level (string)
         - Name of the level (ex. '2 m above ground', '850 mb', etc.)
+    - yrev (optional)
+        - Option to flip the data in the y-direction
 
     Returns
     -------
@@ -97,6 +99,10 @@ def read_grib(file, grib_type, variable, level):
         raise Exception('No grib record found')
     # Delete the temporary file
     os.remove(temp_file)
+    # Flip the data in the y-dimension (if necessary)
+    if yrev:
+        # Reshape into 2 dimensions
+        data = numpy.reshape(data, ())
     # Return data
     return data
 
