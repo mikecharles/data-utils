@@ -24,7 +24,6 @@ setup(
     install_requires=[
         'numpy',
         'scipy',
-        'sphinx_rtd_theme',
         'matplotlib',
         'pyyaml',
     ]
