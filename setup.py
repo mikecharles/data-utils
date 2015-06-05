@@ -2,6 +2,7 @@
 
 from setuptools import setup, find_packages
 
+
 setup(
     name='data-utils',
     version='0.1',
