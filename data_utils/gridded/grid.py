@@ -8,11 +8,11 @@ class Grid:
     A Grid object can either be created by providing the name of the grid, in
     which case the name must match one of the following:
 
-    1. 1deg_global
-    2. 2deg_global
-    3. 2.5deg_global
-    4. 2deg_conus
-    5. 1/6th_deg_global
+    1. 1deg-global
+    2. 2deg-global
+    3. 2.5deg-global
+    4. 2deg-conus
+    5. 1/6th-deg-global
 
     or by providing the other attributes listed below
 
@@ -54,31 +54,31 @@ class Grid:
         '''Grid type (currently only latlon is supported)'''
 
         # Create built-in grid definitions based on name
-        if name == '1deg_global':
+        if name == '1deg_global' or name == '1deg-global':
             self.name = name
             self.ll_corner = (-90, 0)
             self.ur_corner = (90, 359)
             self.res = 1
             self.type = 'latlon'
-        elif name == '2deg_global':
+        elif name == '2deg_global' or name == '2deg-global':
             self.name = name
             self.ll_corner = (-90, 0)
             self.ur_corner = (90, 358)
             self.res = 2
             self.type = 'latlon'
-        elif name == '2.5deg_global':
+        elif name == '2.5deg_global' or name == '2.5deg-global':
             self.name = name
             self.ll_corner = (-90, 0)
             self.ur_corner = (90, 357.5)
             self.res = 2.5
             self.type = 'latlon'
-        elif name == '2deg_conus':
+        elif name == '2deg_conus' or name == '2deg-conus':
             self.name = name
             self.ll_corner = (20, 230)
             self.ur_corner = (56, 300)
             self.res = 2
             self.type = 'latlon'
-        elif name == '1/6th_deg_global':
+        elif name == '1/6th_deg_global' or name == '1/6th-deg-global':
             self.name = name
             self.ll_corner = (-89.9167, 0.0833)
             self.ur_corner = (89.9167, 359.9167)
