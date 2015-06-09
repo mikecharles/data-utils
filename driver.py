@@ -249,8 +249,7 @@ try:
         config = yaml.load(f)
 except Exception as e:
     raise Exception('Could not parse config file {}: {} Make sure you\'ve '
-                    'copied config.yml.example to config.yml'.format(
-        args.config_file, e))
+                    'copied config.yml.example to config.yml')
 try:
     ptiles = config['ptiles']
     climo_file_template = config['climo-data']['file-template']
