@@ -8,6 +8,7 @@
 /logs
 /dist
 /docs/api
+/build
 # Other specific files/dirs 
 /library/config.yml
 # Files/dirs anywhere in this repo
