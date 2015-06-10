@@ -15,5 +15,4 @@ Otherwise:
 This package
 ------------
 
-    python setup.py install
-
+    pip install git+ssh://git@github.com/noaa-nws-cpc/data-utils.git
