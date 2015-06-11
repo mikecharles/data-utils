@@ -38,6 +38,10 @@ If you don't, then pip will attempt to install the dependencies, though you may 
 
     python setup.py install
 
+It's installed correctly if this doesn't return anything:
+
+    python -c 'import data_utils'
+
 Documentation
 =============
 
