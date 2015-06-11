@@ -1,8 +1,12 @@
 Installing
 ==========
 
-Dependencies
-------------
+### Clone the repo
+
+    git clone git@github.com:noaa-nws-cpc/data-utils.git
+    cd data-utils
+
+### Install dependencies
 
 If you have [Anaconda installed](http://docs.continuum.io/anaconda/install.html):
 
@@ -12,7 +16,6 @@ Otherwise:
 
     pip install -r requirements.txt
 
-This package
-------------
+### Install this package
 
-    pip install git+ssh://git@github.com/noaa-nws-cpc/data-utils.git
+    python setup.py install
