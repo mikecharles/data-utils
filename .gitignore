@@ -1,16 +1,9 @@
 # Specific top-level files/dirs
-/output
-/docs/_build
 /*.bin
 /*.png
 /.idea
-/work
-/logs
 /dist
-/docs/api
 /build
-# Other specific files/dirs 
-/library/config.yml
 # Files/dirs anywhere in this repo
 __pycache__
 # File/dir types
