@@ -40,6 +40,7 @@ If you don't, then pip will attempt to install the dependencies, though you may 
 
 It's installed correctly if this doesn't return anything:
 
+    cd $HOME
     python -c 'import data_utils'
 
 Documentation
