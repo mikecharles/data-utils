@@ -32,7 +32,7 @@ If you have [Anaconda installed](http://docs.continuum.io/anaconda/install.html)
 
     conda install --file requirements.txt
 
-If you don't, then pip will attempt to install the dependencies, though you may run into trouble with the big packages (specifically NumPy and SciPy).
+If you don't, then pip will attempt to install the dependencies when you run `python setup.py` below, though you may run into trouble with the big packages (specifically NumPy and SciPy).
 
 ### Install this package
 
