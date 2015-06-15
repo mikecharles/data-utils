@@ -26,7 +26,9 @@ setup(
         'numpy',
         'scipy',
         'matplotlib',
+	'basemap',
         'pyyaml',
+	'stats-utils'
     ]
 )
 
