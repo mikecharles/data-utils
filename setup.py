@@ -7,6 +7,7 @@ setup(
     name='data-utils',
     version='0.1',
     packages=find_packages(),
+    include_package_data=True,
     url='https://cpc-devtools.ncep.noaa.gov/trac/projects/model-post-processing',
     license='',
     author='Mike Charles',
