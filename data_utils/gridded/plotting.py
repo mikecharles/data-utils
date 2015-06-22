@@ -20,7 +20,7 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
     """
     Plots the given data and displays on-screen.
 
-    Essentially makes calls to :func:`make_plot` and :func:`show_plot` to do
+    Essentially makes calls to :func:`_make_plot` and :func:`_show_plot` to do
     the work
 
     Parameters
@@ -77,7 +77,7 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
     del kwargs['data']
     del kwargs['grid']
     # --------------------------------------------------------------------------
-    # Define *args for child function
+    # Define *args to pass to child function
     #
     args = [data, grid]
     # --------------------------------------------------------------------------
@@ -88,10 +88,10 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
     elif data.ndim != 2:
         raise ValueError('data array must have 1 or 2 dimensions')
     # --------------------------------------------------------------------------
-    # Call make_plot()
+    # Call _make_plot()
     #
-    make_plot(*args, **kwargs)
-    show_plot()
+    _make_plot(*args, **kwargs)
+    _show_plot()
     matplotlib.pyplot.close("all")
 
 
@@ -102,7 +102,7 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
     """
     Plots the given data and saves to a file.
 
-    Essentially makes calls to :func:`make_plot` and :func:`save_plot` to do
+    Essentially makes calls to :func:`_make_plot` and :func:`_save_plot` to do
     the work
 
     Parameters
@@ -156,27 +156,45 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
         >>> plot_to_file(A, grid, 'test.png')
     """
 
+    # --------------------------------------------------------------------------
+    # Get dictionary of kwargs for child function
+    #
+    # Use locals() function to get all defined vars
+    kwargs = locals()
+    # Remove positional args
+    del kwargs['data']
+    del kwargs['grid']
+    del kwargs['file']
+    # --------------------------------------------------------------------------
     # Set backend to Agg which won't require X11
+    #
     matplotlib.pyplot.switch_backend('Agg')
-
+    # --------------------------------------------------------------------------
     # Reshape array if necessary
+    #
     if data.ndim == 1:
         data = np.reshape(data, (grid.num_y, grid.num_x))
     elif data.ndim != 2:
         raise ValueError('data array must have 1 or 2 dimensions')
-
-    make_plot(**locals())
-    save_plot(file, dpi)
+    # --------------------------------------------------------------------------
+    # Define *args to pass to child function
+    #
+    args = [data, grid]
+    # --------------------------------------------------------------------------
+    # Call _make_plot()
+    #
+    _make_plot(*args, **kwargs)
+    _save_plot(file, dpi)
     matplotlib.pyplot.close("all")
 
 
-def make_plot(*args, **kwargs):
+def _make_plot(*args, **kwargs):
     """
     Creates a plot object using `mpl_toolkits.basemap`
 
     Nothing is actually plotted. Usually you'd want to call
-    `data_utils.gridded.plotting.show_plot` or
-    `data_utils.gridded.plotting.save_plot` after this.
+    `data_utils.gridded.plotting._show_plot` or
+    `data_utils.gridded.plotting._save_plot` after this.
 
     Parameters
     ----------
@@ -331,7 +349,7 @@ def make_plot(*args, **kwargs):
         cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax)
 
 
-def show_plot():
+def _show_plot():
     """
     Shows an existing plot that was created using `mpl_toolkits.basemap`
     """
@@ -339,7 +357,7 @@ def show_plot():
     matplotlib.pyplot.show()
 
 
-def save_plot(file, dpi=200):
+def _save_plot(file, dpi=200):
     """Saves an existing plot that was created using `mpl_toolkits.basemap`
     to a file.
 
@@ -355,47 +373,87 @@ def save_plot(file, dpi=200):
     matplotlib.pyplot.savefig(file, dpi=dpi, bbox_inches='tight')
 
 
-def plot_tercile_probs_to_screen(below, near, above, grid, levels=None,
-                       colors='tmean_colors', title=None, lat_range=(-90, 90),
-                       lon_range=(0, 360), cbar_ends='triangular',
-                       tercile_type='normal', smoothing_factor=0,
-                       cbar_type='tercile'):
-    # Get colors
-    colors = get_colors(colors)
-
-    # Put terciles into a single array for plotting
-    all_probs = put_terciles_in_one_array(below, near, above)
-
-    # Convert all_probs into probabilities from 0-100
-    all_probs *= 100
-    # Plot
-    plot_to_screen(all_probs, grid, levels=levels, colors=colors,
-                   title=title, cbar_ends=cbar_ends,
-                   tercile_type=tercile_type,
-                   smoothing_factor=smoothing_factor, cbar_type=cbar_type)
-
-
-def plot_tercile_probs_to_file(below, near, above, grid, file, levels=None,
+def plot_tercile_probs_to_screen(below, near, above, grid,
+                                 levels=[-90, -80, -70, -60, -50, -40, -33, 33,
+                                         40, 50, 60, 70, 80, 90],
                                  colors='tmean_colors', title=None,
                                  lat_range=(-90, 90), lon_range=(0, 360),
-                                 cbar_ends='triangular',
-                                 tercile_type='normal', smoothing_factor=0,
-                                 cbar_type='tercile'):
+                                 cbar_ends='triangular', tercile_type='normal',
+                                 smoothing_factor=0, cbar_type='tercile'):
+    # --------------------------------------------------------------------------
     # Get colors
+    #
     colors = get_colors(colors)
-
+    # --------------------------------------------------------------------------
+    # Get dictionary of kwargs for child function
+    #
+    # Use locals() function to get all defined vars
+    kwargs = locals()
+    # Remove positional args
+    del kwargs['below']
+    del kwargs['near']
+    del kwargs['above']
+    del kwargs['grid']
+    # --------------------------------------------------------------------------
     # Put terciles into a single array for plotting
-    all_probs = put_terciles_in_one_array(below, near, above)
-
+    #
+    all_probs = _put_terciles_in_one_array(below, near, above)
+    # --------------------------------------------------------------------------
     # Convert all_probs into probabilities from 0-100
+    #
     all_probs *= 100
+    # --------------------------------------------------------------------------
+    # Define *args for child function
+    #
+    args = [all_probs, grid]
+    # --------------------------------------------------------------------------
     # Plot
-    plot_to_file(all_probs, grid, file, levels=levels, colors=colors,
-                 title=title, cbar_ends=cbar_ends, tercile_type=tercile_type,
-                 smoothing_factor=smoothing_factor, cbar_type=cbar_type)
+    #
+    plot_to_screen(*args, **kwargs)
 
 
-def put_terciles_in_one_array(below, near, above):
+def plot_tercile_probs_to_file(below, near, above, grid, file,
+                               levels=[-90, -80, -70, -60, -50, -40, -33, 33,
+                                       40, 50, 60, 70, 80, 90],
+                               colors='tmean_colors', title=None,
+                               lat_range=(-90, 90), lon_range=(0, 360),
+                               cbar_ends='triangular',
+                               tercile_type='normal', smoothing_factor=0,
+                                cbar_type='tercile'):
+    # --------------------------------------------------------------------------
+    # Get colors
+    #
+    colors = get_colors(colors)
+    # --------------------------------------------------------------------------
+    # Get dictionary of kwargs for child function
+    #
+    # Use locals() function to get all defined vars
+    kwargs = locals()
+    # Remove positional args
+    del kwargs['below']
+    del kwargs['near']
+    del kwargs['above']
+    del kwargs['grid']
+    del kwargs['file']
+    # --------------------------------------------------------------------------
+    # Put terciles into a single array for plotting
+    #
+    all_probs = _put_terciles_in_one_array(below, near, above)
+    # --------------------------------------------------------------------------
+    # Convert all_probs into probabilities from 0-100
+    #
+    all_probs *= 100
+    # --------------------------------------------------------------------------
+    # Define *args for child function
+    #
+    args = [all_probs, grid, file]
+    # --------------------------------------------------------------------------
+    # Plot
+    #
+    plot_to_file(*args, **kwargs)
+
+
+def _put_terciles_in_one_array(below, near, above):
     # Make an empty array to store above, near, and below
     all_probs = np.empty(below.shape)
     all_probs[:] = np.nan
