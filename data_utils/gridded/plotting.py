@@ -395,6 +395,21 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
     del kwargs['above']
     del kwargs['grid']
     # --------------------------------------------------------------------------
+    # Reshape arrays if necessary
+    #
+    if below.ndim == 1:
+        below = np.reshape(below, (grid.num_y, grid.num_x))
+    elif below.ndim != 2:
+        raise ValueError('data array must have 1 or 2 dimensions')
+    if near.ndim == 1:
+        near = np.reshape(near, (grid.num_y, grid.num_x))
+    elif near.ndim != 2:
+        raise ValueError('data array must have 1 or 2 dimensions')
+    if above.ndim == 1:
+        above = np.reshape(above, (grid.num_y, grid.num_x))
+    elif above.ndim != 2:
+        raise ValueError('data array must have 1 or 2 dimensions')
+    # --------------------------------------------------------------------------
     # Put terciles into a single array for plotting
     #
     all_probs = _put_terciles_in_one_array(below, near, above)
@@ -435,6 +450,21 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
     del kwargs['above']
     del kwargs['grid']
     del kwargs['file']
+    # --------------------------------------------------------------------------
+    # Reshape arrays if necessary
+    #
+    if below.ndim == 1:
+        below = np.reshape(below, (grid.num_y, grid.num_x))
+    elif below.ndim != 2:
+        raise ValueError('data array must have 1 or 2 dimensions')
+    if near.ndim == 1:
+        near = np.reshape(near, (grid.num_y, grid.num_x))
+    elif near.ndim != 2:
+        raise ValueError('data array must have 1 or 2 dimensions')
+    if above.ndim == 1:
+        above = np.reshape(above, (grid.num_y, grid.num_x))
+    elif above.ndim != 2:
+        raise ValueError('data array must have 1 or 2 dimensions')
     # --------------------------------------------------------------------------
     # Put terciles into a single array for plotting
     #
