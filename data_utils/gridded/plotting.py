@@ -10,8 +10,6 @@ import numpy as np
 import scipy.ndimage
 import math
 
-import data_utils.gridded.grid
-
 
 def plot_to_screen(data, grid, levels=None, colors=None, title=None,
                    lat_range=(-90, 90), lon_range=(0, 360),
@@ -51,22 +49,24 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
         - Type of tercile ('normal' or 'median')
     - smoothing_factor (float, optional)
         - Level of smoothing (gaussian filter, this represents the kernel
-        width - may need to experiment with value)
+        width in standard deviations - may need to experiment with value -
+        generally between 0 and 2 should suffice)
 
     Examples
     --------
 
-        #!python
+        #!/usr/bin/env python
         >>> from pkg_resources import resource_filename
         >>> import numpy as np
         >>> from data_utils.gridded.plotting import plot_to_screen
         >>> from data_utils.gridded.grid import Grid
-        >>> grid = Grid('1deg_global')
-        >>> A = np.fromfile(resource_filename('data_utils', 'lib/tmax.bin'),
-        ... dtype='float32')
+        >>> grid = Grid('1deg-global')
+        >>> A = np.fromfile(resource_filename('data_utils',
+        ... 'lib/example-tmean.bin'), dtype='float32')
         >>> A = np.reshape(A, (grid.num_y, grid.num_x))
         >>> A[A == -999] = np.nan
-        >>> plot_to_screen(A, grid)
+        >>> plot_to_screen(A, grid)  # doctest: +SKIP
+        >>>
     """
     # --------------------------------------------------------------------------
     # Get dictionary of kwargs for child function
@@ -143,17 +143,17 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
     Examples
     --------
 
-        #!python
+        #!/usr/bin/env python
         >>> from pkg_resources import resource_filename
         >>> import numpy as np
         >>> from data_utils.gridded.plotting import plot_to_file
         >>> from data_utils.gridded.grid import Grid
-        >>> grid = Grid('1deg_global')
-        >>> A = np.fromfile(resource_filename('data_utils', 'lib/tmax.bin'),
-        ... dtype='float32')
+        >>> grid = Grid('1deg-global')
+        >>> A = np.fromfile(resource_filename('data_utils',
+        ... 'lib/example-tmean.bin'), dtype='float32')
         >>> A = np.reshape(A, (grid.num_y, grid.num_x))
         >>> A[A == -999] = np.nan
-        >>> plot_to_file(A, grid, 'test.png')
+        >>> plot_to_file(A, grid, 'out.png')  # doctest: +SKIP
     """
 
     # --------------------------------------------------------------------------
@@ -383,7 +383,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
     # --------------------------------------------------------------------------
     # Get colors
     #
-    colors = get_colors(colors)
+    colors = _get_colors(colors)
     # --------------------------------------------------------------------------
     # Get dictionary of kwargs for child function
     #
@@ -423,7 +423,7 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
     # --------------------------------------------------------------------------
     # Get colors
     #
-    colors = get_colors(colors)
+    colors = _get_colors(colors)
     # --------------------------------------------------------------------------
     # Get dictionary of kwargs for child function
     #
@@ -467,7 +467,7 @@ def _put_terciles_in_one_array(below, near, above):
     return all_probs
 
 
-def get_colors(colors):
+def _get_colors(colors):
     # Colors should be set to '[var]_colors'
     if colors == 'tmean_colors':
         return [
