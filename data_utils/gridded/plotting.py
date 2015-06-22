@@ -68,17 +68,29 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
         >>> A[A == -999] = np.nan
         >>> plot_to_screen(A, grid)
     """
-
+    # --------------------------------------------------------------------------
+    # Get dictionary of kwargs for child function
+    #
+    # Use locals() function to get all defined vars
+    kwargs = locals()
+    # Remove positional args
+    del kwargs['data']
+    del kwargs['grid']
+    # --------------------------------------------------------------------------
+    # Define *args for child function
+    #
+    args = [data, grid]
+    # --------------------------------------------------------------------------
     # Reshape array if necessary
+    #
     if data.ndim == 1:
         data = np.reshape(data, (grid.num_y, grid.num_x))
     elif data.ndim != 2:
         raise ValueError('data array must have 1 or 2 dimensions')
-
-    make_plot(data, grid, levels=levels, colors=colors, title=title,
-              lat_range=lat_range, lon_range=lon_range, cbar_ends=cbar_ends,
-              tercile_type=tercile_type, smoothing_factor=smoothing_factor,
-              cbar_type=cbar_type)
+    # --------------------------------------------------------------------------
+    # Call make_plot()
+    #
+    make_plot(*args, **kwargs)
     show_plot()
     matplotlib.pyplot.close("all")
 
@@ -153,18 +165,12 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
     elif data.ndim != 2:
         raise ValueError('data array must have 1 or 2 dimensions')
 
-    make_plot(data, grid, levels=levels, colors=colors, title=title,
-              lat_range=lat_range, lon_range=lon_range, cbar_ends=cbar_ends,
-              tercile_type=tercile_type, smoothing_factor=smoothing_factor,
-              cbar_type=cbar_type)
+    make_plot(**locals())
     save_plot(file, dpi)
     matplotlib.pyplot.close("all")
 
 
-def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
-        -90, 90), lon_range=(0, 360), cbar_ends='triangular',
-              tercile_type='normal', projection='lcc', smoothing_factor=0,
-              cbar_type='normal'):
+def make_plot(*args, **kwargs):
     """
     Creates a plot object using `mpl_toolkits.basemap`
 
@@ -202,6 +208,19 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
         - Level of smoothing (gaussian filter, this represents the kernel
         width - may need to experiment with value)
     """
+    # Get *args
+    data = args[0]
+    grid = args[1]
+    # Get **kwargs
+    levels = kwargs['levels']
+    colors = kwargs['colors']
+    title = kwargs['title']
+    lat_range = kwargs['lat_range']
+    lon_range = kwargs['lon_range']
+    cbar_ends = kwargs['cbar_ends']
+    cbar_type = kwargs['cbar_type']
+    tercile_type = kwargs['tercile_type']
+    smoothing_factor = kwargs['smoothing_factor']
 
     # Check args
     if colors and not levels:
@@ -219,6 +238,7 @@ def make_plot(data, grid, levels=None, colors=None, title=None, lat_range=(
 
     # Create Basemap
     fig, ax = matplotlib.pyplot.subplots()
+    projection = 'lcc'
     if projection == 'mercator':
         m = mpl_toolkits.basemap.Basemap(llcrnrlon=lon_range[0],
                                          llcrnrlat=lat_range[0],
