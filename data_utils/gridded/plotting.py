@@ -23,6 +23,8 @@ _docstring_kwargs = """
             to 1 (ex. [[0.2, 0.2, 1],[0.4, 0.5, 0.8],[0.2, 0.2, 0.5]])
             - A string specifying the variable and plot type. Supported values:
                 - tmean-terciles
+    - projection (str, optional)
+        - Set the map projection ('lcc' or 'mercator')
     - title (str, optional)
         - Title of the resulting plot
     - lat_range (tuple, optional)
@@ -45,7 +47,8 @@ _docstring_kwargs = """
     """
 
 
-def plot_to_screen(data, grid, levels=None, colors=None, title=None,
+def plot_to_screen(data, grid, levels=None, colors=None,
+                   projection='lcc', title=None,
                    lat_range=(-90, 90), lon_range=(0, 360),
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal'):
@@ -107,7 +110,8 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
     matplotlib.pyplot.close("all")
 
 
-def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
+def plot_to_file(data, grid, file, dpi=200, levels=None,
+                 projection='lcc', colors=None,
                  title=None, lat_range=(-90, 90), lon_range=(0, 360),
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal'):
@@ -200,6 +204,7 @@ def _make_plot(*args, **kwargs):
     grid = args[1]
     # Get **kwargs
     levels = kwargs['levels']
+    projection = kwargs['projection']
     colors = kwargs['colors']
     title = kwargs['title']
     lat_range = kwargs['lat_range']
@@ -237,7 +242,6 @@ def _make_plot(*args, **kwargs):
 
     # Create Basemap
     fig, ax = matplotlib.pyplot.subplots()
-    projection = 'lcc'
     if projection == 'mercator':
         m = mpl_toolkits.basemap.Basemap(llcrnrlon=lon_range[0],
                                          llcrnrlat=lat_range[0],
@@ -269,7 +273,7 @@ def _make_plot(*args, **kwargs):
         m.drawcountries()
 
     else:
-        raise ValueError('Supported projections: \'mercator\', \'stereo\'')
+        raise ValueError('Supported projections: \'mercator\', \'lcc\'')
 
     # Smooth data
     data = scipy.ndimage.filters.gaussian_filter(data, smoothing_factor)
@@ -355,10 +359,11 @@ def _save_plot(file, dpi=200):
 def plot_tercile_probs_to_screen(below, near, above, grid,
                                  levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                          40, 50, 60, 70, 80, 90],
-                                 colors='tmean-terciles', title=None,
-                                 lat_range=(-90, 90), lon_range=(0, 360),
-                                 cbar_ends='triangular', tercile_type='normal',
-                                 smoothing_factor=0, cbar_type='tercile'):
+                                 projection='lcc', colors='tmean-terciles',
+                                 title=None, lat_range=(-90, 90),
+                                 lon_range=(0, 360), cbar_ends='triangular',
+                                 tercile_type='normal', smoothing_factor=0,
+                                 cbar_type='tercile'):
     """
     Plots below, near, and above normal (median) terciles to the screen.
 
@@ -442,9 +447,9 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
 def plot_tercile_probs_to_file(below, near, above, grid, file,
                                levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                        40, 50, 60, 70, 80, 90],
-                               colors='tmean-terciles', title=None,
-                               lat_range=(-90, 90), lon_range=(0, 360),
-                               cbar_ends='triangular',
+                               projection='lcc', colors='tmean-terciles',
+                               title=None, lat_range=(-90, 90),
+                               lon_range=(0, 360), cbar_ends='triangular',
                                tercile_type='normal', smoothing_factor=0,
                                cbar_type='tercile'):
     """
