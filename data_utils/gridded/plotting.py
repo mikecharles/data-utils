@@ -17,8 +17,12 @@ import math
 _docstring_kwargs = """
     - levels (list, optional)
         - List of levels to shade/contour.
-    - colors (list of lists)
-        - List of colors, each color being a list of RGB values from 0 to 1
+    - colors (list of lists, or string)
+        - Specifies the colors to be used to plot the data. It can either be:
+            - A list of colors, each color being a list of RGB values from 0
+            to 1 (ex. [[0.2, 0.2, 1],[0.4, 0.5, 0.8],[0.2, 0.2, 0.5]])
+            - A string specifying the variable and plot type. Supported values:
+                - tmean-terciles
     - title (str, optional)
         - Title of the resulting plot
     - lat_range (tuple, optional)
@@ -210,6 +214,18 @@ def _make_plot(*args, **kwargs):
         raise ValueError('The "levels" argument must be set if the "colors" '
                          'argument is set')
 
+    # --------------------------------------------------------------------------
+    # Check colors variable
+    #
+    # If colors is a string, obtain a colors list
+    if isinstance(colors, str):
+        colors = _get_colors(colors)
+    # Make sure there is 1 more color than levels
+    if colors:
+        if len(colors) != (len(levels) + 1):
+            raise ValueError('The number of colors must be 1 greater than the '
+                             'number of levels')
+
     # Convert the ll_corner and res to arrays of lons and lats
     start_lat, start_lon = grid.ll_corner
     end_lat, end_lon = grid.ur_corner
@@ -280,8 +296,6 @@ def _make_plot(*args, **kwargs):
     # Add labels
     matplotlib.pyplot.title(title, fontsize=10)
 
-
-
     # --------------------------------------------------------------------------
     # Add a colorbar
     #
@@ -341,7 +355,7 @@ def _save_plot(file, dpi=200):
 def plot_tercile_probs_to_screen(below, near, above, grid,
                                  levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                          40, 50, 60, 70, 80, 90],
-                                 colors='tmean_colors', title=None,
+                                 colors='tmean-terciles', title=None,
                                  lat_range=(-90, 90), lon_range=(0, 360),
                                  cbar_ends='triangular', tercile_type='normal',
                                  smoothing_factor=0, cbar_type='tercile'):
@@ -382,11 +396,6 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
         >>> below, near, above = poe_to_terciles(data, ptiles)
         >>> plot_tercile_probs_to_screen(below, near, above, grid)  # doctest: +SKIP
     """
-
-    # --------------------------------------------------------------------------
-    # Get colors
-    #
-    colors = _get_colors(colors)
     # --------------------------------------------------------------------------
     # Get dictionary of kwargs for child function
     #
@@ -433,7 +442,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
 def plot_tercile_probs_to_file(below, near, above, grid, file,
                                levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                        40, 50, 60, 70, 80, 90],
-                               colors='tmean_colors', title=None,
+                               colors='tmean-terciles', title=None,
                                lat_range=(-90, 90), lon_range=(0, 360),
                                cbar_ends='triangular',
                                tercile_type='normal', smoothing_factor=0,
@@ -477,11 +486,6 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
         >>> below, near, above = poe_to_terciles(data, ptiles)
         >>> plot_tercile_probs_to_file(below, near, above, grid, 'out.png')  # doctest: +SKIP
     """
-
-    # --------------------------------------------------------------------------
-    # Get colors
-    #
-    colors = _get_colors(colors)
     # --------------------------------------------------------------------------
     # Get dictionary of kwargs for child function
     #
@@ -541,8 +545,8 @@ def _put_terciles_in_one_array(below, near, above):
 
 
 def _get_colors(colors):
-    # Colors should be set to '[var]_colors'
-    if colors == 'tmean_colors':
+    # Colors should be set to '[var]-[plot-type]'
+    if colors == 'tmean-terciles':
         return [
             # Below normal (blues)
             [0.03, 0.27, 0.58],
@@ -564,8 +568,8 @@ def _get_colors(colors):
             [0.60, 0.00, 0.05]
         ]
     else:
-        raise ValueError('Supported vars for default color scales (colors=['
-                         'var]_colors): tmean, precip')
+        raise ValueError('supplied colors parameter not supported, see API '
+                         'docs')
 
 
 _make_plot.__doc__ = _make_plot.__doc__.format(_docstring_kwargs)
