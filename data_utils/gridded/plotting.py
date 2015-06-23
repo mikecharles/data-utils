@@ -271,7 +271,19 @@ def _make_plot(*args, **kwargs):
         m.drawmapboundary(fill_color='#DDDDDD')
         m.drawstates()
         m.drawcountries()
-
+    elif projection == 'laea':
+        m = mpl_toolkits.basemap.Basemap(width=8000000, height=6600000,
+                                         lat_0=53., lon_0=-100.,
+                                         projection='laea', ax=ax,
+                                         resolution='l')
+        m.drawcoastlines(linewidth=1)
+        # m.drawparallels(np.arange(lat_range[0], lat_range[1] + 1, 10),
+        # labels=[1, 1, 0, 0], fontsize=9)
+        # m.drawmeridians(np.arange(lon_range[0], lon_range[1] + 1, 10),
+        #                 labels=[0, 0, 0, 1], fontsize=9)
+        # m.drawmapboundary(fill_color='#DDDDDD')
+        m.drawstates()
+        m.drawcountries()
     else:
         raise ValueError('Supported projections: \'mercator\', \'lcc\'')
 
