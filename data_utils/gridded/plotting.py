@@ -11,28 +11,10 @@ import scipy.ndimage
 import math
 
 
-# __all__ = ['_get_colors']
-
-
-def plot_to_screen(data, grid, levels=None, colors=None, title=None,
-                   lat_range=(-90, 90), lon_range=(0, 360),
-                   cbar_ends='triangular', tercile_type='normal',
-                   smoothing_factor=0, cbar_type='normal'):
-    """
-    Plots the given data and displays on-screen.
-
-    Essentially makes calls to `_make_plot` and `_show_plot` to do the work
-
-    See [#_make_plot](#_make_plot for usage)
-
-    Parameters
-    ----------
-
-    - data (array_like)
-        - 1- or 2-dimensional (lat x lon) Numpy array of data to plot
-    - grid (Grid object)
-        - See [data_utils.gridded.grid.Grid](
-        ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
+# ------------------------------------------------------------------------------
+# Setup reusable docstring
+#
+_docstring_kwargs = """
     - levels (list, optional)
         - List of levels to shade/contour.
     - colors (list of lists)
@@ -56,6 +38,27 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
         - Level of smoothing (gaussian filter, this represents the kernel
         width in standard deviations - may need to experiment with value -
         generally between 0 and 2 should suffice)
+    """
+
+
+def plot_to_screen(data, grid, levels=None, colors=None, title=None,
+                   lat_range=(-90, 90), lon_range=(0, 360),
+                   cbar_ends='triangular', tercile_type='normal',
+                   smoothing_factor=0, cbar_type='normal'):
+    """
+    Plots the given data and displays on-screen.
+
+    Essentially makes calls to `_make_plot` and `_show_plot` to do the work
+
+    Parameters
+    ----------
+
+    - data (array_like)
+        - 1- or 2-dimensional (lat x lon) Numpy array of data to plot
+    - grid (Grid object)
+        - See [data_utils.gridded.grid.Grid](
+        ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
+    {}
 
     Examples
     --------
@@ -72,6 +75,7 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
         >>> A[A == -999] = np.nan
         >>> plot_to_screen(A, grid)  # doctest: +SKIP
     """
+
     # --------------------------------------------------------------------------
     # Get dictionary of kwargs for child function
     #
@@ -103,7 +107,6 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
                  title=None, lat_range=(-90, 90), lon_range=(0, 360),
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal'):
-
     """
     Plots the given data and saves to a file.
 
@@ -117,34 +120,9 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
     - grid (Grid object)
         - See [data_utils.gridded.grid.Grid](
         ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
-    - levels (list, optional)
-        - List of levels to shade/contour.
-    - colors (list of lists)
-        - List of colors, each color being a list of RGB values from 0 to 1
     - file (str)
         - File name to save plot to
-    - dpi (float, optional)
-        - dpi of the image (higher means higher resolution). By default `dpi =
-        200`.
-    - title (str, optional)
-        - Title of the resulting plot
-    - lat_range (tuple, optional)
-        - Range of latitude values to plot
-    - lon_range (tuple, optional)
-        - Range of longitude values to plot
-    - cbar_ends (str, optional)
-        - Shape of the ends of the colorbar ('square' or 'triangular'). If
-          'square', levels should contain the endpoints. If 'triangular',
-          the levels should not contain the endpoints.
-    - cbar_type (strin, optional)
-        - Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
-          tercile colorbar with 3 color ranges)
-    - tercile_type (str, optional)
-        - Type of tercile ('normal' or 'median')
-    - smoothing_factor (float, optional)
-        - Level of smoothing (gaussian filter, this represents the kernel
-        width in standard deviations - may need to experiment with value -
-        generally between 0 and 2 should suffice)
+    {}
 
     Examples
     --------
@@ -210,30 +188,9 @@ def _make_plot(*args, **kwargs):
     - grid (Grid object)
         - See [data_utils.gridded.grid.Grid](
         ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
-    - levels (list, optional)
-        - List of levels to shade/contour.
-    - colors (list of lists)
-        - List of colors, each color being a list of RGB values from 0 to 1
-    - title (str, optional)
-        - Title of the resulting plot
-    - lat_range (tuple, optional)
-        - Range of latitude values to plot
-    - lon_range (tuple, optional)
-        - Range of longitude values to plot
-    - cbar_ends (str, optional)
-        - Shape of the ends of the colorbar ('square' or 'triangular'). If
-        'square', levels should contain the endpoints. If 'triangular',
-        the levels should not contain the endpoints.
-    - cbar_type (strin, optional)
-        - Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
-        tercile colorbar with 3 color ranges)
-    - tercile_type (str, optional)
-        - Type of tercile ('normal' or 'median')
-    - smoothing_factor (float, optional)
-        - Level of smoothing (gaussian filter, this represents the kernel
-        width in standard deviations - may need to experiment with value -
-        generally between 0 and 2 should suffice)
+    {}
     """
+
     # Get *args
     data = args[0]
     grid = args[1]
@@ -403,50 +360,29 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
     - grid (Grid object)
         - See [data_utils.gridded.grid.Grid](
         ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
-    - levels (list, optional)
-        - List of levels to shade/contour.
-    - colors (list of lists)
-        - List of colors, each color being a list of RGB values from 0 to 1
-    - title (str, optional)
-        - Title of the resulting plot
-    - lat_range (tuple, optional)
-        - Range of latitude values to plot
-    - lon_range (tuple, optional)
-        - Range of longitude values to plot
-    - cbar_ends (str, optional)
-        - Shape of the ends of the colorbar ('square' or 'triangular'). If
-        'square', levels should contain the endpoints. If 'triangular',
-        the levels should not contain the endpoints.
-    - cbar_type (strin, optional)
-        - Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
-        tercile colorbar with 3 color ranges)
-    - tercile_type (str, optional)
-        - Type of tercile ('normal' or 'median')
-    - smoothing_factor (float, optional)
-        - Level of smoothing (gaussian filter, this represents the kernel
-        width in standard deviations - may need to experiment with value -
-        generally between 0 and 2 should suffice)
+    {}
 
     Examples
     --------
 
-    >>> from data_utils.gridded.plotting import plot_tercile_probs_to_screen
-    >>> from data_utils.gridded.grid import Grid
-    >>> from mpp.poe import poe_to_terciles
-    >>> from pkg_resources import resource_filename
-    >>> import numpy as np
-    >>> ptiles = [
-    ...  1,  2,  5, 10, 15,
-    ... 20, 25, 33, 40, 50,
-    ... 60, 67, 75, 80, 85,
-    ... 90, 95, 98, 99]
-    >>> grid = Grid('2deg-conus')
-    >>> data = np.fromfile(resource_filename('data_utils',
-    ... 'lib/example-tmean-fcst.bin'), dtype='float32')
-    >>> data = np.reshape(data, (len(ptiles), grid.num_y * grid.num_x))
-    >>> below, near, above = poe_to_terciles(data, ptiles)
-    >>> plot_tercile_probs_to_screen(below, near, above, grid)  # doctest: +SKIP
+        >>> from data_utils.gridded.plotting import plot_tercile_probs_to_screen
+        >>> from data_utils.gridded.grid import Grid
+        >>> from mpp.poe import poe_to_terciles
+        >>> from pkg_resources import resource_filename
+        >>> import numpy as np
+        >>> ptiles = [
+        ...  1,  2,  5, 10, 15,
+        ... 20, 25, 33, 40, 50,
+        ... 60, 67, 75, 80, 85,
+        ... 90, 95, 98, 99]
+        >>> grid = Grid('2deg-conus')
+        >>> data = np.fromfile(resource_filename('data_utils',
+        ... 'lib/example-tmean-fcst.bin'), dtype='float32')
+        >>> data = np.reshape(data, (len(ptiles), grid.num_y * grid.num_x))
+        >>> below, near, above = poe_to_terciles(data, ptiles)
+        >>> plot_tercile_probs_to_screen(below, near, above, grid)  # doctest: +SKIP
     """
+
     # --------------------------------------------------------------------------
     # Get colors
     #
@@ -517,50 +453,31 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
     - grid (Grid object)
         - See [data_utils.gridded.grid.Grid](
         ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
-    - levels (list, optional)
-        - List of levels to shade/contour.
-    - colors (list of lists)
-        - List of colors, each color being a list of RGB values from 0 to 1
-    - title (str, optional)
-        - Title of the resulting plot
-    - lat_range (tuple, optional)
-        - Range of latitude values to plot
-    - lon_range (tuple, optional)
-        - Range of longitude values to plot
-    - cbar_ends (str, optional)
-        - Shape of the ends of the colorbar ('square' or 'triangular'). If
-        'square', levels should contain the endpoints. If 'triangular',
-        the levels should not contain the endpoints.
-    - cbar_type (strin, optional)
-        - Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
-        tercile colorbar with 3 color ranges)
-    - tercile_type (str, optional)
-        - Type of tercile ('normal' or 'median')
-    - smoothing_factor (float, optional)
-        - Level of smoothing (gaussian filter, this represents the kernel
-        width in standard deviations - may need to experiment with value -
-        generally between 0 and 2 should suffice)
+    - file (str)
+        - File name to save plot to
+    {}
 
     Examples
     --------
 
-    >>> from data_utils.gridded.plotting import plot_tercile_probs_to_file
-    >>> from data_utils.gridded.grid import Grid
-    >>> from mpp.poe import poe_to_terciles
-    >>> from pkg_resources import resource_filename
-    >>> import numpy as np
-    >>> ptiles = [
-    ...  1,  2,  5, 10, 15,
-    ... 20, 25, 33, 40, 50,
-    ... 60, 67, 75, 80, 85,
-    ... 90, 95, 98, 99]
-    >>> grid = Grid('2deg-conus')
-    >>> data = np.fromfile(resource_filename('data_utils',
-    ... 'lib/example-tmean-fcst.bin'), dtype='float32')
-    >>> data = np.reshape(data, (len(ptiles), grid.num_y * grid.num_x))
-    >>> below, near, above = poe_to_terciles(data, ptiles)
-    >>> plot_tercile_probs_to_file(below, near, above, grid, 'out.png')  # doctest: +SKIP
+        >>> from data_utils.gridded.plotting import plot_tercile_probs_to_file
+        >>> from data_utils.gridded.grid import Grid
+        >>> from mpp.poe import poe_to_terciles
+        >>> from pkg_resources import resource_filename
+        >>> import numpy as np
+        >>> ptiles = [
+        ...  1,  2,  5, 10, 15,
+        ... 20, 25, 33, 40, 50,
+        ... 60, 67, 75, 80, 85,
+        ... 90, 95, 98, 99]
+        >>> grid = Grid('2deg-conus')
+        >>> data = np.fromfile(resource_filename('data_utils',
+        ... 'lib/example-tmean-fcst.bin'), dtype='float32')
+        >>> data = np.reshape(data, (len(ptiles), grid.num_y * grid.num_x))
+        >>> below, near, above = poe_to_terciles(data, ptiles)
+        >>> plot_tercile_probs_to_file(below, near, above, grid, 'out.png')  # doctest: +SKIP
     """
+
     # --------------------------------------------------------------------------
     # Get colors
     #
@@ -650,10 +567,11 @@ def _get_colors(colors):
         raise ValueError('Supported vars for default color scales (colors=['
                          'var]_colors): tmean, precip')
 
-# ------------------------------------------------------------------------------
-# Set some functions' docstrings to _make_plot's docstring
-#
-plot_to_screen.__doc__ = _make_plot.__doc__
-plot_to_file.__doc__ = _make_plot.__doc__
-plot_tercile_probs_to_screen.__doc__ = _make_plot.__doc__
-plot_tercile_probs_to_file.__doc__ = _make_plot.__doc__
+
+_make_plot.__doc__ = _make_plot.__doc__.format(_docstring_kwargs)
+plot_to_screen.__doc__ = plot_to_screen.__doc__.format(_docstring_kwargs)
+plot_to_file.__doc__ = plot_to_file.__doc__.format(_docstring_kwargs)
+plot_tercile_probs_to_file.__doc__ = \
+    plot_tercile_probs_to_file.__doc__.format(_docstring_kwargs)
+plot_tercile_probs_to_screen.__doc__ = \
+    plot_tercile_probs_to_screen.__doc__.format(_docstring_kwargs)
