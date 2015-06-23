@@ -11,6 +11,9 @@ import scipy.ndimage
 import math
 
 
+# __all__ = ['_get_colors']
+
+
 def plot_to_screen(data, grid, levels=None, colors=None, title=None,
                    lat_range=(-90, 90), lon_range=(0, 360),
                    cbar_ends='triangular', tercile_type='normal',
@@ -18,8 +21,9 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
     """
     Plots the given data and displays on-screen.
 
-    Essentially makes calls to `_make_plot` and `_show_plot` to do
-    the work
+    Essentially makes calls to `_make_plot` and `_show_plot` to do the work
+
+    See [#_make_plot](#_make_plot for usage)
 
     Parameters
     ----------
@@ -43,7 +47,7 @@ def plot_to_screen(data, grid, levels=None, colors=None, title=None,
         - Shape of the ends of the colorbar ('square' or 'triangular'). If
         'square', levels should contain the endpoints. If 'triangular',
         the levels should not contain the endpoints.
-    - cbar_type (strin, optional)
+    - cbar_type (string, optional)
         - Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
         tercile colorbar with 3 color ranges)
     - tercile_type (str, optional)
@@ -99,11 +103,11 @@ def plot_to_file(data, grid, file, dpi=200, levels=None, colors=None,
                  title=None, lat_range=(-90, 90), lon_range=(0, 360),
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal'):
+
     """
     Plots the given data and saves to a file.
 
-    Essentially makes calls to :func:`_make_plot` and :func:`_save_plot` to do
-    the work
+    Essentially makes calls to `_make_plot` and `_save_plot` to do the work
 
     Parameters
     ----------
@@ -201,10 +205,11 @@ def _make_plot(*args, **kwargs):
     Parameters
     ----------
 
-    - data (2-d array)
-        - 2-dimensional (lat x lon) Numpy array of data to plot
-    - grid (Grid)
-        - `data_utils.gridded.grid.Grid`
+    - data (array_like)
+        - 1- or 2-dimensional (lat x lon) Numpy array of data to plot
+    - grid (Grid object)
+        - See [data_utils.gridded.grid.Grid](
+        ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
     - levels (list, optional)
         - List of levels to shade/contour.
     - colors (list of lists)
@@ -217,16 +222,17 @@ def _make_plot(*args, **kwargs):
         - Range of longitude values to plot
     - cbar_ends (str, optional)
         - Shape of the ends of the colorbar ('square' or 'triangular'). If
-          'square', levels should contain the endpoints. If 'triangular',
-          the levels should not contain the endpoints.
-    - cbar_type (str, optional)
+        'square', levels should contain the endpoints. If 'triangular',
+        the levels should not contain the endpoints.
+    - cbar_type (strin, optional)
         - Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
-          tercile colorbar with 3 color ranges)
+        tercile colorbar with 3 color ranges)
     - tercile_type (str, optional)
         - Type of tercile ('normal' or 'median')
     - smoothing_factor (float, optional)
         - Level of smoothing (gaussian filter, this represents the kernel
-        width - may need to experiment with value)
+        width in standard deviations - may need to experiment with value -
+        generally between 0 and 2 should suffice)
     """
     # Get *args
     data = args[0]
@@ -643,3 +649,11 @@ def _get_colors(colors):
     else:
         raise ValueError('Supported vars for default color scales (colors=['
                          'var]_colors): tmean, precip')
+
+# ------------------------------------------------------------------------------
+# Set some functions' docstrings to _make_plot's docstring
+#
+plot_to_screen.__doc__ = _make_plot.__doc__
+plot_to_file.__doc__ = _make_plot.__doc__
+plot_tercile_probs_to_screen.__doc__ = _make_plot.__doc__
+plot_tercile_probs_to_file.__doc__ = _make_plot.__doc__
