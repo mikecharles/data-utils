@@ -276,7 +276,7 @@ def _make_plot(*args, **kwargs):
 
 
 def plot_to_screen(data, grid, levels=None, colors=None,
-                   projection='lcc', region='US', title='',
+                   projection='equal-area', region='US', title='',
                    lat_range=None, lon_range=None,
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal'):
@@ -339,7 +339,7 @@ def plot_to_screen(data, grid, levels=None, colors=None,
 
 
 def plot_to_file(data, grid, file, dpi=200, levels=None,
-                 projection='lcc', region='US', colors=None,
+                 projection='equal-area', region='US', colors=None,
                  title='', lat_range=None, lon_range=None,
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal'):
@@ -411,7 +411,7 @@ def plot_to_file(data, grid, file, dpi=200, levels=None,
 def plot_tercile_probs_to_screen(below, near, above, grid,
                                  levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                          40, 50, 60, 70, 80, 90],
-                                 projection='lcc', region='US',
+                                 projection='equal-area', region='US',
                                  colors='tmean-terciles', title='',
                                  lat_range=None, lon_range=None,
                                  cbar_ends='triangular',
@@ -500,7 +500,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
 def plot_tercile_probs_to_file(below, near, above, grid, file,
                                levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                        40, 50, 60, 70, 80, 90],
-                               projection='lcc', region='US',
+                               projection='equal-area', region='US',
                                colors='tmean-terciles', title='',
                                lat_range=None, lon_range=None,
                                cbar_ends='triangular', tercile_type='normal',
