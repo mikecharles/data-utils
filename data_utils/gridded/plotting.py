@@ -9,7 +9,14 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import scipy.ndimage
 import math
+import logging
 
+
+# ------------------------------------------------------------------------------
+# Setup logging
+#
+logging.basicConfig(format='%(levelname)s - %(module)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------------------
 # Setup reusable docstring
@@ -25,6 +32,8 @@ _docstring_kwargs = """
                 - tmean-terciles
     - projection (str, optional)
         - Set the map projection ('lcc' or 'mercator')
+    - region (str, optional)
+        - Set the plotting region ('US', 'CONUS', 'global')
     - title (str, optional)
         - Title of the resulting plot
     - lat_range (tuple, optional)
@@ -72,6 +81,7 @@ def _make_plot(*args, **kwargs):
     # Get **kwargs
     levels = kwargs['levels']
     projection = kwargs['projection']
+    region = kwargs['region']
     colors = kwargs['colors']
     title = kwargs['title']
     lat_range = kwargs['lat_range']
@@ -81,10 +91,25 @@ def _make_plot(*args, **kwargs):
     tercile_type = kwargs['tercile_type']
     smoothing_factor = kwargs['smoothing_factor']
 
+    # --------------------------------------------------------------------------
     # Check args
+    #
+    # Levels must be set if colors is set
     if colors and not levels:
         raise ValueError('The "levels" argument must be set if the "colors" '
                          'argument is set')
+    # Make sure either region is set, or lat_range and lon_range are set
+    if lat_range and lon_range:
+        logger.warning('lat_range and lon_range will override the given region')
+    elif lat_range is None and lon_range is None:
+        # Make sure region is supported
+        supported_regions = ['US', 'CONUS', 'global']
+        if region not in supported_regions:
+            raise ValueError('Unsupported region, must be one of {}'.format(
+                supported_regions))
+    else:
+        raise ValueError('lat_range on lon_range must either both be defined, '
+                         'or both be not defined')
 
     # --------------------------------------------------------------------------
     # Check colors variable
@@ -110,6 +135,20 @@ def _make_plot(*args, **kwargs):
     # Create Basemap
     fig, ax = matplotlib.pyplot.subplots()
     if projection == 'mercator':
+        # Get lat_range and lon_range from region if they aren't already defined
+        if not (lat_range and lon_range):
+            if region == 'US':
+                lat_range = (25, 72)
+                lon_range = (190, 300)
+                latlon_line_interval = 10
+            elif region == 'CONUS':
+                lat_range = (24, 50)
+                lon_range = (230, 295)
+                latlon_line_interval = 5
+            elif region == 'global':
+                lat_range = (-90, 90)
+                lon_range = (0, 360)
+                latlon_line_interval = 30
         m = mpl_toolkits.basemap.Basemap(llcrnrlon=lon_range[0],
                                          llcrnrlat=lat_range[0],
                                          urcrnrlon=lon_range[1],
@@ -118,14 +157,19 @@ def _make_plot(*args, **kwargs):
                                          ax=ax,
                                          resolution='l')
         m.drawcoastlines(linewidth=1)
-        m.drawparallels(np.arange(lat_range[0], lat_range[1]+1, 10),
+        m.drawparallels(np.arange(lat_range[0], lat_range[1]+1, latlon_line_interval),
                         labels=[1, 1, 0, 0], fontsize=9)
-        m.drawmeridians(np.arange(lon_range[0], lon_range[1]+1, 10),
+        m.drawmeridians(np.arange(lon_range[0], lon_range[1]+1, latlon_line_interval),
                         labels=[0, 0, 0, 1], fontsize=9)
         m.drawmapboundary(fill_color='#DDDDDD')
         m.drawstates()
         m.drawcountries()
     elif projection == 'lcc':
+        # Warn if user provides lat_range and lon_range, which will have no
+        # effect for this projection
+        if lat_range or lon_range:
+            logger.warning('lat_range and lon_range have no effect for '
+                           'projection {}'.format(projection))
         m = mpl_toolkits.basemap.Basemap(width=8000000, height=6600000,
                                          lat_0=53., lon_0=-100.,
                                          projection='lcc', ax=ax,
@@ -138,7 +182,29 @@ def _make_plot(*args, **kwargs):
         m.drawmapboundary(fill_color='#DDDDDD')
         m.drawstates()
         m.drawcountries()
-    elif projection == 'laea':
+    elif projection == 'equal-area':
+        # Warn if user provides lat_range and lon_range, which will have no
+        # effect for this projection
+        if lat_range or lon_range:
+            logger.warning('lat_range and lon_range have no effect for '
+                           'projection {}'.format(projection))
+        # Set width, height, lat_0, and lon_0 based on region
+        if not (lat_range and lon_range):
+            if region == 'US':
+                width = (25, 72)
+                height = (190, 300)
+                lat_0 = 10
+                lon_0 = 10
+            elif region == 'CONUS':
+                width = (25, 72)
+                height = (190, 300)
+                lat_0 = 10
+                lon_0 = 10
+            elif region == 'global':
+                width = (25, 72)
+                height = (190, 300)
+                lat_0 = 10
+                lon_0 = 10
         m = mpl_toolkits.basemap.Basemap(width=8000000, height=6600000,
                                          lat_0=53., lon_0=-100.,
                                          projection='laea', ax=ax,
@@ -212,8 +278,8 @@ def _make_plot(*args, **kwargs):
 
 
 def plot_to_screen(data, grid, levels=None, colors=None,
-                   projection='lcc', title=None,
-                   lat_range=(-90, 90), lon_range=(0, 360),
+                   projection='lcc', region='US', title=None,
+                   lat_range=None, lon_range=None,
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal'):
     """
@@ -275,8 +341,8 @@ def plot_to_screen(data, grid, levels=None, colors=None,
 
 
 def plot_to_file(data, grid, file, dpi=200, levels=None,
-                 projection='lcc', colors=None,
-                 title=None, lat_range=(-90, 90), lon_range=(0, 360),
+                 projection='lcc', region='US', colors=None,
+                 title=None, lat_range=None, lon_range=None,
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal'):
     """
@@ -347,9 +413,10 @@ def plot_to_file(data, grid, file, dpi=200, levels=None,
 def plot_tercile_probs_to_screen(below, near, above, grid,
                                  levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                          40, 50, 60, 70, 80, 90],
-                                 projection='lcc', colors='tmean-terciles',
-                                 title=None, lat_range=(-90, 90),
-                                 lon_range=(0, 360), cbar_ends='triangular',
+                                 projection='lcc', region='US',
+                                 colors='tmean-terciles', title=None,
+                                 lat_range=None, lon_range=None,
+                                 cbar_ends='triangular',
                                  tercile_type='normal', smoothing_factor=0,
                                  cbar_type='tercile'):
     """
@@ -435,11 +502,11 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
 def plot_tercile_probs_to_file(below, near, above, grid, file,
                                levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                        40, 50, 60, 70, 80, 90],
-                               projection='lcc', colors='tmean-terciles',
-                               title=None, lat_range=(-90, 90),
-                               lon_range=(0, 360), cbar_ends='triangular',
-                               tercile_type='normal', smoothing_factor=0,
-                               cbar_type='tercile'):
+                               projection='lcc', region='US',
+                               colors='tmean-terciles', title=None,
+                               lat_range=None, lon_range=None,
+                               cbar_ends='triangular', tercile_type='normal',
+                               smoothing_factor=0, cbar_type='tercile'):
     """
     Plots below, near, and above normal (median) terciles to a file.
 
