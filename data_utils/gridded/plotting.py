@@ -47,139 +47,6 @@ _docstring_kwargs = """
     """
 
 
-def plot_to_screen(data, grid, levels=None, colors=None,
-                   projection='lcc', title=None,
-                   lat_range=(-90, 90), lon_range=(0, 360),
-                   cbar_ends='triangular', tercile_type='normal',
-                   smoothing_factor=0, cbar_type='normal'):
-    """
-    Plots the given data and displays on-screen.
-
-    Essentially makes calls to `_make_plot` and `_show_plot` to do the work
-
-    Parameters
-    ----------
-
-    - data (array_like)
-        - 1- or 2-dimensional (lat x lon) Numpy array of data to plot
-    - grid (Grid object)
-        - See [data_utils.gridded.grid.Grid](
-        ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
-    {}
-
-    Examples
-    --------
-
-        #!/usr/bin/env python
-        >>> from pkg_resources import resource_filename
-        >>> import numpy as np
-        >>> from data_utils.gridded.plotting import plot_to_screen
-        >>> from data_utils.gridded.grid import Grid
-        >>> grid = Grid('2deg-conus')
-        >>> A = np.fromfile(resource_filename('data_utils',
-        ... 'lib/example-tmean-obs.bin'), dtype='float32')
-        >>> A = np.reshape(A, (grid.num_y, grid.num_x))
-        >>> A[A == -999] = np.nan
-        >>> plot_to_screen(A, grid)  # doctest: +SKIP
-    """
-
-    # --------------------------------------------------------------------------
-    # Get dictionary of kwargs for child function
-    #
-    # Use locals() function to get all defined vars
-    kwargs = locals()
-    # Remove positional args
-    del kwargs['data']
-    del kwargs['grid']
-    # --------------------------------------------------------------------------
-    # Define *args to pass to child function
-    #
-    args = [data, grid]
-    # --------------------------------------------------------------------------
-    # Reshape array if necessary
-    #
-    if data.ndim == 1:
-        data = np.reshape(data, (grid.num_y, grid.num_x))
-    elif data.ndim != 2:
-        raise ValueError('data array must have 1 or 2 dimensions')
-    # --------------------------------------------------------------------------
-    # Call _make_plot()
-    #
-    _make_plot(*args, **kwargs)
-    _show_plot()
-    matplotlib.pyplot.close("all")
-
-
-def plot_to_file(data, grid, file, dpi=200, levels=None,
-                 projection='lcc', colors=None,
-                 title=None, lat_range=(-90, 90), lon_range=(0, 360),
-                 cbar_ends='triangular', tercile_type='normal',
-                 smoothing_factor=0, cbar_type='normal'):
-    """
-    Plots the given data and saves to a file.
-
-    Essentially makes calls to `_make_plot` and `_save_plot` to do the work
-
-    Parameters
-    ----------
-
-    - data (array_like)
-        - 1- or 2-dimensional (lat x lon) Numpy array of data to plot
-    - grid (Grid object)
-        - See [data_utils.gridded.grid.Grid](
-        ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
-    - file (str)
-        - File name to save plot to
-    {}
-
-    Examples
-    --------
-
-        #!/usr/bin/env python
-        >>> from pkg_resources import resource_filename
-        >>> import numpy as np
-        >>> from data_utils.gridded.plotting import plot_to_file
-        >>> from data_utils.gridded.grid import Grid
-        >>> grid = Grid('2deg-conus')
-        >>> A = np.fromfile(resource_filename('data_utils',
-        ... 'lib/example-tmean-obs.bin'), dtype='float32')
-        >>> A = np.reshape(A, (grid.num_y, grid.num_x))
-        >>> A[A == -999] = np.nan
-        >>> plot_to_file(A, grid, 'out.png')  # doctest: +SKIP
-    """
-
-    # --------------------------------------------------------------------------
-    # Get dictionary of kwargs for child function
-    #
-    # Use locals() function to get all defined vars
-    kwargs = locals()
-    # Remove positional args
-    del kwargs['data']
-    del kwargs['grid']
-    del kwargs['file']
-    # --------------------------------------------------------------------------
-    # Set backend to Agg which won't require X11
-    #
-    matplotlib.pyplot.switch_backend('Agg')
-    # --------------------------------------------------------------------------
-    # Reshape array if necessary
-    #
-    if data.ndim == 1:
-        data = np.reshape(data, (grid.num_y, grid.num_x))
-    elif data.ndim != 2:
-        raise ValueError('data array must have 1 or 2 dimensions')
-    # --------------------------------------------------------------------------
-    # Define *args to pass to child function
-    #
-    args = [data, grid]
-    # --------------------------------------------------------------------------
-    # Call _make_plot()
-    #
-    _make_plot(*args, **kwargs)
-    _save_plot(file, dpi)
-    matplotlib.pyplot.close("all")
-
-
 def _make_plot(*args, **kwargs):
     """
     Creates a plot object using `mpl_toolkits.basemap`
@@ -344,28 +211,137 @@ def _make_plot(*args, **kwargs):
         cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax)
 
 
-def _show_plot():
+def plot_to_screen(data, grid, levels=None, colors=None,
+                   projection='lcc', title=None,
+                   lat_range=(-90, 90), lon_range=(0, 360),
+                   cbar_ends='triangular', tercile_type='normal',
+                   smoothing_factor=0, cbar_type='normal'):
     """
-    Shows an existing plot that was created using `mpl_toolkits.basemap`
-    """
-    # Plot data
-    matplotlib.pyplot.show()
+    Plots the given data and displays on-screen.
 
-
-def _save_plot(file, dpi=200):
-    """Saves an existing plot that was created using `mpl_toolkits.basemap`
-    to a file.
+    Essentially makes calls to `_make_plot` and `_show_plot` to do the work
 
     Parameters
     ----------
 
+    - data (array_like)
+        - 1- or 2-dimensional (lat x lon) Numpy array of data to plot
+    - grid (Grid object)
+        - See [data_utils.gridded.grid.Grid](
+        ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
+    {}
+
+    Examples
+    --------
+
+        #!/usr/bin/env python
+        >>> from pkg_resources import resource_filename
+        >>> import numpy as np
+        >>> from data_utils.gridded.plotting import plot_to_screen
+        >>> from data_utils.gridded.grid import Grid
+        >>> grid = Grid('2deg-conus')
+        >>> A = np.fromfile(resource_filename('data_utils',
+        ... 'lib/example-tmean-obs.bin'), dtype='float32')
+        >>> A = np.reshape(A, (grid.num_y, grid.num_x))
+        >>> A[A == -999] = np.nan
+        >>> plot_to_screen(A, grid)  # doctest: +SKIP
+    """
+
+    # --------------------------------------------------------------------------
+    # Get dictionary of kwargs for child function
+    #
+    # Use locals() function to get all defined vars
+    kwargs = locals()
+    # Remove positional args
+    del kwargs['data']
+    del kwargs['grid']
+    # --------------------------------------------------------------------------
+    # Define *args to pass to child function
+    #
+    args = [data, grid]
+    # --------------------------------------------------------------------------
+    # Reshape array if necessary
+    #
+    if data.ndim == 1:
+        data = np.reshape(data, (grid.num_y, grid.num_x))
+    elif data.ndim != 2:
+        raise ValueError('data array must have 1 or 2 dimensions')
+    # --------------------------------------------------------------------------
+    # Call _make_plot()
+    #
+    _make_plot(*args, **kwargs)
+    _show_plot()
+    matplotlib.pyplot.close("all")
+
+
+def plot_to_file(data, grid, file, dpi=200, levels=None,
+                 projection='lcc', colors=None,
+                 title=None, lat_range=(-90, 90), lon_range=(0, 360),
+                 cbar_ends='triangular', tercile_type='normal',
+                 smoothing_factor=0, cbar_type='normal'):
+    """
+    Plots the given data and saves to a file.
+
+    Essentially makes calls to `_make_plot` and `_save_plot` to do the work
+
+    Parameters
+    ----------
+
+    - data (array_like)
+        - 1- or 2-dimensional (lat x lon) Numpy array of data to plot
+    - grid (Grid object)
+        - See [data_utils.gridded.grid.Grid](
+        ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
     - file (str)
         - File name to save plot to
-    - dpi (float, optional)
-        - dpi of the image (higher means higher resolution). By default `dpi =
-          200`.
+    {}
+
+    Examples
+    --------
+
+        #!/usr/bin/env python
+        >>> from pkg_resources import resource_filename
+        >>> import numpy as np
+        >>> from data_utils.gridded.plotting import plot_to_file
+        >>> from data_utils.gridded.grid import Grid
+        >>> grid = Grid('2deg-conus')
+        >>> A = np.fromfile(resource_filename('data_utils',
+        ... 'lib/example-tmean-obs.bin'), dtype='float32')
+        >>> A = np.reshape(A, (grid.num_y, grid.num_x))
+        >>> A[A == -999] = np.nan
+        >>> plot_to_file(A, grid, 'out.png')  # doctest: +SKIP
     """
-    matplotlib.pyplot.savefig(file, dpi=dpi, bbox_inches='tight')
+
+    # --------------------------------------------------------------------------
+    # Get dictionary of kwargs for child function
+    #
+    # Use locals() function to get all defined vars
+    kwargs = locals()
+    # Remove positional args
+    del kwargs['data']
+    del kwargs['grid']
+    del kwargs['file']
+    # --------------------------------------------------------------------------
+    # Set backend to Agg which won't require X11
+    #
+    matplotlib.pyplot.switch_backend('Agg')
+    # --------------------------------------------------------------------------
+    # Reshape array if necessary
+    #
+    if data.ndim == 1:
+        data = np.reshape(data, (grid.num_y, grid.num_x))
+    elif data.ndim != 2:
+        raise ValueError('data array must have 1 or 2 dimensions')
+    # --------------------------------------------------------------------------
+    # Define *args to pass to child function
+    #
+    args = [data, grid]
+    # --------------------------------------------------------------------------
+    # Call _make_plot()
+    #
+    _make_plot(*args, **kwargs)
+    _save_plot(file, dpi)
+    matplotlib.pyplot.close("all")
 
 
 def plot_tercile_probs_to_screen(below, near, above, grid,
@@ -545,6 +521,30 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
     # Plot
     #
     plot_to_file(*args, **kwargs)
+
+
+def _show_plot():
+    """
+    Shows an existing plot that was created using `mpl_toolkits.basemap`
+    """
+    # Plot data
+    matplotlib.pyplot.show()
+
+
+def _save_plot(file, dpi=200):
+    """Saves an existing plot that was created using `mpl_toolkits.basemap`
+    to a file.
+
+    Parameters
+    ----------
+
+    - file (str)
+        - File name to save plot to
+    - dpi (float, optional)
+        - dpi of the image (higher means higher resolution). By default `dpi =
+          200`.
+    """
+    matplotlib.pyplot.savefig(file, dpi=dpi, bbox_inches='tight')
 
 
 def _put_terciles_in_one_array(below, near, above):
