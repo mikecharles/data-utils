@@ -5,11 +5,13 @@ Contains methods for plotting gridded data.
 from __future__ import print_function
 import mpl_toolkits.basemap
 import matplotlib
+from matplotlib.patches import Polygon
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import scipy.ndimage
 import math
 import logging
+from pkg_resources import resource_filename
 
 
 # ------------------------------------------------------------------------------
@@ -110,6 +112,10 @@ def _make_plot(*args, **kwargs):
     else:
         raise ValueError('lat_range on lon_range must either both be defined, '
                          'or both be not defined')
+    # Make sure region and projection make sense together
+    if region == 'global' and projection != 'mercator':
+        raise ValueError('Only the \'mercator\' projection can be used when '
+                         'region is set to \'global\'')
 
     # --------------------------------------------------------------------------
     # Check colors variable
@@ -149,6 +155,12 @@ def _make_plot(*args, **kwargs):
                 lat_range = (-90, 90)
                 lon_range = (0, 360)
                 latlon_line_interval = 30
+            else:
+                lat_range = (-90, 90)
+                lon_range = (0, 360)
+                latlon_line_interval = 30
+        else:
+            latlon_line_interval = 30
         m = mpl_toolkits.basemap.Basemap(llcrnrlon=lon_range[0],
                                          llcrnrlat=lat_range[0],
                                          urcrnrlon=lon_range[1],
@@ -162,61 +174,47 @@ def _make_plot(*args, **kwargs):
         m.drawmeridians(np.arange(lon_range[0], lon_range[1]+1, latlon_line_interval),
                         labels=[0, 0, 0, 1], fontsize=9)
         m.drawmapboundary(fill_color='#DDDDDD')
-        m.drawstates()
         m.drawcountries()
-    elif projection == 'lcc':
+    elif projection in ['lcc', 'equal-area']:
+        # Set the name of the projection for Basemap
+        if projection == 'lcc':
+            basemap_projection = 'lcc'
+        elif projection == 'equal-area':
+            basemap_projection = 'laea'
         # Warn if user provides lat_range and lon_range, which will have no
-        # effect for this projection
-        if lat_range or lon_range:
-            logger.warning('lat_range and lon_range have no effect for '
-                           'projection {}'.format(projection))
-        m = mpl_toolkits.basemap.Basemap(width=8000000, height=6600000,
-                                         lat_0=53., lon_0=-100.,
-                                         projection='lcc', ax=ax,
-                                         resolution='l')
-        m.drawcoastlines(linewidth=1)
-        # m.drawparallels(np.arange(lat_range[0], lat_range[1] + 1, 10),
-        #                 labels=[1, 1, 0, 0], fontsize=9)
-        # m.drawmeridians(np.arange(lon_range[0], lon_range[1] + 1, 10),
-        #                 labels=[0, 0, 0, 1], fontsize=9)
-        m.drawmapboundary(fill_color='#DDDDDD')
-        m.drawstates()
-        m.drawcountries()
-    elif projection == 'equal-area':
-        # Warn if user provides lat_range and lon_range, which will have no
-        # effect for this projection
+        # effect for these projections
         if lat_range or lon_range:
             logger.warning('lat_range and lon_range have no effect for '
                            'projection {}'.format(projection))
         # Set width, height, lat_0, and lon_0 based on region
         if not (lat_range and lon_range):
             if region == 'US':
-                width = (25, 72)
-                height = (190, 300)
-                lat_0 = 10
-                lon_0 = 10
+                m = mpl_toolkits.basemap.Basemap(width=8000000, height=6600000,
+                                                 lat_0=53., lon_0=260.,
+                                                 projection=basemap_projection,
+                                                 ax=ax, resolution='l')
             elif region == 'CONUS':
-                width = (25, 72)
-                height = (190, 300)
-                lat_0 = 10
-                lon_0 = 10
-            elif region == 'global':
-                width = (25, 72)
-                height = (190, 300)
-                lat_0 = 10
-                lon_0 = 10
-        m = mpl_toolkits.basemap.Basemap(width=8000000, height=6600000,
-                                         lat_0=53., lon_0=-100.,
-                                         projection='laea', ax=ax,
-                                         resolution='l')
-        m.drawcoastlines(linewidth=1)
-        # m.drawparallels(np.arange(lat_range[0], lat_range[1] + 1, 10),
-        # labels=[1, 1, 0, 0], fontsize=9)
-        # m.drawmeridians(np.arange(lon_range[0], lon_range[1] + 1, 10),
-        #                 labels=[0, 0, 0, 1], fontsize=9)
-        # m.drawmapboundary(fill_color='#DDDDDD')
-        m.drawstates()
-        m.drawcountries()
+                m = mpl_toolkits.basemap.Basemap(width=5000000, height=3200000,
+                                                 lat_0=39., lon_0=262.,
+                                                 projection=basemap_projection,
+                                                 ax=ax, resolution='l')
+        else:
+            m = mpl_toolkits.basemap.Basemap(llcrnrlon=lon_range[0],
+                                             llcrnrlat=lat_range[0],
+                                             urcrnrlon=lon_range[1],
+                                             urcrnrlat=lat_range[1],
+                                             projection=basemap_projection,
+                                             ax=ax, resolution='l')
+        # Draw political boundaries
+        m.drawcountries(linewidth=0.5)
+        m.drawcoastlines(0.5)
+        if region in ['US', 'CONUS']:
+            m.readshapefile(resource_filename('data_utils', 'lib/states'),
+                            name='states', drawbounds=True)
+            ax = matplotlib.pyplot.gca()
+            for state in m.states:
+                x, y = zip(*state)
+                m.plot(x, y, marker=None, color='black', linewidth=0.75)
     else:
         raise ValueError('Supported projections: \'mercator\', \'lcc\'')
 
