@@ -212,7 +212,7 @@ def _make_plot(*args, **kwargs):
 
 
 def plot_to_screen(data, grid, levels=None, colors=None,
-                   projection='lcc', title=None,
+                   projection='lcc', title='',
                    lat_range=(-90, 90), lon_range=(0, 360),
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal'):
@@ -276,7 +276,7 @@ def plot_to_screen(data, grid, levels=None, colors=None,
 
 def plot_to_file(data, grid, file, dpi=200, levels=None,
                  projection='lcc', colors=None,
-                 title=None, lat_range=(-90, 90), lon_range=(0, 360),
+                 title='', lat_range=(-90, 90), lon_range=(0, 360),
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal'):
     """
@@ -348,7 +348,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
                                  levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                          40, 50, 60, 70, 80, 90],
                                  projection='lcc', colors='tmean-terciles',
-                                 title=None, lat_range=(-90, 90),
+                                 title='', lat_range=(-90, 90),
                                  lon_range=(0, 360), cbar_ends='triangular',
                                  tercile_type='normal', smoothing_factor=0,
                                  cbar_type='tercile'):
@@ -436,7 +436,7 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
                                levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                        40, 50, 60, 70, 80, 90],
                                projection='lcc', colors='tmean-terciles',
-                               title=None, lat_range=(-90, 90),
+                               title='', lat_range=(-90, 90),
                                lon_range=(0, 360), cbar_ends='triangular',
                                tercile_type='normal', smoothing_factor=0,
                                cbar_type='tercile'):
