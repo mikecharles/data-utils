@@ -5,11 +5,20 @@ Contains methods for plotting gridded data.
 from __future__ import print_function
 import mpl_toolkits.basemap
 import matplotlib
+from matplotlib.patches import Polygon
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import scipy.ndimage
 import math
+import logging
+from pkg_resources import resource_filename
 
+
+# ------------------------------------------------------------------------------
+# Setup logging
+#
+logging.basicConfig(format='%(levelname)s - %(module)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------------------
 # Setup reusable docstring
@@ -25,6 +34,8 @@ _docstring_kwargs = """
                 - tmean-terciles
     - projection (str, optional)
         - Set the map projection ('lcc' or 'mercator')
+    - region (str, optional)
+        - Set the plotting region ('US', 'CONUS', 'global')
     - title (str, optional)
         - Title of the resulting plot
     - lat_range (tuple, optional)
@@ -47,9 +58,226 @@ _docstring_kwargs = """
     """
 
 
+def _make_plot(*args, **kwargs):
+    """
+    Creates a plot object using `mpl_toolkits.basemap`
+
+    Nothing is actually plotted. Usually you'd want to call
+    `data_utils.gridded.plotting._show_plot` or
+    `data_utils.gridded.plotting._save_plot` after this.
+
+    Parameters
+    ----------
+
+    - data (array_like)
+        - 1- or 2-dimensional (lat x lon) Numpy array of data to plot
+    - grid (Grid object)
+        - See [data_utils.gridded.grid.Grid](
+        ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
+    {}
+    """
+
+    # Get *args
+    data = args[0]
+    grid = args[1]
+    # Get **kwargs
+    levels = kwargs['levels']
+    projection = kwargs['projection']
+    region = kwargs['region']
+    colors = kwargs['colors']
+    title = kwargs['title']
+    lat_range = kwargs['lat_range']
+    lon_range = kwargs['lon_range']
+    cbar_ends = kwargs['cbar_ends']
+    cbar_type = kwargs['cbar_type']
+    tercile_type = kwargs['tercile_type']
+    smoothing_factor = kwargs['smoothing_factor']
+
+    # --------------------------------------------------------------------------
+    # Check args
+    #
+    # Levels must be set if colors is set
+    if colors and not levels:
+        raise ValueError('The "levels" argument must be set if the "colors" '
+                         'argument is set')
+    # Make sure either region is set, or lat_range and lon_range are set
+    if lat_range and lon_range:
+        logger.warning('lat_range and lon_range will override the given region')
+    elif lat_range is None and lon_range is None:
+        # Make sure region is supported
+        supported_regions = ['US', 'CONUS', 'global']
+        if region not in supported_regions:
+            raise ValueError('Unsupported region, must be one of {}'.format(
+                supported_regions))
+    else:
+        raise ValueError('lat_range on lon_range must either both be defined, '
+                         'or both be not defined')
+    # Make sure region and projection make sense together
+    if region == 'global' and projection != 'mercator':
+        raise ValueError('Only the \'mercator\' projection can be used when '
+                         'region is set to \'global\'')
+
+    # --------------------------------------------------------------------------
+    # Check colors variable
+    #
+    # If colors is a string, obtain a colors list
+    if isinstance(colors, str):
+        colors = _get_colors(colors)
+    # Make sure there is 1 more color than levels
+    if colors:
+        if len(colors) != (len(levels) + 1):
+            raise ValueError('The number of colors must be 1 greater than the '
+                             'number of levels')
+
+    # Convert the ll_corner and res to arrays of lons and lats
+    start_lat, start_lon = grid.ll_corner
+    end_lat, end_lon = grid.ur_corner
+    lats = np.arange(start_lat, end_lat + grid.res, grid.res)
+    lons = np.arange(start_lon, end_lon + grid.res, grid.res)
+
+    # Create a 2-d mesh array of lons and lats for pyplot
+    lons, lats = np.meshgrid(lons, lats)
+
+    # Create Basemap
+    fig, ax = matplotlib.pyplot.subplots()
+    if projection == 'mercator':
+        # Get lat_range and lon_range from region if they aren't already defined
+        if not (lat_range and lon_range):
+            if region == 'US':
+                lat_range = (25, 72)
+                lon_range = (190, 300)
+                latlon_line_interval = 10
+            elif region == 'CONUS':
+                lat_range = (24, 50)
+                lon_range = (230, 295)
+                latlon_line_interval = 5
+            elif region == 'global':
+                lat_range = (-90, 90)
+                lon_range = (0, 360)
+                latlon_line_interval = 30
+            else:
+                lat_range = (-90, 90)
+                lon_range = (0, 360)
+                latlon_line_interval = 30
+        else:
+            latlon_line_interval = 30
+        m = mpl_toolkits.basemap.Basemap(llcrnrlon=lon_range[0],
+                                         llcrnrlat=lat_range[0],
+                                         urcrnrlon=lon_range[1],
+                                         urcrnrlat=lat_range[1],
+                                         projection='mill',
+                                         ax=ax,
+                                         resolution='l')
+        m.drawcoastlines(linewidth=1)
+        m.drawparallels(np.arange(lat_range[0], lat_range[1]+1, latlon_line_interval),
+                        labels=[1, 1, 0, 0], fontsize=9)
+        m.drawmeridians(np.arange(lon_range[0], lon_range[1]+1, latlon_line_interval),
+                        labels=[0, 0, 0, 1], fontsize=9)
+        m.drawmapboundary(fill_color='#DDDDDD')
+        m.drawcountries()
+    elif projection in ['lcc', 'equal-area']:
+        # Set the name of the projection for Basemap
+        if projection == 'lcc':
+            basemap_projection = 'lcc'
+        elif projection == 'equal-area':
+            basemap_projection = 'laea'
+        # Warn if user provides lat_range and lon_range, which will have no
+        # effect for these projections
+        if lat_range or lon_range:
+            logger.warning('lat_range and lon_range have no effect for '
+                           'projection {}'.format(projection))
+        # Set width, height, lat_0, and lon_0 based on region
+        if not (lat_range and lon_range):
+            if region == 'US':
+                m = mpl_toolkits.basemap.Basemap(width=8000000, height=6600000,
+                                                 lat_0=53., lon_0=260.,
+                                                 projection=basemap_projection,
+                                                 ax=ax, resolution='l')
+            elif region == 'CONUS':
+                m = mpl_toolkits.basemap.Basemap(width=5000000, height=3200000,
+                                                 lat_0=39., lon_0=262.,
+                                                 projection=basemap_projection,
+                                                 ax=ax, resolution='l')
+        else:
+            m = mpl_toolkits.basemap.Basemap(llcrnrlon=lon_range[0],
+                                             llcrnrlat=lat_range[0],
+                                             urcrnrlon=lon_range[1],
+                                             urcrnrlat=lat_range[1],
+                                             projection=basemap_projection,
+                                             ax=ax, resolution='l')
+        # Draw political boundaries
+        m.drawcountries(linewidth=0.5)
+        m.drawcoastlines(0.5)
+        if region in ['US', 'CONUS']:
+            m.readshapefile(resource_filename('data_utils', 'lib/states'),
+                            name='states', drawbounds=True)
+            ax = matplotlib.pyplot.gca()
+            for state in m.states:
+                x, y = zip(*state)
+                m.plot(x, y, marker=None, color='black', linewidth=0.75)
+    else:
+        raise ValueError('Supported projections: \'mercator\', \'lcc\'')
+
+    # Smooth data
+    data = scipy.ndimage.filters.gaussian_filter(data, smoothing_factor)
+
+    # Plot data
+    if cbar_ends == 'triangular':
+        extend='both'
+    elif cbar_ends == 'square':
+        extend='neither'
+    else:
+        raise ValueError('cbar_ends must be either \'triangular\' or '
+                         '\'square\'')
+    if levels:
+        if colors:
+            plot = m.contourf(lons, lats, data, levels, latlon=True,
+                              extend=extend, colors=colors)
+        else:
+            plot = m.contourf(lons, lats, data, levels, latlon=True,
+                              extend=extend)
+    else:
+        plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
+        levels = plot._levels
+
+    # Add labels
+    matplotlib.pyplot.title(title, fontsize=10)
+
+    # --------------------------------------------------------------------------
+    # Add a colorbar
+    #
+    if cbar_type == 'tercile':
+        # Generate probability tick labels
+        labels = ['{:.0f}%'.format(math.fabs(level)) for level in levels]
+        # Add the colorbar (attached to figure above)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("bottom", size="4%", pad=0.3)
+        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
+                                        ticks=levels, cax=cax)
+        cb.ax.set_xticklabels(labels)
+        cb.ax.tick_params(labelsize=8)
+        # Add colorbar labels
+        fontsize=8
+        tercile_type = tercile_type.capitalize()
+        cb.ax.text(0.24, 1.2, 'Probability of Below {}'.format(tercile_type),
+                   horizontalalignment='center', transform=cb.ax.transAxes,
+                   fontsize=fontsize, fontstyle='normal')
+        cb.ax.text(0.5, 1.2, '{}'.format(tercile_type),
+                   horizontalalignment='center', transform=cb.ax.transAxes,
+                   fontsize=fontsize, fontstyle='normal')
+        cb.ax.text(0.76, 1.2, 'Probability of Above {}'.format(tercile_type),
+                   horizontalalignment='center', transform=cb.ax.transAxes,
+                   fontsize=fontsize, fontstyle='normal')
+    else:
+        # Add the colorbar (attached to figure above)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("bottom", size="4%", pad=0.3)
+        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax)
+
+
 def plot_to_screen(data, grid, levels=None, colors=None,
-                   projection='lcc', title=None,
-                   lat_range=(-90, 90), lon_range=(0, 360),
+                   projection='equal-area', region='US', title='',
+                   lat_range=None, lon_range=None,
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal'):
     """
@@ -111,8 +339,8 @@ def plot_to_screen(data, grid, levels=None, colors=None,
 
 
 def plot_to_file(data, grid, file, dpi=200, levels=None,
-                 projection='lcc', colors=None,
-                 title=None, lat_range=(-90, 90), lon_range=(0, 360),
+                 projection='equal-area', region='US', colors=None,
+                 title='', lat_range=None, lon_range=None,
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal'):
     """
@@ -180,200 +408,13 @@ def plot_to_file(data, grid, file, dpi=200, levels=None,
     matplotlib.pyplot.close("all")
 
 
-def _make_plot(*args, **kwargs):
-    """
-    Creates a plot object using `mpl_toolkits.basemap`
-
-    Nothing is actually plotted. Usually you'd want to call
-    `data_utils.gridded.plotting._show_plot` or
-    `data_utils.gridded.plotting._save_plot` after this.
-
-    Parameters
-    ----------
-
-    - data (array_like)
-        - 1- or 2-dimensional (lat x lon) Numpy array of data to plot
-    - grid (Grid object)
-        - See [data_utils.gridded.grid.Grid](
-        ../gridded/grid.m.html#data_utils.gridded.grid.Grid)
-    {}
-    """
-
-    # Get *args
-    data = args[0]
-    grid = args[1]
-    # Get **kwargs
-    levels = kwargs['levels']
-    projection = kwargs['projection']
-    colors = kwargs['colors']
-    title = kwargs['title']
-    lat_range = kwargs['lat_range']
-    lon_range = kwargs['lon_range']
-    cbar_ends = kwargs['cbar_ends']
-    cbar_type = kwargs['cbar_type']
-    tercile_type = kwargs['tercile_type']
-    smoothing_factor = kwargs['smoothing_factor']
-
-    # Check args
-    if colors and not levels:
-        raise ValueError('The "levels" argument must be set if the "colors" '
-                         'argument is set')
-
-    # --------------------------------------------------------------------------
-    # Check colors variable
-    #
-    # If colors is a string, obtain a colors list
-    if isinstance(colors, str):
-        colors = _get_colors(colors)
-    # Make sure there is 1 more color than levels
-    if colors:
-        if len(colors) != (len(levels) + 1):
-            raise ValueError('The number of colors must be 1 greater than the '
-                             'number of levels')
-
-    # Convert the ll_corner and res to arrays of lons and lats
-    start_lat, start_lon = grid.ll_corner
-    end_lat, end_lon = grid.ur_corner
-    lats = np.arange(start_lat, end_lat + grid.res, grid.res)
-    lons = np.arange(start_lon, end_lon + grid.res, grid.res)
-
-    # Create a 2-d mesh array of lons and lats for pyplot
-    lons, lats = np.meshgrid(lons, lats)
-
-    # Create Basemap
-    fig, ax = matplotlib.pyplot.subplots()
-    if projection == 'mercator':
-        m = mpl_toolkits.basemap.Basemap(llcrnrlon=lon_range[0],
-                                         llcrnrlat=lat_range[0],
-                                         urcrnrlon=lon_range[1],
-                                         urcrnrlat=lat_range[1],
-                                         projection='mill',
-                                         ax=ax,
-                                         resolution='l')
-        m.drawcoastlines(linewidth=1)
-        m.drawparallels(np.arange(lat_range[0], lat_range[1]+1, 10),
-                        labels=[1, 1, 0, 0], fontsize=9)
-        m.drawmeridians(np.arange(lon_range[0], lon_range[1]+1, 10),
-                        labels=[0, 0, 0, 1], fontsize=9)
-        m.drawmapboundary(fill_color='#DDDDDD')
-        m.drawstates()
-        m.drawcountries()
-    elif projection == 'lcc':
-        m = mpl_toolkits.basemap.Basemap(width=8000000, height=6600000,
-                                         lat_0=53., lon_0=-100.,
-                                         projection='lcc', ax=ax,
-                                         resolution='l')
-        m.drawcoastlines(linewidth=1)
-        # m.drawparallels(np.arange(lat_range[0], lat_range[1] + 1, 10),
-        #                 labels=[1, 1, 0, 0], fontsize=9)
-        # m.drawmeridians(np.arange(lon_range[0], lon_range[1] + 1, 10),
-        #                 labels=[0, 0, 0, 1], fontsize=9)
-        m.drawmapboundary(fill_color='#DDDDDD')
-        m.drawstates()
-        m.drawcountries()
-    elif projection == 'laea':
-        m = mpl_toolkits.basemap.Basemap(width=8000000, height=6600000,
-                                         lat_0=53., lon_0=-100.,
-                                         projection='laea', ax=ax,
-                                         resolution='l')
-        m.drawcoastlines(linewidth=1)
-        # m.drawparallels(np.arange(lat_range[0], lat_range[1] + 1, 10),
-        # labels=[1, 1, 0, 0], fontsize=9)
-        # m.drawmeridians(np.arange(lon_range[0], lon_range[1] + 1, 10),
-        #                 labels=[0, 0, 0, 1], fontsize=9)
-        # m.drawmapboundary(fill_color='#DDDDDD')
-        m.drawstates()
-        m.drawcountries()
-    else:
-        raise ValueError('Supported projections: \'mercator\', \'lcc\'')
-
-    # Smooth data
-    data = scipy.ndimage.filters.gaussian_filter(data, smoothing_factor)
-
-    # Plot data
-    if cbar_ends == 'triangular':
-        extend='both'
-    elif cbar_ends == 'square':
-        extend='neither'
-    else:
-        raise ValueError('cbar_ends must be either \'triangular\' or '
-                         '\'square\'')
-    if levels:
-        if colors:
-            plot = m.contourf(lons, lats, data, levels, latlon=True,
-                              extend=extend, colors=colors)
-        else:
-            plot = m.contourf(lons, lats, data, levels, latlon=True,
-                              extend=extend)
-    else:
-        plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
-        levels = plot._levels
-
-    # Add labels
-    matplotlib.pyplot.title(title, fontsize=10)
-
-    # --------------------------------------------------------------------------
-    # Add a colorbar
-    #
-    if cbar_type == 'tercile':
-        # Generate probability tick labels
-        labels = ['{:.0f}%'.format(math.fabs(level)) for level in levels]
-        # Add the colorbar (attached to figure above)
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("bottom", size="4%", pad=0.3)
-        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
-                                        ticks=levels, cax=cax)
-        cb.ax.set_xticklabels(labels)
-        cb.ax.tick_params(labelsize=8)
-        # Add colorbar labels
-        fontsize=8
-        tercile_type = tercile_type.capitalize()
-        cb.ax.text(0.24, 1.2, 'Probability of Below {}'.format(tercile_type),
-                   horizontalalignment='center', transform=cb.ax.transAxes,
-                   fontsize=fontsize, fontstyle='normal')
-        cb.ax.text(0.5, 1.2, '{}'.format(tercile_type),
-                   horizontalalignment='center', transform=cb.ax.transAxes,
-                   fontsize=fontsize, fontstyle='normal')
-        cb.ax.text(0.76, 1.2, 'Probability of Above {}'.format(tercile_type),
-                   horizontalalignment='center', transform=cb.ax.transAxes,
-                   fontsize=fontsize, fontstyle='normal')
-    else:
-        # Add the colorbar (attached to figure above)
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("bottom", size="4%", pad=0.3)
-        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax)
-
-
-def _show_plot():
-    """
-    Shows an existing plot that was created using `mpl_toolkits.basemap`
-    """
-    # Plot data
-    matplotlib.pyplot.show()
-
-
-def _save_plot(file, dpi=200):
-    """Saves an existing plot that was created using `mpl_toolkits.basemap`
-    to a file.
-
-    Parameters
-    ----------
-
-    - file (str)
-        - File name to save plot to
-    - dpi (float, optional)
-        - dpi of the image (higher means higher resolution). By default `dpi =
-          200`.
-    """
-    matplotlib.pyplot.savefig(file, dpi=dpi, bbox_inches='tight')
-
-
 def plot_tercile_probs_to_screen(below, near, above, grid,
                                  levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                          40, 50, 60, 70, 80, 90],
-                                 projection='lcc', colors='tmean-terciles',
-                                 title=None, lat_range=(-90, 90),
-                                 lon_range=(0, 360), cbar_ends='triangular',
+                                 projection='equal-area', region='US',
+                                 colors='tmean-terciles', title='',
+                                 lat_range=None, lon_range=None,
+                                 cbar_ends='triangular',
                                  tercile_type='normal', smoothing_factor=0,
                                  cbar_type='tercile'):
     """
@@ -459,11 +500,11 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
 def plot_tercile_probs_to_file(below, near, above, grid, file,
                                levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                        40, 50, 60, 70, 80, 90],
-                               projection='lcc', colors='tmean-terciles',
-                               title=None, lat_range=(-90, 90),
-                               lon_range=(0, 360), cbar_ends='triangular',
-                               tercile_type='normal', smoothing_factor=0,
-                               cbar_type='tercile'):
+                               projection='equal-area', region='US',
+                               colors='tmean-terciles', title='',
+                               lat_range=None, lon_range=None,
+                               cbar_ends='triangular', tercile_type='normal',
+                               smoothing_factor=0, cbar_type='tercile'):
     """
     Plots below, near, and above normal (median) terciles to a file.
 
@@ -545,6 +586,30 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
     # Plot
     #
     plot_to_file(*args, **kwargs)
+
+
+def _show_plot():
+    """
+    Shows an existing plot that was created using `mpl_toolkits.basemap`
+    """
+    # Plot data
+    matplotlib.pyplot.show()
+
+
+def _save_plot(file, dpi=200):
+    """Saves an existing plot that was created using `mpl_toolkits.basemap`
+    to a file.
+
+    Parameters
+    ----------
+
+    - file (str)
+        - File name to save plot to
+    - dpi (float, optional)
+        - dpi of the image (higher means higher resolution). By default `dpi =
+          200`.
+    """
+    matplotlib.pyplot.savefig(file, dpi=dpi, bbox_inches='tight')
 
 
 def _put_terciles_in_one_array(below, near, above):
