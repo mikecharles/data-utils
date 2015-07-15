@@ -107,7 +107,8 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
     if set(fcst_ptiles).issuperset(set(desired_output_thresholds)):
 
         # Find the indexes of the desired_output_thresholds within fcst_ptiles
-        ptile_indexes = [fcst_ptiles.index(i) for i in desired_output_thresholds]
+        fcst_ptiles.sort()
+        ptile_indexes = numpy.searchsorted(fcst_ptiles, desired_output_thresholds)
 
         # Open the output file
         file = open(txt_file, 'w')
