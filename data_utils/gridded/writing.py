@@ -1,13 +1,12 @@
-#!/usr/bin/env python
+"""
+Contains methods for writing gridded data.
+"""
+
 
 import numpy as np
 from data_utils.gridded.grid import Grid
 from data_utils.gridded.interpolation import interpolate
 
-
-"""
-Contains methods for writing gridded data.
-"""
 
 def terciles_to_txt(below, near, above, grid, output_file):
     # Reshape data from one to two dimensions

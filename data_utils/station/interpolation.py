@@ -1,10 +1,10 @@
+"""
+Contains methods for interpolating station data.
+"""
+
+
 import numpy as np
 from stats_utils.stats import find_nearest_index
-
-
-"""
-Contains methods for interpolating gridded data.
-"""
 
 
 def grid_to_stn(gridded_data, grid, stn_ids, stn_lats, stn_lons):

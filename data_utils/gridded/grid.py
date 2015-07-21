@@ -1,3 +1,10 @@
+"""
+Defines a Grid object. Grid objects store certain properties of a gridded
+dataset (lat/lon grid corners, resolution, etc.), and can simplify defining a
+grid when calling utilities such as interpolation routines, plotting, etc.
+"""
+
+
 import numpy as np
 
 

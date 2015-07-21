@@ -1,9 +1,10 @@
-import numpy
-import mpl_toolkits.basemap
-
 """
 Contains methods for interpolating gridded data.
 """
+
+
+import numpy
+import mpl_toolkits.basemap
 
 
 def interpolate(orig_data, orig_grid, new_grid):

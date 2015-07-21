@@ -1,14 +1,14 @@
+"""
+Contains methods for converting between different file formats
+"""
+
+
 import numpy
 from bisect import bisect
 
 import data_utils.gridded.grid
 
 import stats_utils.stats
-
-
-"""
-Contains methods for converting gridded data from one format to another
-"""
 
 
 def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
