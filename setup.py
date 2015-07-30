@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='data-utils',
-    version='0.1.1',
+    version='v0.9.1',
     packages=find_packages(),
     include_package_data=True,
     url='https://cpc-devtools.ncep.noaa.gov/trac/projects/model-post-processing',
