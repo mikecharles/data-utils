@@ -17,7 +17,6 @@ from pkg_resources import resource_filename
 # ------------------------------------------------------------------------------
 # Setup logging
 #
-logging.basicConfig(format='%(levelname)s - %(module)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------------------
