@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='data-utils',
-    version='0.1.1',
+    version='v0.9.2',
     packages=find_packages(),
     include_package_data=True,
     url='https://cpc-devtools.ncep.noaa.gov/trac/projects/model-post-processing',
@@ -23,11 +23,11 @@ setup(
         "Topic :: Scientific/Engineering :: Atmospheric Science",
     ],
     install_requires=[
-        'numpy',
-        'scipy',
-        'matplotlib',
-        'basemap',
-        'pyyaml',
+        'numpy>=1.9.2',
+        'scipy>=0.15.1',
+        'matplotlib>=1.4.3',
+        'basemap>=1.0.7',
+        'pyyaml>=3.11',
         'stats-utils'
     ]
 )

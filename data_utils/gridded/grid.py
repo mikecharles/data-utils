@@ -15,11 +15,12 @@ class Grid:
     A Grid object can either be created by providing the name of the grid, in
     which case the name must match one of the following:
 
-    1. 1deg-global
-    2. 2deg-global
-    3. 2.5deg-global
-    4. 2deg-conus
-    5. 1/6th-deg-global
+    1. 1/6th-deg-global
+    2. 0.5deg-global
+    3. 1deg-global
+    4. 2deg-global
+    5. 2.5deg-global
+    6. 2deg-conus
 
     or by providing the other attributes listed below
 
@@ -90,6 +91,12 @@ class Grid:
             self.ll_corner = (-89.9167, 0.0833)
             self.ur_corner = (89.9167, 359.9167)
             self.res = 1/6
+            self.type = 'latlon'
+        elif name == '0.5deg-global':
+            self.name = name
+            self.ll_corner = (-89.75, 0.25)
+            self.ur_corner = (89.75, 359.75)
+            self.res = 0.5
             self.type = 'latlon'
         # Otherwise create a custom grid definition
         else:
