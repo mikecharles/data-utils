@@ -6,11 +6,11 @@ This package contains utilities for working with station and gridded data, such 
 Requirements
 ============
 
-- Python >= 3.0
-- numpy
-- scipy
-- matplotlib
-- pyyaml
+- Python>=3.0
+- numpy>=1.9.2
+- scipy>=0.15.1
+- matplotlib>=1.4.3
+- pyyaml>=3.11
 
 Installing
 ==========
