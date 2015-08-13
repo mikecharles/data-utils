@@ -102,6 +102,8 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
         for p in range(len(fcst_ptiles)):
             data_new[p] = data_utils.gridded.interpolation.interpolate(data[p, :, :], grid, output_grid)
         data = data_new
+    else:
+        output_grid = grid
 
     # Make sure desired percentiles are part of the forecast percentiles
     if set(fcst_ptiles).issuperset(set(desired_output_thresholds)):
@@ -271,6 +273,8 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
                 obs_ptile_data,
                 grid,
                 output_grid)
+        else:
+            output_grid = grid
 
         # Open the output file
         file = open(txt_file, 'w')
