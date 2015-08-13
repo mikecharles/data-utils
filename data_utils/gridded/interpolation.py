@@ -30,19 +30,18 @@ def interpolate(orig_data, orig_grid, new_grid):
     Examples
     --------
 
-    Interpolate Wei Shi's gridded temperature obs from 1/6th deg to 1 deg
+    Interpolate gridded temperature obs from 2 degrees (CONUS) to 1 degree
+    global
 
-        #!python
-        >>> import numpy
-        >>> from data_utils.gridded.interpolation import interpolate
+        #!/usr/bin/env python
+        >>> from pkg_resources import resource_filename
+        >>> import numpy as np
+        >>> from data_utils.gridded.plotting import plot_to_file
         >>> from data_utils.gridded.grid import Grid
-        >>> file = 'CPC_GLOBAL_T_V0.x_10min.lnx.20131220'
-        >>> old_grid = Grid('1/6th_deg_global')
-        >>> new_grid = Grid('2deg_global')
+        >>> old_grid = Grid('2deg-conus')
+        >>> new_grid = Grid('1deg-global')
+        >>> file = resource_filename('data_utils', 'lib/example-tmean-obs.bin')
         >>> data = numpy.fromfile(file, 'float32')
-        >>> data[data <= -999] = numpy.nan
-        >>> data = numpy.reshape(data, (6, old_grid.num_y, old_grid.num_x))
-        >>> data = data[4]
         >>> new_data = interpolate(data, old_grid, new_grid)
     """
 

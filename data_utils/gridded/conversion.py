@@ -70,18 +70,20 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
     Examples
     --------
 
-        #!python
-        >>> import data_utils.gridded.conversion
-        >>> bin_file = 'gefs_temp_2m_20140611_00z_d08_d14_poe_ER.bin'
-        >>> grid = data_utils.gridded.grid.Grid('1deg_global')
+        #!/usr/bin/env python
+        >>> from data_utils.gridded.conversion import fcst_bin_to_txt
+        >>> from data_utils.gridded.grid import Grid
+        >>> from pkg_resources import resource_filename
+        >>> grid = Grid('2deg-conus')
         >>> fcst_ptiles = [ 1,  2,  5, 10, 15,
         ...                20, 25, 33, 40, 50,
         ...                60, 67, 75, 80, 85,
         ...                90, 95, 98, 99]
         >>> desired_output_thresholds = [33, 67]
-        >>> data_utils.gridded.conversion.fcst_bin_to_txt(
-        ...    bin_file, grid, fcst_ptiles, desired_output_thresholds,
-        ...    'out.txt', terciles=True)
+        >>> bin_file = resource_filename('data_utils',
+        ... 'lib/example-tmean-fcst.bin')
+        >>> fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
+        ... desired_output_thresholds, 'out.txt', terciles=True)
     """
 
     # If terciles=True, make sure there are only 2 percentiles
@@ -202,7 +204,7 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
         - Binary file containing the observation, with the dimensions (Y x X)
     - grid (Grid)
         - `data_utils.gridded.grid.Grid` that the binary file maps to
-    - desired_output_thresholds (list)
+    - desired_output_thresholds (array_like)
         - 1-dimensional list of thresholds (either ptiles or raw values) to
         include in the output file
     - txt_file (string)
@@ -211,7 +213,7 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
         - Type of thresholds to write out ('ptile' or 'raw')
     - climo_file (string, optional)
         - Binary file containing the observation, with the dimensions (Y x X)
-    - climo_ptiles (list, optional)
+    - climo_ptiles (array_like, optional)
         - List of percentiles found in the climatology file
     - output_grid (Grid, optional)
         - `data_utils.gridded.grid.Grid` to interpolate to before
@@ -226,25 +228,33 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
     Examples
     --------
 
-        #!python
-        >>> import numpy
+
+        #!/usr/bin/env python
         >>> from data_utils.gridded.conversion import obs_bin_to_txt
-        >>> grid = data_utils.gridded.grid.Grid('1deg_global')
-        >>> climo_file = 'tmean_clim_poe_07d_0625.bin'
-        >>> climo_ptiles = numpy.array([ 1,  2,  5, 10, 15,
-        ...                             20, 25, 33, 40, 50,
-        ...                             60, 67, 75, 80, 85,
-        ...                             90, 95, 98, 99])
-        >>> bin_file = 'tmean_07d_20140625.bin'
+        >>> from data_utils.gridded.grid import Grid
+        >>> from pkg_resources import resource_filename
+        >>> grid = Grid('2deg-conus')
+        >>> climo_ptiles = [ 1,  2,  5, 10, 15,
+        ...                 20, 25, 33, 40, 50,
+        ...                 60, 67, 75, 80, 85,
+        ...                 90, 95, 98, 99]
         >>> desired_output_thresholds = [33, 67]
-        >>> obs_bin_to_txt(bin_file, grid,desired_output_thresholds,
-                           'obs.txt', climo_file=climo_file,
-                           climo_ptiles=climo_ptiles)
+        >>> bin_file = resource_filename('data_utils',
+        ... 'lib/example-tmean-obs.bin')
+        >>> climo_file = resource_filename('data_utils',
+        ... 'lib/example-tmean-clim.bin')
+        >>> obs_bin_to_txt(bin_file, grid, desired_output_thresholds, 'out.txt',
+        ... climo_file=climo_file, climo_ptiles=climo_ptiles)
     """
 
     # Currently only supports 3 categories
     if len(desired_output_thresholds) != 2:
         raise ValueError('Currently only supports 3 categories')
+
+    # Convert ptiles and thresholds into NumPy arrays
+    desired_output_thresholds = numpy.array(desired_output_thresholds)
+    if climo_ptiles:
+        climo_ptiles = numpy.array(climo_ptiles)
 
     # Open obs binary file
     obs_data = numpy.fromfile(bin_file, dtype='float32')

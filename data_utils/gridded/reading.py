@@ -54,19 +54,20 @@ def read_grib(file, grib_type, variable, level, yrev=False):
     Examples
     --------
 
-        #!python
-        >>> import data_utils.gridded.reading
-        >>>
-        >>> file = 'gefs_20140101_00z_f036_m05.grb2'
+        #!/usr/bin/env python
+        >>> from data_utils.gridded.reading import read_grib
+        >>> from pkg_resources import resource_filename
+        >>> file = resource_filename('data_utils',
+        ... 'lib/example-tmean-fcst.grb2')
         >>> grib_type = 'grib2'
         >>> variable = 'TMP'
         >>> level = '2 m above ground'
-        >>> data = data_utils.gridded.reading.read_grib(file, grib_type, variable, level)
+        >>> data = read_grib(file, grib_type, variable, level)
         >>> data.shape
         (65160,)
         >>> data
-        array([ 246.3999939 ,  246.3999939 ,  246.3999939 , ...,  242.74000549,
-                242.74000549,  242.74000549], dtype=float32)
+        array([ 248.77000427,  248.77000427,  248.77000427, ...,  241.86000061,
+                241.86000061,  241.86000061], dtype=float32)
     """
     # Make sure grib file exists first
     if not os.path.isfile(file):
