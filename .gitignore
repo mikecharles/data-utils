@@ -4,7 +4,11 @@
 /.idea
 /dist
 /build
+/docs
+/.coverage
 # Files/dirs anywhere in this repo
 __pycache__
+__init__.pyc
+*.pyc
 # File/dir types
 *.egg-info
