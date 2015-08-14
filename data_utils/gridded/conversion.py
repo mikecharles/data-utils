@@ -83,7 +83,8 @@ def fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
         >>> bin_file = resource_filename('data_utils',
         ... 'lib/example-tmean-fcst.bin')
         >>> fcst_bin_to_txt(bin_file, grid, fcst_ptiles,
-        ... desired_output_thresholds, 'out.txt', terciles=True)
+        ... desired_output_thresholds, 'out.txt',
+        ... terciles=True)  # doctest: +SKIP
     """
 
     # If terciles=True, make sure there are only 2 percentiles
@@ -244,7 +245,7 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
         >>> climo_file = resource_filename('data_utils',
         ... 'lib/example-tmean-clim.bin')
         >>> obs_bin_to_txt(bin_file, grid, desired_output_thresholds, 'out.txt',
-        ... climo_file=climo_file, climo_ptiles=climo_ptiles)
+        ... climo_file=climo_file, climo_ptiles=climo_ptiles)  # doctest: +SKIP
     """
 
     # Currently only supports 3 categories
