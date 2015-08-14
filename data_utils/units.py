@@ -40,19 +40,16 @@ class UnitConverter:
         Examples
         --------
 
-        Here's an example:
+        Convert degrees Kelvin to Celsius
 
             #!/usr/bin/env python
-            >>> from pkg_resources import resource_filename
             >>> import numpy as np
-            >>> from data_utils.gridded.plotting import plot_to_file
-            >>> from data_utils.gridded.grid import Grid
-            >>> from data_utils.gridded.interpolation import interpolate
-            >>> old_grid = Grid('2deg-conus')
-            >>> new_grid = Grid('1deg-global')
-            >>> file = resource_filename('data_utils', 'lib/example-tmean-obs.bin')
-            >>> data = np.fromfile(file, 'float32')
-            >>> new_data = interpolate(data, old_grid, new_grid)
+            >>> from data_utils.units import UnitConverter
+            >>> uc = UnitConverter()
+            >>> A = np.array([[300, 295, 305], [297, 309, 288]])
+            >>> uc.convert(A, 'degK-to-degC')
+            array([[ 26.85,  21.85,  31.85],
+                   [ 23.85,  35.85,  14.85]])
         """
         # Throw a ValueError if the given units aren't supported
         if units not in self.supported_units:
