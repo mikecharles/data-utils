@@ -319,16 +319,16 @@ def plot_to_screen(data, grid, levels=None, colors=None,
     del kwargs['data']
     del kwargs['grid']
     # --------------------------------------------------------------------------
-    # Define *args to pass to child function
-    #
-    args = [data, grid]
-    # --------------------------------------------------------------------------
     # Reshape array if necessary
     #
     if data.ndim == 1:
         data = np.reshape(data, (grid.num_y, grid.num_x))
     elif data.ndim != 2:
         raise ValueError('data array must have 1 or 2 dimensions')
+    # --------------------------------------------------------------------------
+    # Define *args to pass to child function
+    #
+    args = [data, grid]
     # --------------------------------------------------------------------------
     # Call _make_plot()
     #
