@@ -70,28 +70,15 @@ def interpolate(orig_data, orig_grid, new_grid):
     # Generate mesh of longitude and latitude values for the new grid
     new_start_lat, new_start_lon = new_grid.ll_corner
     new_end_lat, new_end_lon = new_grid.ur_corner
-    new_lons = numpy.arange(new_start_lon,
-                            new_end_lon + new_grid.res,
-                            new_grid.res,
-                            numpy.float32)
-    new_lats = numpy.arange(new_start_lat,
-                            new_end_lat + new_grid.res,
-                            new_grid.res,
-                            numpy.float32)
-    new_lons, new_lats = numpy.meshgrid(new_lons, new_lats)
+    new_lons, new_lats = numpy.meshgrid(new_grid.lons, new_grid.lats)
 
     # Use the interp() function from mpl_toolkits.basemap to interpolate the
-    # grid to the new lat/lon values. Note that this requires 2 calls because
-    # with bilinear, if 1 neighbor point is missing, the interpolated gridpoint
-    # becomes missing, so the first call does a nearest neighbor interpolation,
-    # the 2nd call does a bilinar interpolation, and we take all points from
-    # the 2nd call that are non-nan, and points from the 1st call for all
-    # others.
-    new_data_temp1 = mpl_toolkits.basemap.interp(orig_data, orig_lons, orig_lats,
-                                                 new_lons, new_lats, order=0)
-    new_data_temp2 = mpl_toolkits.basemap.interp(orig_data, orig_lons, orig_lats,
-                                                 new_lons, new_lats, order=1)
-    new_data = numpy.where(new_data_temp2 == numpy.nan, new_data_temp1, new_data_temp2)
+    # grid to the new lat/lon values.
+    new_data = mpl_toolkits.basemap.interp(orig_data, orig_lons, orig_lats,
+                                           new_lons, new_lats, order=1,
+                                           masked=True)
+    # Extract the data portion of the MaskedArray
+    new_data = new_data.filled(numpy.nan)
 
     # If the original data was 1-dimensional, return to 1 dimension
     if reshape_back_to_1:
