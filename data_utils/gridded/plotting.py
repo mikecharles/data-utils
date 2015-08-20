@@ -12,7 +12,11 @@ import scipy.ndimage
 import math
 import logging
 from pkg_resources import resource_filename
-
+from palettable.colorbrewer.sequential import Greens_7, YlOrBr_7
+from data_utils.gridded.interpolation import interpolate
+from data_utils.gridded.grid import Grid
+from data_utils.gridded.interpolation import fill_outside_borders
+from data_utils.gridded.interpolation import smooth
 
 # ------------------------------------------------------------------------------
 # Setup logging
@@ -91,6 +95,7 @@ def _make_plot(*args, **kwargs):
     cbar_type = kwargs['cbar_type']
     tercile_type = kwargs['tercile_type']
     smoothing_factor = kwargs['smoothing_factor']
+    fill_coastal_vals = kwargs['fill_coastal_vals']
 
     # --------------------------------------------------------------------------
     # Check args
@@ -217,8 +222,31 @@ def _make_plot(*args, **kwargs):
     else:
         raise ValueError('Supported projections: \'mercator\', \'lcc\'')
 
-    # Smooth data
-    data = scipy.ndimage.filters.gaussian_filter(data, smoothing_factor)
+    # Smooth the data
+    data = smooth(data, grid, smoothing_factor=smoothing_factor)
+
+    # --------------------------------------------------------------------------
+    # Fill coastal values (if requested)
+    #
+    if fill_coastal_vals:
+        # Datasets (particularly datasets on a course grid) that are masked
+        # out over the water suffer from some missing grid points along the
+        # coast. The methodology below remedies this, filling in those values
+        #  while creating a clean mask along the water.
+        #
+        # Shift the entire data array 1 grid point in each direction,
+        # and for every grid point that becomes "unmissing" after shifting
+        # the grid (every grid point that has a non-missing neighbor),
+        # set the value of the grid point to the neighbor's value.
+        data = fill_outside_borders(data, passes=2)
+
+        # Place data in a high-res grid so the ocean masking looks decent
+        high_res_grid = Grid('1/6th-deg-global')
+        data = interpolate(data, grid, high_res_grid)
+        lons, lats = np.meshgrid(high_res_grid.lons, high_res_grid.lats)
+        # Mask the ocean values
+        data = mpl_toolkits.basemap.maskoceans((lons - 360), lats, data,
+                                               inlands=True)
 
     # Plot data
     if cbar_ends == 'triangular':
@@ -278,7 +306,8 @@ def plot_to_screen(data, grid, levels=None, colors=None,
                    projection='equal-area', region='US', title='',
                    lat_range=None, lon_range=None,
                    cbar_ends='triangular', tercile_type='normal',
-                   smoothing_factor=0, cbar_type='normal'):
+                   smoothing_factor=0, cbar_type='normal',
+                   fill_coastal_vals=False):
     """
     Plots the given data and displays on-screen.
 
@@ -341,7 +370,8 @@ def plot_to_file(data, grid, file, dpi=200, levels=None,
                  projection='equal-area', region='US', colors=None,
                  title='', lat_range=None, lon_range=None,
                  cbar_ends='triangular', tercile_type='normal',
-                 smoothing_factor=0, cbar_type='normal'):
+                 smoothing_factor=0, cbar_type='normal',
+                 fill_coastal_vals=False):
     """
     Plots the given data and saves to a file.
 
@@ -415,7 +445,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
                                  lat_range=None, lon_range=None,
                                  cbar_ends='triangular',
                                  tercile_type='normal', smoothing_factor=0,
-                                 cbar_type='tercile'):
+                                 cbar_type='tercile', fill_coastal_vals=False):
     """
     Plots below, near, and above normal (median) terciles to the screen.
 
@@ -500,10 +530,11 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
                                levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                        40, 50, 60, 70, 80, 90],
                                projection='equal-area', region='US',
-                               colors='tmean-terciles', title='',
+                               colors=None, title='',
                                lat_range=None, lon_range=None,
                                cbar_ends='triangular', tercile_type='normal',
-                               smoothing_factor=0, cbar_type='tercile'):
+                               smoothing_factor=0, cbar_type='tercile',
+                               fill_coastal_vals=False):
     """
     Plots below, near, and above normal (median) terciles to a file.
 

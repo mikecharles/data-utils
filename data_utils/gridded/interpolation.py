@@ -2,10 +2,10 @@
 Contains methods for interpolating gridded data.
 """
 
-
 import numpy
 import mpl_toolkits.basemap
-
+from scipy import ndimage
+from scipy.ndimage.filters import gaussian_filter
 
 def interpolate(orig_data, orig_grid, new_grid):
     """
@@ -89,3 +89,58 @@ def interpolate(orig_data, orig_grid, new_grid):
     # data_new = f(lats_new[:,1], lons_new[1,:])
 
     return new_data
+
+
+def fill_outside_borders(data, passes=1):
+    """
+    Fill the grid points outside of the borders of a dataset (eg. over the
+    ocean for land-only datasets) with the value from the nearest non-missing
+    neighbor
+
+    Parameters
+    ----------
+
+        - data - *numpy array( - data to fill missing
+        - passes - *int* - number of passes (for each pass, 1 extra layer of
+        grid points will be filled)
+        points
+
+    Returns
+    -------
+
+        - A filled array.
+    """
+    # If data is already a masked array, then make sure to return a masked
+    # array. If not, return just the data portion
+    if ~numpy.ma.getmask(data):
+        data = numpy.ma.masked_invalid(data)
+        is_masked = False
+    else:
+        is_masked = True
+    for _ in range(passes):
+        for shift in (-1, 1):
+            for axis in (0, 1):
+                data_shifted = numpy.roll(data, shift=shift, axis=axis)
+                idx = ~data_shifted.mask * data.mask
+                data[idx] = data_shifted[idx]
+    if is_masked:
+        return data
+    else:
+        return data.data
+
+
+def smooth(data, grid, smoothing_factor):
+    # ----------------------------------------------------------------------
+    # Smooth the data
+    #
+    # Get the mask of the current data array
+    mask = numpy.ma.masked_invalid(data).mask
+    # Fill all missing values with their nearest neighbor's value so that
+    # the following Gaussian filter does not eat away the data set at the
+    # borders.
+    data = fill_outside_borders(data, passes=max([grid.num_y, grid.num_x]))
+    # Apply a Gaussian filter to smooth the data
+    data = gaussian_filter(data, smoothing_factor,
+                                                 order=0, mode='nearest')
+    # Reapply the mask from the initial data array
+    return numpy.where(mask, numpy.NaN, data)
