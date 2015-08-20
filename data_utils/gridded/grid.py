@@ -116,10 +116,10 @@ class Grid:
         '''Number of points in the y-direction'''
         self.num_x = int(((self.ur_corner[1] - self.ll_corner[1]) / self.res) + 1)
         '''Number of points in the x-direction'''
-        self.lats = np.arange(self.ll_corner[0], self.ur_corner[0] + 1,
+        self.lats = np.arange(self.ll_corner[0], self.ur_corner[0] + 0.00000001,
                               self.res).tolist()
         '''List of latitude values at which grid points are found'''
-        self.lons = np.arange(self.ll_corner[1], self.ur_corner[1] + 1,
+        self.lons = np.arange(self.ll_corner[1], self.ur_corner[1] + 0.00000001,
                               self.res).tolist()
         '''List of longitude values at which grid points are found'''
 
