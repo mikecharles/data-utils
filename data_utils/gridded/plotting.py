@@ -12,7 +12,7 @@ import scipy.ndimage
 import math
 import logging
 from pkg_resources import resource_filename
-from palettable.colorbrewer.sequential import Greens_7, YlOrBr_7
+from palettable.colorbrewer.sequential import Greens_7, YlOrBr_7, GnBu_7
 from data_utils.gridded.interpolation import interpolate
 from data_utils.gridded.grid import Grid
 from data_utils.gridded.interpolation import fill_outside_borders
@@ -679,6 +679,27 @@ def _get_colors(colors):
             [0.84, 0.19, 0.12],
             [0.6, 0., 0.]
         ]
+    elif colors == 'precip-terciles':
+        return [
+            # Below normal (browns)
+            [0.26,  0.13,  0.01],
+            [0.36,  0.19,  0.02],
+            [0.45,  0.25,  0.02],
+            [0.63,  0.39,  0.12],
+            [0.74,  0.56,  0.33],
+            [0.85,  0.73,  0.55],
+            [0.96,  0.9 ,  0.76],
+            # Near normal (grey)
+            [0.75, 0.75, 0.75],
+            # Above normal (greens)
+            [0.9, 0.96, 0.88],
+            [0.6, 0.73, 0.62],
+            [0.3, 0.49, 0.36],
+            [0., 0.26, 0.1],
+            [0.02, 0.2, 0.42],
+            [0.16, 0.42, 0.77],
+            [0.32, 0.63, 1.]
+        ]
     else:
         raise ValueError('supplied colors parameter not supported, see API '
                          'docs')
@@ -691,3 +712,19 @@ plot_tercile_probs_to_file.__doc__ = \
     plot_tercile_probs_to_file.__doc__.format(_docstring_kwargs)
 plot_tercile_probs_to_screen.__doc__ = \
     plot_tercile_probs_to_screen.__doc__.format(_docstring_kwargs)
+
+if __name__ == '__main__':
+    from data_utils.gridded.plotting import plot_tercile_probs_to_file
+    from data_utils.gridded.grid import Grid
+    from mpp.poe import poe_to_terciles
+    from pkg_resources import resource_filename
+    import numpy as np
+    ptiles = [1,  2,  5, 10, 15, 20, 25, 33, 40, 50, 60, 67, 75, 80, 85, 90,
+              95,  98, 99]
+    grid = Grid('2deg-conus')
+    data = np.fromfile(resource_filename('data_utils',
+                                         'lib/example-tmean-fcst.bin'), dtype='float32')
+    data = np.reshape(data, (len(ptiles), grid.num_y * grid.num_x))
+    below, near, above = poe_to_terciles(data, ptiles)
+    plot_tercile_probs_to_file(below, near, above, grid, 'out.png',
+                               colors='precip-terciles')
