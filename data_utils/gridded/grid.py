@@ -100,7 +100,7 @@ class Grid:
             self.type = 'latlon'
         # Otherwise create a custom grid definition
         else:
-            if ll_corner or ur_corner or res == None:
+            if not all([self.ll_corner, self.ur_corner, self.res]):
                 raise ValueError('You must either supply the name of a '
                                  'built-in Grid, or an ll_corner, '
                                  'ur_corner, and res to create a custom '
