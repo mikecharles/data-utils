@@ -1,20 +1,18 @@
-# from unittest import TestCase
 from data_utils import units
-# from nose.tools import assert_raises, assert_equal, assert_true
 from pytest import raises
 from numpy.testing import assert_array_equal, assert_allclose
 import numpy as np
 
 
-# class TestUnitConverter(TestCase):
-
 def test_create_UnitConverter_object():
     """Ensure the UnitConvert object can be created"""
     units.UnitConverter()
 
+
 def test_get_supported_units_returns_something():
     """Ensure get_supported_units() returns a non-empty string"""
     assert(units.UnitConverter().get_supported_units())
+
 
 def test_exception_raised_for_unsupported_units():
     """Ensure an exception is raised for an unsupported units"""
@@ -23,6 +21,7 @@ def test_exception_raised_for_unsupported_units():
         test_val = 1
         test_units = 'unsupported_units'
         unit_converter.convert(test_val, test_units)
+
 
 def test_convert_0pt1mm_to_mm():
     """Test converting from 0.1mm to mm"""
