@@ -93,7 +93,7 @@ def interpolate(orig_data, orig_grid, new_grid):
 
 def fill_outside_mask_borders(data, passes=1):
     """
-    Fill the grid points outside of the borders of a dataset (eg. over the
+    Fill the grid points outside of the mask borders of a dataset (eg. over the
     ocean for land-only datasets) with the value from the nearest non-missing
     neighbor
 
@@ -112,11 +112,12 @@ def fill_outside_mask_borders(data, passes=1):
     """
     # If data is already a masked array, then make sure to return a masked
     # array. If not, return just the data portion
-    if ~numpy.ma.getmask(data):
+    try:
+        data.mask
+        is_masked = True
+    except AttributeError as e:
         data = numpy.ma.masked_invalid(data)
         is_masked = False
-    else:
-        is_masked = True
     for _ in range(passes):
         for shift in (-1, 1):
             for axis in (0, 1):
