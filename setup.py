@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='data-utils',
-    version='v0.9.3',
+    version='v0.9.4',
     packages=find_packages(),
     include_package_data=True,
     url='https://cpc-devtools.ncep.noaa.gov/trac/projects/model-post-processing',
@@ -28,7 +28,7 @@ setup(
         'matplotlib>=1.4.3',
         'basemap>=1.0.7',
         'pyyaml>=3.11',
-        'stats-utils'
+        'stats-utils>=1.2'
     ]
 )
 
