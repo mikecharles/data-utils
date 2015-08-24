@@ -15,7 +15,7 @@ from pkg_resources import resource_filename
 from palettable.colorbrewer.sequential import Greens_7, YlOrBr_7, GnBu_7, BuGn_7
 from data_utils.gridded.interpolation import interpolate
 from data_utils.gridded.grid import Grid
-from data_utils.gridded.interpolation import fill_outside_borders
+from data_utils.gridded.interpolation import fill_outside_mask_borders
 from data_utils.gridded.interpolation import smooth
 
 # ------------------------------------------------------------------------------
@@ -238,7 +238,7 @@ def _make_plot(*args, **kwargs):
         # and for every grid point that becomes "unmissing" after shifting
         # the grid (every grid point that has a non-missing neighbor),
         # set the value of the grid point to the neighbor's value.
-        data = fill_outside_borders(data, passes=2)
+        data = fill_outside_mask_borders(data, passes=2)
 
         # Place data in a high-res grid so the ocean masking looks decent
         high_res_grid = Grid('1/6th-deg-global')

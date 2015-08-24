@@ -91,7 +91,7 @@ def interpolate(orig_data, orig_grid, new_grid):
     return new_data
 
 
-def fill_outside_borders(data, passes=1):
+def fill_outside_mask_borders(data, passes=1):
     """
     Fill the grid points outside of the borders of a dataset (eg. over the
     ocean for land-only datasets) with the value from the nearest non-missing
@@ -138,7 +138,7 @@ def smooth(data, grid, smoothing_factor):
     # Fill all missing values with their nearest neighbor's value so that
     # the following Gaussian filter does not eat away the data set at the
     # borders.
-    data = fill_outside_borders(data, passes=max([grid.num_y, grid.num_x]))
+    data = fill_outside_mask_borders(data, passes=max([grid.num_y, grid.num_x]))
     # Apply a Gaussian filter to smooth the data
     data = gaussian_filter(data, smoothing_factor,
                                                  order=0, mode='nearest')
