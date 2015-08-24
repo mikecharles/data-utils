@@ -8,6 +8,17 @@ grid when calling utilities such as interpolation routines, plotting, etc.
 import numpy as np
 
 
+def get_supported_grids():
+    return [
+        '1/6th-deg-global',
+        '0.5deg-global',
+        '1deg-global',
+        '2deg-global',
+        '2.5deg-global',
+        '2deg-conus',
+    ]
+
+
 class Grid:
     """
     Grid definition storing attributes of a grid.
