@@ -12,7 +12,7 @@ import scipy.ndimage
 import math
 import logging
 from pkg_resources import resource_filename
-from palettable.colorbrewer.sequential import Greens_7, YlOrBr_7, GnBu_7
+from palettable.colorbrewer.sequential import Greens_7, YlOrBr_7, GnBu_7, BuGn_7
 from data_utils.gridded.interpolation import interpolate
 from data_utils.gridded.grid import Grid
 from data_utils.gridded.interpolation import fill_outside_borders
@@ -680,8 +680,8 @@ def _get_colors(colors):
             [0.6, 0., 0.]
         ]
     elif colors == 'precip-terciles':
-        return [
-            # Below normal (browns)
+        # Below normal (browns)
+        below = [
             [0.26,  0.13,  0.01],
             [0.36,  0.19,  0.02],
             [0.45,  0.25,  0.02],
@@ -689,17 +689,12 @@ def _get_colors(colors):
             [0.74,  0.56,  0.33],
             [0.85,  0.73,  0.55],
             [0.96,  0.9 ,  0.76],
-            # Near normal (grey)
-            [0.75, 0.75, 0.75],
-            # Above normal (greens)
-            [0.9, 0.96, 0.88],
-            [0.6, 0.73, 0.62],
-            [0.3, 0.49, 0.36],
-            [0., 0.26, 0.1],
-            [0.02, 0.2, 0.42],
-            [0.16, 0.42, 0.77],
-            [0.32, 0.63, 1.]
         ]
+        # Near normal (grey)
+        near = [[0.75, 0.75, 0.75],]
+        # Above normal (greens)
+        above = (np.array(BuGn_7.colors) / 255).tolist()
+        return below + near + above
     else:
         raise ValueError('supplied colors parameter not supported, see API '
                          'docs')
