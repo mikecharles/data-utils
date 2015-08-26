@@ -1,12 +1,12 @@
 from pytest import raises
 from data_utils.gridded import grid
-from data_utils.gridded.grid import get_supported_grids
+import numpy as np
 
 
 
 def test_create_Grid_object():
     """Ensure the Grid object can be created"""
-    for supported_grid in get_supported_grids():
+    for supported_grid in grid.get_supported_grids():
         grid.Grid(supported_grid)
 
 
@@ -29,7 +29,24 @@ def test_create_custom_Grid():
 
 def test_print_info_returns_something(capfd):
     """Ensure the print_info() functions returns a non-empty string"""
-    for supported_grid in get_supported_grids():
+    for supported_grid in grid.get_supported_grids():
         grid.Grid(supported_grid).print_info()
         out, err = capfd.readouterr()
         assert(out)
+
+
+def test_is_correct_grid():
+    """Tests the is_correct_grid() function"""
+    # Should return False if the number of points is incorrect
+    test_grid = grid.Grid('1deg-global')
+    bad_y = test_grid.num_y - 1
+    bad_x = test_grid.num_x - 1
+    test_array = np.random.rand(bad_y, bad_x)
+    test_grid.is_correct_grid(test_array)
+    # Should return False if the data isn't a NumPy array
+    test_grid = grid.Grid('1deg-global')
+    test_grid.is_correct_grid(1)
+
+
+if __name__ == '__main__':
+    test_is_correct_grid()

@@ -6,6 +6,7 @@ grid when calling utilities such as interpolation routines, plotting, etc.
 
 
 import numpy as np
+import warnings
 
 
 def get_supported_grids():
@@ -142,3 +143,29 @@ class Grid:
         print('Grid info:')
         for key, val in vars(self).items():
             print('\t{}: {}'.format(key, val))
+
+
+    def is_correct_grid(self, data):
+        """
+        Verifies that this is the correct Grid for the given data
+
+        Parameters
+        ----------
+
+        - data - array_like - data to verify
+
+        Returns
+        -------
+
+        True or False - whether this is the correct Grid for the given data
+        """
+        # Make sure there are num_y x num_x points
+        try:
+            if self.num_y * self.num_x != data.size:
+                warnings.warn('Total number of points in array incorrect')
+                return False
+        except AttributeError:
+            warnings.warn('data not a valid NumPy array')
+            return False
+        # Otherwise return True
+        return True
