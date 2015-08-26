@@ -136,6 +136,13 @@ def fill_outside_mask_borders(data, passes=1):
            [ 3.,  3.,  8.,  8.,  8.],
            [ 3.,  3.,  8.,  8.,  8.]], dtype=float16)
     """
+    # Data must be 2-dimensional
+    if data.ndim != 2:
+        raise ValueError('data must be 2-dimensional')
+    # If all values are NaNs, raise a warning
+    if numpy.all(numpy.isnan(data)):
+        raise Warning('All values of data are NaN, returning original array')
+        return data
     # If data is already a masked array, then make sure to return a masked
     # array. If not, return just the data portion
     try:
@@ -188,6 +195,8 @@ def smooth(data, grid, smoothing_factor=0.5):
     >>> B = smooth(A, grid, smoothing_factor=1)
     >>> plot_to_screen(B, grid, levels=range(-20, 20, 2))  # doctest: +SKIP
     """
+    # Make sure data matches grid
+    grid.assert_correct_grid(data)
     # ----------------------------------------------------------------------
     # Smooth the data
     #
