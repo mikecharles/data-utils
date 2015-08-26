@@ -6,6 +6,8 @@ import numpy
 import mpl_toolkits.basemap
 from scipy import ndimage
 from scipy.ndimage.filters import gaussian_filter
+import warnings
+
 
 def interpolate(orig_data, orig_grid, new_grid):
     """
@@ -141,7 +143,7 @@ def fill_outside_mask_borders(data, passes=1):
         raise ValueError('data must be 2-dimensional')
     # If all values are NaNs, raise a warning
     if numpy.all(numpy.isnan(data)):
-        raise Warning('All values of data are NaN, returning original array')
+        warnings.warn('All values of data are NaN, returning original array')
         return data
     # If data is already a masked array, then make sure to return a masked
     # array. If not, return just the data portion
