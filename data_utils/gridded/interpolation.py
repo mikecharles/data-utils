@@ -109,6 +109,32 @@ def fill_outside_mask_borders(data, passes=1):
     -------
 
         - A filled array.
+
+    Examples
+    --------
+
+    Create a 5x5 array of data, mask out the outer values, and fill
+
+    >>> # Import packages
+    >>> from data_utils.gridded.interpolation import fill_outside_mask_borders
+    >>> import numpy as np
+    >>> # Generate random data with missing values along the border
+    >>> A = np.random.randint(1, 9, (5, 5)).astype('float16')
+    >>> A[0] = A[-1] = A[:,0] = A[:,-1] = np.nan
+    >>> A  # doctest: +SKIP
+    array([[ nan,  nan,  nan,  nan,  nan],
+           [ nan,   4.,   4.,   3.,  nan],
+           [ nan,   6.,   7.,   3.,  nan],
+           [ nan,   3.,   8.,   8.,  nan],
+           [ nan,  nan,  nan,  nan,  nan]], dtype=float16)
+    >>> # Fill the missing outside values with the nearest neighbor values
+    >>> A = fill_outside_mask_borders(A)
+    >>> A  # doctest: +SKIP
+    array([[ 4.,  4.,  4.,  3.,  3.],
+           [ 4.,  4.,  4.,  3.,  3.],
+           [ 6.,  6.,  7.,  3.,  3.],
+           [ 3.,  3.,  8.,  8.,  8.],
+           [ 3.,  3.,  8.,  8.,  8.]], dtype=float16)
     """
     # If data is already a masked array, then make sure to return a masked
     # array. If not, return just the data portion
@@ -130,7 +156,38 @@ def fill_outside_mask_borders(data, passes=1):
         return data.data
 
 
-def smooth(data, grid, smoothing_factor):
+def smooth(data, grid, smoothing_factor=0.5):
+    """
+    Smooth an array of spatial data using a gaussian filter
+
+    Parameters
+    ----------
+
+    - data - array_like - array of spatial data
+    - grid - Grid object corresponding to data
+    - smoothing_factor - float, optional - sigma value for the gaussian filter
+
+    Returns
+    -------
+
+    - array_like - array of smoothed spatial data
+
+    Examples
+    --------
+
+    >>> from pkg_resources import resource_filename
+    >>> import numpy as np
+    >>> from data_utils.gridded.plotting import plot_to_screen
+    >>> from data_utils.gridded.grid import Grid
+    >>> from data_utils.gridded.interpolation import smooth
+    >>> grid = Grid('2deg-conus')
+    >>> A = np.fromfile(resource_filename('data_utils',
+    ... 'lib/example-tmean-obs.bin'), dtype='float32')
+    >>> A = np.reshape(A, (grid.num_y, grid.num_x))
+    >>> plot_to_screen(A, grid, levels=range(-20, 20, 2))  # doctest: +SKIP
+    >>> B = smooth(A, grid, smoothing_factor=1)
+    >>> plot_to_screen(B, grid, levels=range(-20, 20, 2))  # doctest: +SKIP
+    """
     # ----------------------------------------------------------------------
     # Smooth the data
     #
