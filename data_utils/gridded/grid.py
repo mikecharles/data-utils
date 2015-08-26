@@ -20,6 +20,11 @@ def get_supported_grids():
     ]
 
 
+class GridError(Exception):
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+
+
 class Grid:
     """
     Grid definition storing attributes of a grid.
@@ -145,27 +150,23 @@ class Grid:
             print('\t{}: {}'.format(key, val))
 
 
-    def is_correct_grid(self, data):
+    def assert_correct_grid(self, data):
         """
-        Verifies that this is the correct Grid for the given data
+        Verifies that this is the correct Grid for the given data. If it isn't,
 
         Parameters
         ----------
 
         - data - array_like - data to verify
 
-        Returns
-        -------
+        Exceptions
+        ----------
 
-        True or False - whether this is the correct Grid for the given data
+        GridError - if the grid is not correct
         """
         # Make sure there are num_y x num_x points
         try:
             if self.num_y * self.num_x != data.size:
-                warnings.warn('Total number of points in array incorrect')
-                return False
+                raise GridError('Total number of points in array is incorrect')
         except AttributeError:
-            warnings.warn('data not a valid NumPy array')
-            return False
-        # Otherwise return True
-        return True
+            raise GridError('Data not a valid NumPy array')

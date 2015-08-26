@@ -35,18 +35,20 @@ def test_print_info_returns_something(capfd):
         assert(out)
 
 
-def test_is_correct_grid():
+def test_assert_correct_grid():
     """Tests the is_correct_grid() function"""
-    # Should return False if the number of points is incorrect
+    # Should raise a GridError if the number of points is incorrect
     test_grid = grid.Grid('1deg-global')
     bad_y = test_grid.num_y - 1
     bad_x = test_grid.num_x - 1
     test_array = np.random.rand(bad_y, bad_x)
-    test_grid.is_correct_grid(test_array)
-    # Should return False if the data isn't a NumPy array
+    with raises(grid.GridError):
+        test_grid.assert_correct_grid(test_array)
+    # Should raise a GridError if the data isn't a NumPy array
     test_grid = grid.Grid('1deg-global')
-    test_grid.is_correct_grid(1)
+    with raises(grid.GridError):
+        test_grid.assert_correct_grid(1)
 
 
 if __name__ == '__main__':
-    test_is_correct_grid()
+    test_assert_correct_grid()
