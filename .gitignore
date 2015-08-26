@@ -10,5 +10,7 @@
 __pycache__
 __init__.pyc
 *.pyc
+.eggs
 # File/dir types
 *.egg-info
+
