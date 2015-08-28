@@ -75,7 +75,3 @@ def test_smooth():
     test_array = np.random.rand(test_grid.num_y, test_grid.num_x)
     smoothed_array = interpolation.smooth(test_array, test_grid)
     assert test_array.shape == smoothed_array.shape
-
-
-if __name__ == '__main__':
-    test_smooth()

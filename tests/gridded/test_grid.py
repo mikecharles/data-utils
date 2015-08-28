@@ -48,7 +48,3 @@ def test_assert_correct_grid():
     test_grid = grid.Grid('1deg-global')
     with raises(grid.GridError):
         test_grid.assert_correct_grid(1)
-
-
-if __name__ == '__main__':
-    test_assert_correct_grid()
