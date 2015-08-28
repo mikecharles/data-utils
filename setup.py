@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 
+import os
 import sys
 from setuptools import setup, find_packages, Command
 from setuptools.command.test import test as TestCommand
 
+
+# Get the version
+script_path = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(script_path, 'VERSION')) as version_file:
+    version = version_file.read().strip()
 
 class PyTest(TestCommand):
     user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
@@ -26,7 +32,7 @@ class PyTest(TestCommand):
 
 setup(
     name='data-utils',
-    version='v0.9.4',
+    version=version,
     packages=find_packages(),
     include_package_data=True,
     url='https://cpc-devtools.ncep.noaa.gov/trac/projects/model-post-processing',
