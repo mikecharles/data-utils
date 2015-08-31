@@ -2,6 +2,7 @@
 
 import os
 import sys
+import subprocess
 from setuptools import setup, find_packages, Command
 from setuptools.command.test import test as TestCommand
 
@@ -29,6 +30,37 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
+
+class MakeAPI(Command):
+    """Command to create API documentation using the pdoc package"""
+    description = 'Create API documentation using the pdoc package'
+    user_options = [('api-dir=', 'o', 'Directory to write API docs to')]
+
+    def initialize_options(self):
+        """Set default values for options."""
+        self.api_dir = None
+
+    def finalize_options(self):
+        """Post-process options."""
+
+    def run(self):
+        """Run command."""
+        template_dir = script_path+'/lib/api-doc-templates'
+        if not self.api_dir:
+            self.api_dir = script_path+'/docs/api'
+        print('Writing API docs to {}'.format(self.api_dir))
+        subprocess.call('export PYTHONPATH={} ; pdoc --html '
+                        '--html-dir {} --overwrite --only-pypath '
+                        '--template-dir {} ./data_utils'.format(script_path,
+                                                        self.api_dir,
+                                                        template_dir),
+                        shell=True)
+        # Move all HTML files out of the 'data_utils/' directory that was
+        # created (unnecessary level)
+        subprocess.call('mv {}/data_utils/* {}'.format(self.api_dir,
+                                                       self.api_dir),
+                        shell=True)
+        subprocess.call('rm -rf {}/data_utils'.format(self.api_dir), shell=True)
 
 setup(
     name='data-utils',
@@ -58,5 +90,8 @@ setup(
         'stats-utils>=1.2'
     ],
     tests_require=['pytest'],
-    cmdclass={'test': PyTest},
+    cmdclass={
+        'test': PyTest,
+        'makeapi': MakeAPI
+    },
 )
