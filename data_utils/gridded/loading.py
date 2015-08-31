@@ -8,11 +8,55 @@ simpler.
 
 import numpy as np
 from datetime import datetime
+from .reading import read_grib
+from string_utils.strings import replace_vars_in_string
 
 
-def load_fcsts(dates, file_template, data_type, grid, variable=None,
-               level=None, record_num=None):
-    pass
+def load_fcsts(dates, file_template, data_type, grid, num_members, fhr_range,
+               variable=None, level=None, record_num=None, fhr_int=6,
+               fhr_stat='mean'):
+    # num_members is required
+    if not num_members:
+        raise ValueError('num_members is required')
+    # Initialize a NumPy array to store the data for all fhrs, one member,
+    # one date
+    data_temp = np.empty((len(range(fhr_range[0], fhr_range[1]+1, fhr_int)),
+                          grid.num_y * grid.num_x))
+    # Initialize a NumPy array to store the full data array
+    data = np.empty((len(dates), num_members, grid.num_y * grid.num_x))
+    # Loop over dates
+    for d, date in enumerate(dates):
+        # Loop over members
+        for m in range(num_members):
+            # Loop over fhr
+            for f, fhr in enumerate(range(fhr_range[0], fhr_range[1]+1, fhr_int)):
+                fhr = '{:03d}'.format(fhr)
+                member = '{:02d}'.format(m)
+                # Convert file template to real file
+                date_obj = datetime.strptime(date, '%Y%m%d')
+                file = datetime.strftime(date_obj, file_template)
+                var_dict = {'fhr': fhr, 'member': member}
+                file = replace_vars_in_string(file, **var_dict)
+                # --------------------------------------------------------------
+                # grib2 data
+                #
+                if data_type in ['grib1', 'grib2']:
+                    # Open file and read the appropriate data
+                    try:
+                        # Read in one forecast hour, one member
+                        data_temp[f] = read_grib(file, data_type, variable,
+                                                    level)
+                    except OSError:
+                        data_temp[f] = np.nan
+            # Calculate stat (mean, total) across fhr
+            if fhr_stat == 'mean':
+                data[d, m] = np.nanmean(data_temp, axis=0)
+            elif fhr_stat == 'sum':
+                data[d, m] = np.nansum(data_temp, axis=0)
+            else:
+                raise ValueError('Supported fhr_stat values: mean, sum')
+    # Return the data
+    return data
 
 
 def load_obs(dates, file_template, data_type, grid, record_num=None):
@@ -30,15 +74,3 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
             data[d] = np.nan
     # Return data
     return data
-
-
-if __name__ == '__main__':
-    from string_utils.dates import generate_date_list
-    from data_utils.gridded.grid import Grid
-    dates = generate_date_list('19850515', '20100515', interval='years')
-    file_template = '/cpc/data/observations/land_air/short_range/global' \
-                    '/merged_tmean/1deg/05d/%Y/%m/%d/tmean_05d_%Y%m%d.bin'
-    data_type = 'bin'
-    grid = Grid('1deg-global')
-    data = load_obs(dates, file_template, data_type, grid)
-    print('Done')
