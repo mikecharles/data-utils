@@ -49,6 +49,9 @@ class MakeAPI(Command):
         if not self.api_dir:
             self.api_dir = script_path+'/docs/api'
         print('Writing API docs to {}'.format(self.api_dir))
+        # Deleting existing API docs
+        subprocess.call('rm -rf {}/*'.format(self.api_dir), shell=True)
+        # Running pdoc to create API docs
         subprocess.call('export PYTHONPATH={} ; pdoc --html '
                         '--html-dir {} --overwrite --only-pypath '
                         '--template-dir {} ./data_utils'.format(script_path,
