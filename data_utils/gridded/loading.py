@@ -15,6 +15,7 @@ from string_utils.strings import replace_vars_in_string
 
 logger = logging.getLogger(__name__)
 
+
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
                    fhr_int=6, fhr_stat='mean', collapse=False):
@@ -51,37 +52,56 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
 
 
     """
+    # --------------------------------------------------------------------------
     # num_members is required
+    #
     if not num_members:
         raise ValueError('num_members is required')
+    # --------------------------------------------------------------------------
     # Initialize data arrays
+    #
     data_f = np.empty((len(range(fhr_range[0], fhr_range[1] + 1, fhr_int)),
                        grid.num_y * grid.num_x))
+    # If collapse==True, then we need a temp data_m array to store the
+    # separate ensemble members before averaging, and we need mean and spread
+    # arrays
     if collapse:
         data_m = np.empty((num_members, grid.num_y * grid.num_x))
         ens_mean = np.empty((len(dates), grid.num_y * grid.num_x))
         ens_spread = np.empty((len(dates), grid.num_y * grid.num_x))
+    # If collapse==False, then we need a single data array to store the
+    # separate ensemble members
     else:
         data = np.empty((len(dates), num_members, grid.num_y * grid.num_x))
+    # --------------------------------------------------------------------------
     # Loop over dates
+    #
     for d, date in enumerate(dates):
         logger.debug('Date: {}'.format(date))
         date_obj = datetime.strptime(date, '%Y%m%d')
+        # ----------------------------------------------------------------------
         # Loop over members
+        #
         for m in range(num_members):
             member = '{:02d}'.format(m)
             logger.debug('  Member: {}'.format(member))
+            # ------------------------------------------------------------------
             # Loop over fhr
-            for f, fhr in enumerate(range(fhr_range[0], fhr_range[1]+1, fhr_int)):
+            #
+            for f, fhr in enumerate(range(fhr_range[0], fhr_range[1]+1,
+                                          fhr_int)):
                 fhr = '{:03d}'.format(fhr)
                 logger.debug('    Fhr: {}'.format(fhr))
+                # --------------------------------------------------------------
                 # Convert file template to real file
+                #
                 file = datetime.strftime(date_obj, file_template)
                 var_dict = {'fhr': fhr, 'member': member}
                 file = replace_vars_in_string(file, **var_dict)
                 # --------------------------------------------------------------
-                # grib2 data
+                # Read data file
                 #
+                # grib1 or grib2
                 if data_type in ['grib1', 'grib2']:
                     # Open file and read the appropriate data
                     try:
@@ -90,7 +110,9 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                                                     level)
                     except OSError:
                         data_f[f] = np.nan
+            # ------------------------------------------------------------------
             # Calculate stat (mean, total) across fhr
+            #
             if fhr_stat == 'mean':
                 if collapse:
                     data_m[m] = np.nanmean(data_f, axis=0)
@@ -103,13 +125,17 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                     data[d, m] = np.nansum(data_f, axis=0)
             else:
                 raise ValueError('Supported fhr_stat values: mean, sum')
+        # ----------------------------------------------------------------------
         # Calculate ensemble mean and spread (if collapse==True)
+        #
         # TODO: Add QCing
         if collapse:
             ens_mean[d] = np.nanmean(data_m, axis=0)
             ens_spread[d] = np.nanstd(data_m, axis=0)
 
+    # --------------------------------------------------------------------------
     # Return the data
+    #
     if collapse:
         return ens_mean, ens_spread
     else:
@@ -117,18 +143,28 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
 
 
 def load_obs(dates, file_template, data_type, grid, record_num=None):
+    # --------------------------------------------------------------------------
     # Initialize a NumPy array to store the data
+    #
     data = np.empty((len(dates), grid.num_y * grid.num_x))
+    # --------------------------------------------------------------------------
     # Loop over dates
+    #
     for d, date in enumerate(dates):
         logger.debug('Loading data from {}'.format(date))
+        # ----------------------------------------------------------------------
         # Convert file template to real file
+        #
         date_obj = datetime.strptime(date, '%Y%m%d')
         file = datetime.strftime(date_obj, file_template)
+        # ----------------------------------------------------------------------
         # Open file and read the appropriate data
+        #
         try:
             data[d] = np.fromfile(file, 'float32')
         except FileNotFoundError:
             data[d] = np.nan
+    # --------------------------------------------------------------------------
     # Return data
+    #
     return data
