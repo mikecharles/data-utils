@@ -54,9 +54,9 @@ class MakeAPI(Command):
         # Running pdoc to create API docs
         subprocess.call('export PYTHONPATH={} ; pdoc --html '
                         '--html-dir {} --overwrite --only-pypath '
-                        '--template-dir {} ./data_utils'.format(script_path,
-                                                        self.api_dir,
-                                                        template_dir),
+                        '--external-links --template-dir {} '
+                        './data_utils'.format(script_path, self.api_dir,
+                                              template_dir),
                         shell=True)
         # Move all HTML files out of the 'data_utils/' directory that was
         # created (unnecessary level)
