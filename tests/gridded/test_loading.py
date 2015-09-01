@@ -21,7 +21,7 @@ def test_load_obs():
     loading.load_obs(dates, file_template, data_type, test_grid)
 
 
-def test_load_fcsts():
+def test_load_ens_fcsts():
     """
     Test load_fcsts function
 
@@ -37,8 +37,8 @@ def test_load_fcsts():
     test_grid = grid.Grid('1deg-global')
     num_members = 11
     fhr_range = (150, 264)
-    loading.load_fcsts(dates, file_template, data_type, test_grid,
-                       num_members, fhr_range)
+    loading.load_ens_fcsts(dates, file_template, data_type, test_grid,
+                           num_members, fhr_range)
 
     # Should run for a single day
     dates = ['20120101', '20120101']
@@ -47,8 +47,8 @@ def test_load_fcsts():
     test_grid = grid.Grid('1deg-global')
     num_members = 11
     fhr_range = (150, 264)
-    loading.load_fcsts(dates, file_template, data_type, test_grid,
-                       num_members, fhr_range)
+    loading.load_ens_fcsts(dates, file_template, data_type, test_grid,
+                           num_members, fhr_range)
 
     # Should run for a single fhr
     dates = ['20120101', '20120102']
@@ -57,5 +57,5 @@ def test_load_fcsts():
     test_grid = grid.Grid('1deg-global')
     num_members = 11
     fhr_range = (150, 150)
-    loading.load_fcsts(dates, file_template, data_type, test_grid, num_members,
-                       fhr_range)
+    loading.load_ens_fcsts(dates, file_template, data_type, test_grid,
+                           num_members, fhr_range)
