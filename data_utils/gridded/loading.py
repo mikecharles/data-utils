@@ -1,9 +1,9 @@
 """
-Containg methods for loading larger amounts of data
+Contains methods for loading larger amounts of data than a single day
 
-For example, let's say you want to load all of the forecasts valid today from
-all years between 1985 and 2010. This module is intended to make that much
-simpler.
+For example, let's say you want to load all of the forecasts valid today's
+month and day from all years between 1985 and 2010. This module is intended
+to make that much simpler.
 """
 
 import numpy as np
@@ -20,7 +20,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
                    fhr_int=6, fhr_stat='mean', collapse=False):
     """
-    Load ensemble forecast data
+    Loads ensemble forecast data
 
     Data is loaded over a given range of dates, forecast hours, and ensemble
     members. If collapse==True, then the information retrieved is collapsed
@@ -38,19 +38,52 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     - dates - *list of strings* - list of dates in YYYYMMDD format
     - file_template - *string* - file template containing date formats and
     bracketed variables
-    - data_type
-    - grid
-    - num_members
-    - fhr_range
-    - variable
-    - level
-    - record_num
-    - fhr_int
-    - fhr_stat
+    - data_type - *string* - input data type (bin, grib1, grib2)
+    - grid - *Grid* - Grid associated with the input data
+    - num_members - *int* - number of ensemble members to read int
+    - fhr_range - *tuple* - first and last forecast hours to process
+    - variable - *string* - variable name (grib only)
+    - level - *string* - vertical level that the variable sits at (grib only)
+    - record_num - *int* - record to extract (binary only)
+    - fhr_int - *int* - interval between forecast hours
+    - fhr_stat - *string* - statistic to calculate over the forecast hour
+    range (mean [default], sum)
     - collapse - *boolean* - collapse the array so that the ensemble member
     information is summarized (default: False)
 
+    Returns
+    -------
 
+    If `collapse=True`, a tuple of 2 NumPy arrays will be returned (ensemble
+    mean and ensemble spread). For example:
+
+        >>> ens_mean, ens_spread = load_ens_fcsts(..., collapse=True)  # doctest: +SKIP
+
+    If `collapse=False`, a single NumPy array will be returned. For example:
+
+        >>> ens_fcst = load_ens_fcsts(..., collapse=False))  # doctest: +SKIP
+
+    Examples
+    --------
+
+    Load ensemble mean and spread from forecasts initialized on a given
+    month/day from 1981-2010
+
+        >>> from string_utils.dates import generate_date_list
+        >>> from data_utils.gridded.grid import Grid
+        >>> from data_utils.gridded.loading import load_obs
+        >>> dates = generate_date_list('19810525', '20100525', interval='years')
+        >>> file_tmplt = '/path/to/obs/%Y/%m/%d/tmean_05d_%Y%m%d.bin'
+        >>> data_type = 'bin'
+        >>> grid = Grid('1deg-global')
+        >>> variable = 'TMP'
+        >>> level = '2 m above ground'
+        >>> num_members = 11
+        >>> fcst_ens_mean, fcst_ens_spread = \  # doctest: +SKIP
+        load_ens_fcsts(dates, file_template=file_tmplt, data_type=data_type,  # doctest: +SKIP
+        ...            grid=grid, variable=variable, level=level,  # doctest: +SKIP
+        ...            fhr_range=(150, 264), num_members=num_members,  # doctest: +SKIP
+        ...            collapse=True)  # doctest: +SKIP
     """
     # --------------------------------------------------------------------------
     # num_members is required
@@ -143,6 +176,44 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
 
 
 def load_obs(dates, file_template, data_type, grid, record_num=None):
+    """
+    Load observation data
+
+    Data is loaded over a given range of dates. The data can be either grib1,
+    grib2, or binary. If reading from binary files containing more than one
+    record (multiple variables), you can specify the record number
+    using the `record_num` parameter.
+
+    Parameters
+    ----------
+
+    - dates - *list of strings* - list of dates in YYYYMMDD format
+    - file_template - *string* - file template containing date formats and
+    bracketed variables. Date formatting (eg. %Y%m%d) will be converted into
+    the given date.
+    - data_type - *string* - input data type (bin, grib1, grib2)
+    - grid - *Grid* - Grid associated with the input data
+    - record_num - *int* - binary record containing the desired variable
+
+    Returns
+    -------
+
+    *NumPy array* - array of observation data (dates x gridpoint)
+
+    Examples
+    --------
+
+    Load observations for a given month/day from 1981-2010
+
+        >>> from string_utils.dates import generate_date_list
+        >>> from data_utils.gridded.grid import Grid
+        >>> from data_utils.gridded.loading import load_obs
+        >>> dates = generate_date_list('19810525', '20100525', interval='years')
+        >>> file_tmplt = '/path/to/obs/%Y/%m/%d/tmean_05d_%Y%m%d.bin'
+        >>> data_type = 'bin'
+        >>> grid = Grid('1deg-global')
+        >>> obs_data = load_obs(dates, file_tmplt, data_type, grid) # doctest: +SKIP
+    """
     # --------------------------------------------------------------------------
     # Initialize a NumPy array to store the data
     #
