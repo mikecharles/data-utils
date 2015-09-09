@@ -254,8 +254,11 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
 
     # Convert ptiles and thresholds into NumPy arrays
     desired_output_thresholds = numpy.array(desired_output_thresholds)
-    if climo_ptiles:
+    try:
         climo_ptiles = numpy.array(climo_ptiles)
+    except ValueError:
+        raise ValueError('climo_ptiles must be defined as a list (or NumPy '
+                         'array) of percentiles between 0 and 100')
 
     # Open obs binary file
     obs_data = numpy.fromfile(bin_file, dtype='float32')
