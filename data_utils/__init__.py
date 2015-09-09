@@ -8,4 +8,3 @@ with utilities including data conversion, interpolation, plotting, etc.
 with utilities including data conversion, interpolation, plotting, etc.
 
 """
-__version__ = '0.9'
