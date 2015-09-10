@@ -276,8 +276,8 @@ def obs_bin_to_txt(bin_file, grid, desired_output_thresholds, txt_file,
 
         # Convert observations to percentiles
         k = 1.343
-        obs_ptile_data = full_fields_to_ptiles(obs_data, climo_data,
-                                               climo_ptiles/100, k)
+        obs_ptile_data = 100 * full_fields_to_ptiles(obs_data, climo_data,
+                                                     climo_ptiles/100, k)
 
         # Reshape obs data
         obs_ptile_data = numpy.reshape(obs_ptile_data, (grid.num_y, grid.num_x))  # Reshape data
