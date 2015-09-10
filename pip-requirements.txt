@@ -4,3 +4,4 @@ matplotlib>=1.4.3
 basemap>=1.0.7
 pyyaml>=3.11
 stats-utils
+palettable>=2.1.1
