@@ -13,7 +13,7 @@ from .reading import read_grib
 from string_utils.strings import replace_vars_in_string
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('root')
 
 
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,

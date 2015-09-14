@@ -12,7 +12,7 @@ import numpy
 
 
 # Initialize a logging object specific to this module
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('root')
 
 
 def read_grib(file, grib_type, variable, level, yrev=False):
