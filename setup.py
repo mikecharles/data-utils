@@ -90,7 +90,8 @@ setup(
         'matplotlib>=1.4.3',
         'basemap>=1.0.7',
         'pyyaml>=3.11',
-        'stats-utils>=1.2'
+        'stats-utils>=1.2',
+        'palettable>=2.1.1'
     ],
     tests_require=['pytest'],
     cmdclass={
