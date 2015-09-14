@@ -80,26 +80,37 @@ def read_grib(file, grib_type, variable, level, yrev=False):
                      '-bin -o "{}"'.format(file, variable, level, file,
                                            temp_file)
     elif grib_type == 'grib2':
+        # Note that the binary data is written to stdout
         wgrib_call = 'wgrib2 "{}" -match "{}" -match "{}" -end -order we:sn ' \
-                     '-no_header -bin "{}"'.format(file, variable, level,
-                                                   temp_file)
+                     '-no_header -inv /dev/null -bin -'.format(file,
+                                                               variable, level)
     else:
         raise IOError(__name__ + ' requires grib_type to be grib1 or grib2')
     # Generate a wgrib call
     try:
         logger.debug('Command to extract grib data: ' + wgrib_call)
-        output = subprocess.call(wgrib_call, shell=True,
-                                 stderr=subprocess.DEVNULL,
-                                 stdout=subprocess.DEVNULL)
+        if grib_type == 'grib1':
+            output = subprocess.call(wgrib_call, shell=True,
+                                     stderr=subprocess.DEVNULL,
+                                     stdout=subprocess.DEVNULL)
+        else:
+            proc = subprocess.Popen(wgrib_call, shell=True,
+                                      stderr=subprocess.DEVNULL,
+                                      stdout=subprocess.PIPE)
     except Exception as e:
-        os.remove(temp_file)
+        if grib_type == 'grib1':
+            os.remove(temp_file)
         raise IOError('Couldn\'t read {} file: {}'.format(grib_type, str(e)))
     # Read in the binary data
-    data = numpy.fromfile(temp_file, dtype=numpy.float32)
+    if grib_type == 'grib1':
+        data = numpy.fromfile(temp_file, dtype=numpy.float32)
+    else:
+        data = numpy.frombuffer(bytearray(proc.stdout.read()), dtype='float32')
     if data.size == 0:
         raise Exception('No grib record found')
     # Delete the temporary file
-    os.remove(temp_file)
+    if grib_type == 'grib1':
+        os.remove(temp_file)
     # Flip the data in the y-dimension (if necessary)
     if yrev:
         # Reshape into 2 dimensions
