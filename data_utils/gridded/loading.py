@@ -143,6 +143,14 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                                                     level)
                     except OSError:
                         data_f[f] = np.nan
+                elif data_type == 'bin':
+                    # Open file and read the appropriate data
+                    try:
+                        # Read in one forecast hour, one member
+                        logger.debug('Loading data from {}'.format(file))
+                        data_f[f] = np.fromfile(file, dtype='float32')
+                    except:
+                        data_f[f] = np.nan
             # ------------------------------------------------------------------
             # Calculate stat (mean, total) across fhr
             #
