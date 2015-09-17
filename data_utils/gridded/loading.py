@@ -94,14 +94,14 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     # Initialize data arrays
     #
     data_f = np.empty((len(range(fhr_range[0], fhr_range[1] + 1, fhr_int)),
-                       grid.num_y * grid.num_x))
+                       grid.num_y * grid.num_x)) * np.nan
     # If collapse==True, then we need a temp data_m array to store the
     # separate ensemble members before averaging, and we need mean and spread
     # arrays
     if collapse:
-        data_m = np.empty((num_members, grid.num_y * grid.num_x))
-        ens_mean = np.empty((len(dates), grid.num_y * grid.num_x))
-        ens_spread = np.empty((len(dates), grid.num_y * grid.num_x))
+        data_m = np.empty((num_members, grid.num_y * grid.num_x)) * np.nan
+        ens_mean = np.empty((len(dates), grid.num_y * grid.num_x)) * np.nan
+        ens_spread = np.empty((len(dates), grid.num_y * grid.num_x)) * np.nan
     # If collapse==False, then we need a single data array to store the
     # separate ensemble members
     else:
