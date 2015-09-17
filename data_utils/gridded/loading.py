@@ -222,7 +222,7 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
     # Loop over dates
     #
     for d, date in enumerate(dates):
-        logger.debug('Loading data from {}'.format(date))
+        logger.debug('Date: {}'.format(date))
         # ----------------------------------------------------------------------
         # Convert file template to real file
         #
@@ -231,6 +231,7 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
         # ----------------------------------------------------------------------
         # Open file and read the appropriate data
         #
+        logger.debug('Loading data from {}'.format(file))
         try:
             data[d] = np.fromfile(file, 'float32')
         except FileNotFoundError:
