@@ -137,6 +137,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                 # grib1 or grib2
                 if data_type in ['grib1', 'grib2']:
                     # Open file and read the appropriate data
+                    logger.debug('Loading data from {}...'.format(file))
                     try:
                         # Read in one forecast hour, one member
                         data_f[f] = read_grib(file, data_type, variable,
@@ -144,10 +145,10 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                     except OSError:
                         data_f[f] = np.nan
                 elif data_type == 'bin':
+                    logger.debug('Loading data from {}...'.format(file))
                     # Open file and read the appropriate data
                     try:
                         # Read in one forecast hour, one member
-                        logger.debug('Loading data from {}'.format(file))
                         data_f[f] = np.fromfile(file, dtype='float32')
                     except:
                         data_f[f] = np.nan
