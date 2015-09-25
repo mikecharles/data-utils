@@ -48,7 +48,7 @@ def read_grib(file, grib_type, variable, level, yrev=False):
     ------
     - IOError
         - If wgrib has a problem reading the grib and/or writing the temp file
-    - Exception
+    - IOError
         - If no grib record is found
 
     Examples
@@ -107,7 +107,7 @@ def read_grib(file, grib_type, variable, level, yrev=False):
     else:
         data = numpy.frombuffer(bytearray(proc.stdout.read()), dtype='float32')
     if data.size == 0:
-        raise Exception('No grib record found')
+        raise IOError('No grib record found')
     # Delete the temporary file
     if grib_type == 'grib1':
         os.remove(temp_file)
