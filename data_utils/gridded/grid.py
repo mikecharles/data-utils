@@ -111,8 +111,8 @@ class Grid:
             self.type = 'latlon'
         elif name == '0.5deg-global':
             self.name = name
-            self.ll_corner = (-89.75, 0.25)
-            self.ur_corner = (89.75, 359.75)
+            self.ll_corner = (-90, 0)
+            self.ur_corner = (90, 359.5)
             self.res = 0.5
             self.type = 'latlon'
         # Otherwise create a custom grid definition
