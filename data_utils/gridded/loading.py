@@ -18,7 +18,7 @@ logger = logging.getLogger('root')
 
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
-                   fhr_int=6, fhr_stat='mean', collapse=False):
+                   fhr_int=6, fhr_stat='mean', collapse=False, yrev=False):
     """
     Loads ensemble forecast data
 
@@ -50,6 +50,8 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     range (mean [default], sum)
     - collapse - *boolean* - collapse the array so that the ensemble member
     information is summarized (default: False)
+    - yrev - *boolean* - whether fcst data is reversed in the y-direction (
+    default: False)
 
     Returns
     -------
@@ -123,6 +125,9 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
             #
             for f, fhr in enumerate(range(fhr_range[0], fhr_range[1]+1,
                                           fhr_int)):
+                # Grep for the fhr hour in case there are any duplicate grib
+                # records (same var, different fhr)
+                grep_fhr = '{:d}hr'.format(fhr)
                 fhr = '{:03d}'.format(fhr)
                 logger.debug('    Fhr: {}'.format(fhr))
                 # --------------------------------------------------------------
@@ -141,7 +146,8 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                     try:
                         # Read in one forecast hour, one member
                         data_f[f] = read_grib(file, data_type, variable,
-                                                    level)
+                                              level, grep_fhr=grep_fhr,
+                                              grid=grid, yrev=yrev)
                     except OSError:
                         data_f[f] = np.nan
                 elif data_type == 'bin':

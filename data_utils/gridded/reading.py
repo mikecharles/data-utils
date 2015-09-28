@@ -10,12 +10,15 @@ import logging
 
 import numpy
 
+from data_utils.gridded.grid import Grid
+
 
 # Initialize a logging object specific to this module
 logger = logging.getLogger('root')
 
 
-def read_grib(file, grib_type, variable, level, yrev=False, grep_fhr=None):
+def read_grib(file, grib_type, variable, level, grid=None, yrev=False,
+              grep_fhr=None):
     """
     Reads a record from a grib file
 
@@ -36,6 +39,8 @@ def read_grib(file, grib_type, variable, level, yrev=False, grep_fhr=None):
         - Name of the variable in the grib record (ex. TMP, UGRD, etc.)
     - level (string)
         - Name of the level (ex. '2 m above ground', '850 mb', etc.)
+    - grid (Grid)
+        - Grid object the data is defined on
     - yrev (optional)
         - Option to flip the data in the y-direction
     - grep_fhr (optional)
@@ -123,7 +128,15 @@ def read_grib(file, grib_type, variable, level, yrev=False, grep_fhr=None):
     # Flip the data in the y-dimension (if necessary)
     if yrev:
         # Reshape into 2 dimensions
-        data = numpy.reshape(data, ())
+        try:
+            data = numpy.reshape(data, (grid.num_y, grid.num_x))
+        except AttributeError:
+            raise ValueError('The \'yrev\' parameter requires that the '
+                             '\'grid\' parameter be defined')
+        # Flip
+        data = numpy.flipud(data)
+        # Reshape back into 1 dimension
+        data = numpy.reshape(data, data.size)
     # Return data
     return data
 
