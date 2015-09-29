@@ -163,23 +163,40 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
             #
             if fhr_stat == 'mean':
                 if collapse:
-                    data_m[m] = np.nanmean(data_f, axis=0)
+                    if np.all(np.isnan(data_f)):
+                        data_m[m] = np.empty(data_f.shape[1]) * np.nan
+                    else:
+                        data_m[m] = np.nanmean(data_f, axis=0)
                 else:
-                    data[d, m] = np.nanmean(data_f, axis=0)
+                    if np.all(np.isnan(data_f)):
+                        data[d, m] = np.empty(data_f.shape[1]) * np.nan
+                    else:
+                        data[d, m] = np.nanmean(data_f, axis=0)
             elif fhr_stat == 'sum':
                 if collapse:
-                    data_m[m] = np.nansum(data_f, axis=0)
+                    if np.all(np.isnan(data_f)):
+                        data_m[m] = np.empty(data_f.shape[1]) * np.nan
+                    else:
+                        data_m[m] = np.nansum(data_f, axis=0)
                 else:
-                    data[d, m] = np.nansum(data_f, axis=0)
+                    if np.all(np.isnan(data_f)):
+                        data[d, m] = np.empty(data_f.shape[1]) * np.nan
+                    else:
+                        data[d, m] = np.nansum(data_f, axis=0)
             else:
                 raise ValueError('Supported fhr_stat values: mean, sum')
         # ----------------------------------------------------------------------
         # Calculate ensemble mean and spread (if collapse==True)
         #
         # TODO: Add QCing
+        # import pdb ; pdb.set_trace()
         if collapse:
-            ens_mean[d] = np.nanmean(data_m, axis=0)
-            ens_spread[d] = np.nanstd(data_m, axis=0)
+            if np.all(np.isnan(data_m)):
+                ens_mean[d] = np.empty(data_m.shape[0]) * np.nan
+                ens_spread[d] = np.empty(data_m.shape[0]) * np.nan
+            else:
+                ens_mean[d] = np.nanmean(data_m, axis=0)
+                ens_spread[d] = np.nanstd(data_m, axis=0)
 
     # --------------------------------------------------------------------------
     # Return the data
