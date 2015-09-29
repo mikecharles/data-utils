@@ -142,7 +142,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                 # Grep for the fhr hour in case there are any duplicate grib
                 # records (same var, different fhr)
                 if remove_dup_fhrs is not None:
-                    grep_fhr = ':{:d}'.format(fhr)
+                    grep_fhr = ':anl' if fhr == 0 else ':{:d}'.format(fhr)
                 else:
                     grep_fhr = None
                 fhr = '{:03d}'.format(fhr)
