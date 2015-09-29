@@ -93,6 +93,12 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     if not num_members:
         raise ValueError('num_members is required')
     # --------------------------------------------------------------------------
+    # variable and level are required for data_type = grib1/grib2
+    #
+    if data_type in ['grib1', 'grib2']:
+        if not (variable and level):
+            raise ValueError('variable and level are required for grib data')
+    # --------------------------------------------------------------------------
     # Initialize data arrays
     #
     data_f = np.empty((len(range(fhr_range[0], fhr_range[1] + 1, fhr_int)),
