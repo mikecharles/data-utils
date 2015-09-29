@@ -18,7 +18,8 @@ logger = logging.getLogger('root')
 
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
-                   fhr_int=6, fhr_stat='mean', collapse=False, yrev=False):
+                   fhr_int=6, fhr_stat='mean', collapse=False, yrev=False,
+                   remove_dup_fhrs=None):
     """
     Loads ensemble forecast data
 
@@ -52,6 +53,12 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     information is summarized (default: False)
     - yrev - *boolean* - whether fcst data is reversed in the y-direction (
     default: False)
+    - remove_dup_fhrs - *boolean* (optional) - remove potential duplicate
+    fhrs from the grib files - sets the `grep_fhr` parameter to the current
+    fhr when calling `read_grib()`,  which greps for the fhr in the given
+    grib file - this is useful for gribs that may for some reason have
+    duplicate records for a given variable but with different fhrs. This way you
+    can get the record for the correct fhr.
 
     Returns
     -------
@@ -75,8 +82,9 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
         >>> from data_utils.gridded.grid import Grid
         >>> from data_utils.gridded.loading import load_obs
         >>> dates = generate_date_list('19810525', '20100525', interval='years')
-        >>> file_tmplt = '/path/to/obs/%Y/%m/%d/tmean_05d_%Y%m%d.bin'
-        >>> data_type = 'bin'
+        >>> file_tmplt = '/path/to/fcsts/%Y/%m/%d/gefs_%Y%m%d_00z_f{fhr}_m{'
+        ... 'member}.grb'
+        >>> data_type = 'grib2'
         >>> grid = Grid('1deg-global')
         >>> variable = 'TMP'
         >>> level = '2 m above ground'
@@ -133,7 +141,10 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                                           fhr_int)):
                 # Grep for the fhr hour in case there are any duplicate grib
                 # records (same var, different fhr)
-                grep_fhr = ':{:d}'.format(fhr)
+                if remove_dup_fhrs is not None:
+                    grep_fhr = ':{:d}'.format(fhr)
+                else:
+                    grep_fhr = None
                 fhr = '{:03d}'.format(fhr)
                 logger.debug('    Fhr: {}'.format(fhr))
                 # --------------------------------------------------------------
