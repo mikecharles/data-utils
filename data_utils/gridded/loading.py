@@ -209,8 +209,8 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
         # import pdb ; pdb.set_trace()
         if collapse:
             if np.all(np.isnan(data_m)):
-                ens_mean[d] = np.empty(data_m.shape[0]) * np.nan
-                ens_spread[d] = np.empty(data_m.shape[0]) * np.nan
+                ens_mean[d] = np.empty(data_m.shape[1]) * np.nan
+                ens_spread[d] = np.empty(data_m.shape[1]) * np.nan
             else:
                 ens_mean[d] = np.nanmean(data_m, axis=0)
                 ens_spread[d] = np.nanstd(data_m, axis=0)
