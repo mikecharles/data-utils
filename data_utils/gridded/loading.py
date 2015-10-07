@@ -38,7 +38,9 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
 
     - dates - *list of strings* - list of dates in YYYYMMDD format
     - file_template - *string* - file template containing date formats and
-    bracketed variables
+    any of the following supported bracketed variables: {fhr}, {member} -
+    these are replaced with the appropriate fhr and member when looping over
+    files within the fhr_range and num_members.
     - data_type - *string* - input data type (bin, grib1, grib2)
     - grid - *Grid* - Grid associated with the input data
     - num_members - *int* - number of ensemble members to read int
