@@ -109,6 +109,11 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
         if not (variable and level):
             raise ValueError('variable and level are required for grib data')
     # --------------------------------------------------------------------------
+    # Make sure dates is a list
+    #
+    if not isinstance(dates, list):
+        dates = [dates]
+    # --------------------------------------------------------------------------
     # Initialize data arrays
     #
     data_f = np.empty((len(range(fhr_range[0], fhr_range[1] + 1, fhr_int)),
@@ -269,6 +274,11 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
     # Initialize a NumPy array to store the data
     #
     data = np.empty((len(dates), grid.num_y * grid.num_x))
+    # --------------------------------------------------------------------------
+    # Make sure dates is a list
+    #
+    if not isinstance(dates, list):
+        dates = [dates]
     # --------------------------------------------------------------------------
     # Loop over dates
     #
