@@ -33,11 +33,14 @@ class Grid:
     which case the name must match one of the following:
 
     1. 1/6th-deg-global
-    2. 0.5deg-global
-    3. 1deg-global
-    4. 2deg-global
-    5. 2.5deg-global
-    6. 2deg-conus
+    2. 0.5deg-global-edge-aligned - note that this grid has the grid box edge
+       aligned with even intervals
+    3. 0.5-deg-global (or 0.5-deg-global-center-aligned) - note that this grid
+       has the grid box center aligned with even intervals 
+    4. 1deg-global
+    5. 2deg-global
+    6. 2.5deg-global
+    7. 2deg-conus
 
     or by providing the other attributes listed below
 
@@ -109,7 +112,13 @@ class Grid:
             self.ur_corner = (89.9167, 359.9167)
             self.res = 1/6
             self.type = 'latlon'
-        elif name == '0.5deg-global':
+        elif name == '0.5deg-global' or name == '0.5-deg-global-center-aligned':
+            self.name = name
+            self.ll_corner = (-89.75, 0.25)
+            self.ur_corner = (89.75, 359.75)
+            self.res = 0.5
+            self.type = 'latlon'
+        elif name == '0.5deg-global-edge-aligned':
             self.name = name
             self.ll_corner = (-90, 0)
             self.ur_corner = (90, 359.5)
