@@ -301,3 +301,81 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
     # Return data
     #
     return data
+
+
+def load_climos(years, days, file_template, grid):
+    """
+    Load climatology data
+
+    Data is loaded over a given range of years, and for a given range of days
+    of the year. Currently the data must be in binary format with the
+    dimensions (ptiles x gridpoints)
+
+    Parameters
+    ----------
+
+    - years - *list of strings* - list of years to load (eg. [1980, 1981, 1982])
+    - days - *list of strings* - list of days of the year to load - must be
+    formatted as MMDD (eg. [0501, 0502, 0503, 0504, 0505])
+    - file_template - *string* - file template containing date formats and
+    bracketed variables. Date formatting (eg. %Y%m%d) will be converted into
+    the given date.
+    - grid - *Grid* - Grid associated with the input data
+
+    Returns
+    -------
+
+    *NumPy array* - array of climatology data (days x ptiles x gridpoint)
+
+    Examples
+    --------
+
+    Load observations for a given month/day from 1981-2010
+
+        >>> from string_utils.dates import generate_date_list
+        >>> from data_utils.gridded.grid import Grid
+        >>> from data_utils.gridded.loading import load_climos
+        >>> years = generate_date_list('1986', '2010', interval='years')
+        >>> days = generate_date_list('20010525', '20010531', interval='days')
+        >>> file_tmplt = '/path/to/climos/tmean_clim_poe_05d_%m%d.bin'
+        >>> grid = Grid('1deg-global')
+        >>> climo_data = load_obs(years, days, file_tmplt, grid) #doctest: +SKIP
+    """
+    # --------------------------------------------------------------------------
+    # Make sure dates is a list
+    #
+    if not isinstance(days, list):
+        days = [days]
+    # --------------------------------------------------------------------------
+    # Initialize a NumPy array to store the data
+    #
+    # Open first file to determine num ptiles
+    date_obj = datetime.strptime(years[0] + days[0], '%Y%m%d')
+    file = datetime.strftime(date_obj, file_template)
+    data = np.fromfile(file, 'float32')
+    num_ptiles = int(data.size / (grid.num_y * grid.num_x))
+    # Initialize empty NumPy array
+    data = np.empty((len(days), num_ptiles, grid.num_y * grid.num_x))
+    # --------------------------------------------------------------------------
+    # Loop over dates
+    #
+    for d, day in enumerate(days):
+        logger.debug('Day: {}'.format(day))
+        # ----------------------------------------------------------------------
+        # Convert file template to real file
+        #
+        date_obj = datetime.strptime('2001'+day, '%Y%m%d')
+        file = datetime.strftime(date_obj, file_template)
+        # ----------------------------------------------------------------------
+        # Open file and read the appropriate data
+        #
+        logger.debug('Loading data from {}'.format(file))
+        try:
+            data[d] = np.fromfile(file, 'float32').reshape(
+                num_ptiles, grid.num_y * grid.num_x)
+        except FileNotFoundError:
+            data[d] = np.nan
+    # --------------------------------------------------------------------------
+    # Return data
+    #
+    return data
