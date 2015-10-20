@@ -646,12 +646,14 @@ def _put_terciles_in_one_array(below, near, above):
     # Make an empty array to store above, near, and below
     all_probs = np.empty(below.shape)
     all_probs[:] = np.nan
-    # Insert belows where they are the winning category and above 33%
-    all_probs = np.where((below > 0.333) & (below > above), -1*below, all_probs)
-    # Insert aboves where they are the winning category and above 33%
-    all_probs = np.where((above > 0.333) & (above > below), above, all_probs)
-    # Insert nears where neither above or below are above 33%
-    all_probs = np.where((below <= 0.333) & (above <= 0.333), 0, all_probs)
+    with np.errstate(invalid='ignore'):
+        # Insert belows where they are the winning category and above 33%
+        all_probs = np.where((below > 0.333) & (below > above), -1*below,
+                             all_probs)
+        # Insert aboves where they are the winning category and above 33%
+        all_probs = np.where((above > 0.333) & (above > below), above, all_probs)
+        # Insert nears where neither above or below are above 33%
+        all_probs = np.where((below <= 0.333) & (above <= 0.333), 0, all_probs)
     # Return all_probs
     return all_probs
 
