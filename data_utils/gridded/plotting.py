@@ -715,19 +715,3 @@ plot_tercile_probs_to_file.__doc__ = \
     plot_tercile_probs_to_file.__doc__.format(_docstring_kwargs)
 plot_tercile_probs_to_screen.__doc__ = \
     plot_tercile_probs_to_screen.__doc__.format(_docstring_kwargs)
-
-if __name__ == '__main__':
-    from data_utils.gridded.plotting import plot_tercile_probs_to_file
-    from data_utils.gridded.grid import Grid
-    from mpp.poe import poe_to_terciles
-    from pkg_resources import resource_filename
-    import numpy as np
-    ptiles = [1,  2,  5, 10, 15, 20, 25, 33, 40, 50, 60, 67, 75, 80, 85, 90,
-              95,  98, 99]
-    grid = Grid('2deg-conus')
-    data = np.fromfile(resource_filename('data_utils',
-                                         'lib/example-tmean-fcst.bin'), dtype='float32')
-    data = np.reshape(data, (len(ptiles), grid.num_y * grid.num_x))
-    below, near, above = poe_to_terciles(data, ptiles)
-    plot_tercile_probs_to_file(below, near, above, grid, 'out.png',
-                               colors='precip-terciles')
