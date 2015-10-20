@@ -288,14 +288,14 @@ def load_obs(dates, file_template, data_type, grid, record_num=None,
     else:
         logger.setLevel(logging.INFO)
     # --------------------------------------------------------------------------
-    # Initialize a NumPy array to store the data
-    #
-    data = np.empty((len(dates), grid.num_y * grid.num_x))
-    # --------------------------------------------------------------------------
     # Make sure dates is a list
     #
     if not isinstance(dates, list):
         dates = [dates]
+    # --------------------------------------------------------------------------
+    # Initialize a NumPy array to store the data
+    #
+    data = np.empty((len(dates), grid.num_y * grid.num_x))
     # --------------------------------------------------------------------------
     # Loop over dates
     #
