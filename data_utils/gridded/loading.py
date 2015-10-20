@@ -124,8 +124,11 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     # --------------------------------------------------------------------------
     # Initialize data arrays
     #
-    data_f = np.empty((len(range(fhr_range[0], fhr_range[1] + 1, fhr_int)),
-                       grid.num_y * grid.num_x)) * np.nan
+    with np.errstate(invalid='ignore'):
+        data_f = np.empty(
+            (len(range(fhr_range[0], fhr_range[1] + 1, fhr_int)), grid.num_y
+             * grid.num_x)
+        ) * np.nan
     # If collapse==True, then we need a temp data_m array to store the
     # separate ensemble members before averaging, and we need mean and spread
     # arrays
