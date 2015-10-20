@@ -17,6 +17,7 @@ from data_utils.gridded.interpolation import interpolate
 from data_utils.gridded.grid import Grid
 from data_utils.gridded.interpolation import fill_outside_mask_borders
 from data_utils.gridded.interpolation import smooth
+import warnings
 
 # ------------------------------------------------------------------------------
 # Setup logging
@@ -211,7 +212,12 @@ def _make_plot(*args, **kwargs):
                                              ax=ax, resolution='l')
         # Draw political boundaries
         m.drawcountries(linewidth=0.5)
-        m.drawcoastlines(0.5)
+        # TODO: Remove this once Matplotlib is updated to version 1.5,
+        # which fixes this bug (see
+        # https://github.com/matplotlib/matplotlib/issues/5209)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            m.drawcoastlines(0.5)
         if region in ['US', 'CONUS']:
             m.readshapefile(resource_filename('data_utils', 'lib/states'),
                             name='states', drawbounds=True)
