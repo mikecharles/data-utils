@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# Get PyPI repo name (optional)
+if [ -n "$1" ]; then
+  pypi_repo="$1"
+  pypi_repo_str="-r $1"
+else
+  pypi_repo="pypi.python.org"
+  pypi_repo_str=""
+fi
+
 # Define some colors for echos
 RED='\033[38;5;160m'
 GREEN='\033[38;5;2m'
@@ -60,3 +69,6 @@ git commit -m "Update package version"
 
 # Make a git tag for this version
 git tag -a $new_version
+
+# Upload to PyPI
+python setup.py sdist upload $pypi_repo_str
