@@ -73,6 +73,7 @@ while [[ $new_version = '' ]] ; do
   read new_version
 done
 
+# Print confirmation text
 echo "${YELLOW}This script will update the VERSION file, create a"
 echo "new git commit and tag, and upload a new package to"
 echo "the $pypi_repo repo. Do you confirm? (${GREEN}y${YELLOW}/[${RED}n${YELLOW}])${NOCOLOR}"
