@@ -10,6 +10,12 @@ if [[ "$PWD" != "$script_path" ]]; then
   exit 1
 fi
 
+# Only run if git reports nothing changed
+if [[ -n "$(git status --porcelain)" ]] ; then
+  echo "Git reports 1 or more files changed, please commit all changes before running this script"
+  exit 1
+fi
+
 # Set the path/name of the VERSION file
 version_file="$script_path/VERSION"
 
