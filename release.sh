@@ -28,6 +28,14 @@ new_version=''
 while [[ $new_version = '' ]] ; do
   echo "Enter the new version:"
   read new_version
+  echo "Release version $new_version? (y/[n])"
+  read confirm
+  if [[ "$confirm" =~ ^[Yy]$ ]] ; then
+    break
+  else
+    echo "Aborting release..."
+    exit 0
+  fi
 done
 
 echo "Updating package to version $new_version"
