@@ -48,15 +48,18 @@ new_version=''
 while [[ $new_version = '' ]] ; do
   printf "${BLUE}Enter the new version: ${NOCOLOR}"
   read new_version
-  echo "${BLUE}Release version $new_version? (${GREEN}y${BLUE}/[${RED}n${BLUE}])${NOCOLOR}"
-  read confirm
-  if [[ "$confirm" =~ ^[Yy]$ ]] ; then
-    break
-  else
-    echo "${RED}Aborting release...${NOCOLOR}"
-    exit 0
-  fi
 done
+
+echo "${YELLOW}This script will update the VERSION file, create a"
+echo "new git commit and tag, and upload a new package to"
+echo "the $pypi_repo repo. Do you confirm? (${GREEN}y${YELLOW}/[${RED}n${YELLOW}])${NOCOLOR}"
+read confirm
+if [[ "$confirm" =~ ^[Yy]$ ]] ; then
+  break
+else
+  echo "${RED}Aborting release...${NOCOLOR}"
+  exit 0
+fi
 
 echo "${GREEN}Updating package to version ${new_version}${NOCOLOR}"
 
