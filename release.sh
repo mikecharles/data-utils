@@ -1,5 +1,28 @@
 #!/bin/sh
 
+# Usage
+usage() {
+  echo "$(basename "$0") [-h] [PYPIREPO]"
+  echo "  where:"
+  echo "    -h        show this help text:"
+  echo "    PYPIREPO  optional PyPI repo (defaults to pypi.org)"
+}
+
+# Check command-line args
+while getopts ':h' option; do
+  case "$option" in
+    h)
+      usage
+      exit
+      ;;
+   \?) printf "Invalid option: -%s\n" "$OPTARG" >&2
+       usage >&2
+       exit 1
+       ;;
+  esac
+done
+shift $((OPTIND - 1))
+
 # Get PyPI repo name (optional)
 if [ -n "$1" ]; then
   pypi_repo="$1"
