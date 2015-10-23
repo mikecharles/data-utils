@@ -78,13 +78,14 @@ echo "${YELLOW}This script will update the VERSION file, create a"
 echo "new git commit and tag, and upload a new package to"
 echo "the $pypi_repo repo. Do you confirm? (${GREEN}y${YELLOW}/[${RED}n${YELLOW}])${NOCOLOR}"
 read confirm
+
+# Get confirmation to proceed or not
 if [[ "$confirm" =~ ^[Yy]$ ]] ; then
   break
 else
   echo "${RED}Aborting release...${NOCOLOR}"
   exit 0
 fi
-
 echo "${GREEN}Updating package to version ${new_version}${NOCOLOR}"
 
 # Update version in VERSION file
