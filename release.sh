@@ -57,3 +57,6 @@ echo $new_version > $version_file
 # Make a git commit with the updated VERSION file
 git add $version_file
 git commit -m "Update package version"
+
+# Make a git tag for this version
+git tag -a $new_version
