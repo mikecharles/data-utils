@@ -1,5 +1,16 @@
 #!/bin/sh
 
+# Define some colors for echos
+RED='\033[38;5;160m'
+GREEN='\033[38;5;2m'
+YELLOW='\033[38;5;3m'
+BLUE='\033[38;5;39m'
+MAGENTA='\033[38;5;5m'
+CYAN='\033[38;5;6m'
+WHITE='\033[38;5;7m'
+BLACK='\033[38;5;8m'
+NOCOLOR='\033[m'
+
 # Get name and path of this script
 script_name="$(basename "$0")"
 script_path="$(cd "$(dirname "$0")" && pwd)"
@@ -21,24 +32,24 @@ version_file="$script_path/VERSION"
 
 # Get the current version
 current_version=$(cat $version_file)
-echo "Current version: $current_version\n"
+echo "${BLUE}Current version: $current_version\n${NOCOLOR}"
 
 # Prompt user for the new version
 new_version=''
 while [[ $new_version = '' ]] ; do
-  echo "Enter the new version:"
+  echo "${BLUE}Enter the new version:${NOCOLOR}"
   read new_version
-  echo "Release version $new_version? (y/[n])"
+  echo "${BLUE}Release version $new_version? (${GREEN}y${BLUE}/[${RED}n${BLUE}])${NOCOLOR}"
   read confirm
   if [[ "$confirm" =~ ^[Yy]$ ]] ; then
     break
   else
-    echo "Aborting release..."
+    echo "${RED}Aborting release...${NOCOLOR}"
     exit 0
   fi
 done
 
-echo "Updating package to version $new_version"
+echo "${GREEN}Updating package to version ${new_version}${NOCOLOR}"
 
 # Update version in VERSION file
 echo $new_version > $version_file
