@@ -32,12 +32,12 @@ version_file="$script_path/VERSION"
 
 # Get the current version
 current_version=$(cat $version_file)
-echo "${BLUE}Current version: $current_version\n${NOCOLOR}"
+echo "${BLUE}Current version:${NOCOLOR} $current_version"
 
 # Prompt user for the new version
 new_version=''
 while [[ $new_version = '' ]] ; do
-  echo "${BLUE}Enter the new version:${NOCOLOR}"
+  printf "${BLUE}Enter the new version: ${NOCOLOR}"
   read new_version
   echo "${BLUE}Release version $new_version? (${GREEN}y${BLUE}/[${RED}n${BLUE}])${NOCOLOR}"
   read confirm
