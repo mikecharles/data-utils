@@ -19,7 +19,7 @@ logger = logging.getLogger('root')
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
                    fhr_int=6, fhr_stat='mean', collapse=False, yrev=False,
-                   remove_dup_fhrs=None):
+                   remove_dup_fhrs=None, debug=False):
     """
     Loads ensemble forecast data
 
@@ -61,6 +61,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     grib file - this is useful for gribs that may for some reason have
     duplicate records for a given variable but with different fhrs. This way you
     can get the record for the correct fhr.
+    - debug - *boolean* (optional) - print debug lines
 
     Returns
     -------
@@ -98,6 +99,13 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
         ...            collapse=True)  # doctest: +SKIP
     """
     # --------------------------------------------------------------------------
+    # Enable debug logging if necessary
+    #
+    if debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+    # --------------------------------------------------------------------------
     # num_members is required
     #
     if not num_members:
@@ -116,8 +124,11 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     # --------------------------------------------------------------------------
     # Initialize data arrays
     #
-    data_f = np.empty((len(range(fhr_range[0], fhr_range[1] + 1, fhr_int)),
-                       grid.num_y * grid.num_x)) * np.nan
+    with np.errstate(invalid='ignore'):
+        data_f = np.empty(
+            (len(range(fhr_range[0], fhr_range[1] + 1, fhr_int)), grid.num_y
+             * grid.num_x)
+        ) * np.nan
     # If collapse==True, then we need a temp data_m array to store the
     # separate ensemble members before averaging, and we need mean and spread
     # arrays
@@ -231,7 +242,8 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
         return data
 
 
-def load_obs(dates, file_template, data_type, grid, record_num=None):
+def load_obs(dates, file_template, data_type, grid, record_num=None,
+             debug=False):
     """
     Load observation data
 
@@ -250,6 +262,7 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
     - data_type - *string* - input data type (bin, grib1, grib2)
     - grid - *Grid* - Grid associated with the input data
     - record_num - *int* - binary record containing the desired variable
+    - debug - *boolean* (optional) - print debug lines
 
     Returns
     -------
@@ -271,14 +284,21 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
         >>> obs_data = load_obs(dates, file_tmplt, data_type, grid) # doctest: +SKIP
     """
     # --------------------------------------------------------------------------
-    # Initialize a NumPy array to store the data
+    # Enable debug logging if necessary
     #
-    data = np.empty((len(dates), grid.num_y * grid.num_x))
+    if debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
     # --------------------------------------------------------------------------
     # Make sure dates is a list
     #
     if not isinstance(dates, list):
         dates = [dates]
+    # --------------------------------------------------------------------------
+    # Initialize a NumPy array to store the data
+    #
+    data = np.empty((len(dates), grid.num_y * grid.num_x))
     # --------------------------------------------------------------------------
     # Loop over dates
     #
@@ -295,6 +315,89 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
         logger.debug('Loading data from {}'.format(file))
         try:
             data[d] = np.fromfile(file, 'float32')
+        except FileNotFoundError:
+            data[d] = np.nan
+    # --------------------------------------------------------------------------
+    # Return data
+    #
+    return data
+
+
+def load_climos(days, file_template, grid, debug=False):
+    """
+    Load climatology data
+
+    Data is loaded for a given range of days of the year. Currently the data
+    must be in binary format with the dimensions (ptiles x gridpoints)
+
+    Parameters
+    ----------
+
+    - days - *list of strings* - list of days of the year to load - must be
+    formatted as MMDD (eg. [0501, 0502, 0503, 0504, 0505])
+    - file_template - *string* - file template containing date formats and
+    bracketed variables. Date formatting (eg. %Y%m%d) will be converted into
+    the given date.
+    - grid - *Grid* - Grid associated with the input data
+    - debug - *boolean* (optional) - print debug lines
+
+    Returns
+    -------
+
+    *NumPy array* - array of climatology data (days x ptiles x gridpoint)
+
+    Examples
+    --------
+
+    Load observations for a given month/day from 1981-2010
+
+        >>> from string_utils.dates import generate_date_list
+        >>> from data_utils.gridded.grid import Grid
+        >>> from data_utils.gridded.loading import load_climos
+        >>> days = generate_date_list('20010525', '20010531', interval='days')
+        >>> file_tmplt = '/path/to/climos/tmean_clim_poe_05d_%m%d.bin'
+        >>> grid = Grid('1deg-global')
+        >>> climo_data = load_obs(days, file_tmplt, grid) #doctest: +SKIP
+    """
+    # --------------------------------------------------------------------------
+    # Enable debug logging if necessary
+    #
+    if debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+    # --------------------------------------------------------------------------
+    # Make sure dates is a list
+    #
+    if not isinstance(days, list):
+        days = [days]
+    # --------------------------------------------------------------------------
+    # Initialize a NumPy array to store the data
+    #
+    # Open first file to determine num ptiles
+    date_obj = datetime.strptime('2001' + days[0], '%Y%m%d')
+    file = datetime.strftime(date_obj, file_template)
+    data = np.fromfile(file, 'float32')
+    num_ptiles = int(data.size / (grid.num_y * grid.num_x))
+    # Initialize empty NumPy array
+    data = np.empty((len(days), num_ptiles, grid.num_y * grid.num_x))
+    # --------------------------------------------------------------------------
+    # Loop over dates
+    #
+    for d, day in enumerate(days):
+        logger.debug('Day: {}'.format(day))
+        # ----------------------------------------------------------------------
+        # Convert file template to real file
+        #
+        date_obj = datetime.strptime('2001'+day, '%Y%m%d')
+        file = datetime.strftime(date_obj, file_template)
+        # ----------------------------------------------------------------------
+        # Open file and read the appropriate data
+        #
+        logger.debug('Loading data from {}'.format(file))
+        try:
+            data[d] = np.fromfile(file, 'float32').reshape(
+                num_ptiles, grid.num_y * grid.num_x)
         except FileNotFoundError:
             data[d] = np.nan
     # --------------------------------------------------------------------------

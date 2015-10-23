@@ -17,6 +17,7 @@ from data_utils.gridded.interpolation import interpolate
 from data_utils.gridded.grid import Grid
 from data_utils.gridded.interpolation import fill_outside_mask_borders
 from data_utils.gridded.interpolation import smooth
+import warnings
 
 # ------------------------------------------------------------------------------
 # Setup logging
@@ -211,7 +212,12 @@ def _make_plot(*args, **kwargs):
                                              ax=ax, resolution='l')
         # Draw political boundaries
         m.drawcountries(linewidth=0.5)
-        m.drawcoastlines(0.5)
+        # TODO: Remove this once Matplotlib is updated to version 1.5,
+        # which fixes this bug (see
+        # https://github.com/matplotlib/matplotlib/issues/5209)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            m.drawcoastlines(0.5)
         if region in ['US', 'CONUS']:
             m.readshapefile(resource_filename('data_utils', 'lib/states'),
                             name='states', drawbounds=True)
@@ -646,12 +652,14 @@ def _put_terciles_in_one_array(below, near, above):
     # Make an empty array to store above, near, and below
     all_probs = np.empty(below.shape)
     all_probs[:] = np.nan
-    # Insert belows where they are the winning category and above 33%
-    all_probs = np.where((below > 0.333) & (below > above), -1*below, all_probs)
-    # Insert aboves where they are the winning category and above 33%
-    all_probs = np.where((above > 0.333) & (above > below), above, all_probs)
-    # Insert nears where neither above or below are above 33%
-    all_probs = np.where((below <= 0.333) & (above <= 0.333), 0, all_probs)
+    with np.errstate(invalid='ignore'):
+        # Insert belows where they are the winning category and above 33%
+        all_probs = np.where((below > 0.333) & (below > above), -1*below,
+                             all_probs)
+        # Insert aboves where they are the winning category and above 33%
+        all_probs = np.where((above > 0.333) & (above > below), above, all_probs)
+        # Insert nears where neither above or below are above 33%
+        all_probs = np.where((below <= 0.333) & (above <= 0.333), 0, all_probs)
     # Return all_probs
     return all_probs
 
@@ -707,19 +715,3 @@ plot_tercile_probs_to_file.__doc__ = \
     plot_tercile_probs_to_file.__doc__.format(_docstring_kwargs)
 plot_tercile_probs_to_screen.__doc__ = \
     plot_tercile_probs_to_screen.__doc__.format(_docstring_kwargs)
-
-if __name__ == '__main__':
-    from data_utils.gridded.plotting import plot_tercile_probs_to_file
-    from data_utils.gridded.grid import Grid
-    from mpp.poe import poe_to_terciles
-    from pkg_resources import resource_filename
-    import numpy as np
-    ptiles = [1,  2,  5, 10, 15, 20, 25, 33, 40, 50, 60, 67, 75, 80, 85, 90,
-              95,  98, 99]
-    grid = Grid('2deg-conus')
-    data = np.fromfile(resource_filename('data_utils',
-                                         'lib/example-tmean-fcst.bin'), dtype='float32')
-    data = np.reshape(data, (len(ptiles), grid.num_y * grid.num_x))
-    below, near, above = poe_to_terciles(data, ptiles)
-    plot_tercile_probs_to_file(below, near, above, grid, 'out.png',
-                               colors='precip-terciles')
