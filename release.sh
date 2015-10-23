@@ -55,7 +55,7 @@ fi
 
 # Only run if git reports nothing changed
 if [[ -n "$(git status --porcelain)" ]] ; then
-  echo "Git reports 1 or more files changed, please commit all changes before running this script"
+  echo "${RED}Git reports 1 or more files changed, please commit all changes before running this script${NOCOLOR}"
   exit 1
 fi
 
