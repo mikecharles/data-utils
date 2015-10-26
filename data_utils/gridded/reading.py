@@ -6,15 +6,10 @@ import subprocess
 import shlex
 import uuid
 import os
-import logging
 
 import numpy
 
 from data_utils.gridded.grid import Grid
-
-
-# Initialize a logging object specific to this module
-logger = logging.getLogger('root')
 
 
 def read_grib(file, grib_type, variable, level, grid=None, yrev=False,
@@ -102,7 +97,6 @@ def read_grib(file, grib_type, variable, level, grid=None, yrev=False,
         raise IOError(__name__ + ' requires grib_type to be grib1 or grib2')
     # Generate a wgrib call
     try:
-        logger.debug('Command to extract grib data: ' + wgrib_call)
         if grib_type == 'grib1':
             output = subprocess.call(wgrib_call, shell=True,
                                      stderr=subprocess.DEVNULL,
