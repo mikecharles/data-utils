@@ -10,7 +10,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import scipy.ndimage
 import math
-import logging
 from pkg_resources import resource_filename
 from palettable.colorbrewer.sequential import Greens_7, YlOrBr_7, GnBu_7, BuGn_7
 from data_utils.gridded.interpolation import interpolate
@@ -19,10 +18,6 @@ from data_utils.gridded.interpolation import fill_outside_mask_borders
 from data_utils.gridded.interpolation import smooth
 import warnings
 
-# ------------------------------------------------------------------------------
-# Setup logging
-#
-logger = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------------------
 # Setup reusable docstring
@@ -107,7 +102,7 @@ def _make_plot(*args, **kwargs):
                          'argument is set')
     # Make sure either region is set, or lat_range and lon_range are set
     if lat_range and lon_range:
-        logger.warning('lat_range and lon_range will override the given region')
+        warnings.warn('lat_range and lon_range will override the given region')
     elif lat_range is None and lon_range is None:
         # Make sure region is supported
         supported_regions = ['US', 'CONUS', 'global']
@@ -189,7 +184,7 @@ def _make_plot(*args, **kwargs):
         # Warn if user provides lat_range and lon_range, which will have no
         # effect for these projections
         if lat_range or lon_range:
-            logger.warning('lat_range and lon_range have no effect for '
+            warnings.warn('lat_range and lon_range have no effect for '
                            'projection {}'.format(projection))
         # Set width, height, lat_0, and lon_0 based on region
         if not (lat_range and lon_range):
