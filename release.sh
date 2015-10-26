@@ -41,6 +41,7 @@ MAGENTA='\e[0;35m'
 CYAN='\e[0;36m'
 WHITE='\e[0;37m'
 BLACK='\e[0;38m'
+BOLDYELLOW='\e[1;33m'
 NOCOLOR='\e[m'
 
 # Get name and path of this script
@@ -76,7 +77,7 @@ done
 # Print confirmation text
 printf "${YELLOW}This script will update the VERSION file, create a\n"
 printf "new git commit and tag, and upload an updated package\n"
-printf "to the $pypi_repo repo. Do you confirm? (${GREEN}y${YELLOW}/[${RED}n${YELLOW}])${NOCOLOR}\n"
+printf "to the ${BOLDYELLOW}$pypi_repo${YELLOW} repo. Do you confirm? (${GREEN}y${YELLOW}/[${RED}n${YELLOW}])${NOCOLOR}\n"
 read confirm
 
 # Get confirmation to proceed or not
