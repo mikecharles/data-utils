@@ -2,10 +2,10 @@
 
 # Usage
 usage() {
-  echo "$(basename "$0") [-h] [PYPIREPO]"
-  echo "  where:"
-  echo "    -h        show this help text:"
-  echo "    PYPIREPO  optional PyPI repo (defaults to pypi.org)"
+  printf "$(basename "$0") [-h] [PYPIREPO]\n"
+  printf "  where:\n"
+  printf "    -h        show this help text:\n"
+  printf "    PYPIREPO  optional PyPI repo (defaults to pypi.org)\n"
 }
 
 # Check command-line args
@@ -32,7 +32,7 @@ else
   pypi_repo_str=""
 fi
 
-# Define some colors for echos
+# Define some colors for printfs
 RED='\033[38;5;1m'
 GREEN='\033[38;5;2m'
 YELLOW='\033[38;5;3m'
@@ -49,13 +49,13 @@ script_path="$(cd "$(dirname "$0")" && pwd)"
 
 # Only run from within script directory
 if [[ "$PWD" != "$script_path" ]]; then
-  echo "Please execute $script_name from inside the directory it's contained in"
+  printf "Please execute $script_name from inside the directory it's contained in\n"
   exit 1
 fi
 
 # Only run if git reports nothing changed
 if [[ -n "$(git status --porcelain)" ]] ; then
-  echo "${RED}Git reports 1 or more files changed, please commit all changes before running this script${NOCOLOR}"
+  printf "${RED}Git reports 1 or more files changed, please commit all changes before running this script${NOCOLOR}\n"
   exit 1
 fi
 
@@ -64,32 +64,32 @@ version_file="$script_path/VERSION"
 
 # Get the current version
 current_version=$(cat $version_file)
-echo "${BLUE}Current version:${NOCOLOR} $current_version"
+printf "${BLUE}Current version:${NOCOLOR} $current_version\n"
 
 # Prompt user for the new version
 new_version=''
 while [[ $new_version = '' ]] ; do
-  printf "${BLUE}Enter the new version: ${NOCOLOR}"
+  printf "${BLUE}Enter the new version: ${NOCOLOR}\n"
   read new_version
 done
 
 # Print confirmation text
-echo "${YELLOW}This script will update the VERSION file, create a"
-echo "new git commit and tag, and upload an updated package"
-echo "to the $pypi_repo repo. Do you confirm? (${GREEN}y${YELLOW}/[${RED}n${YELLOW}])${NOCOLOR}"
+printf "${YELLOW}This script will update the VERSION file, create a\n"
+printf "new git commit and tag, and upload an updated package\n"
+printf "to the $pypi_repo repo. Do you confirm? (${GREEN}y${YELLOW}/[${RED}n${YELLOW}])${NOCOLOR}\n"
 read confirm
 
 # Get confirmation to proceed or not
 if [[ "$confirm" =~ ^[Yy]$ ]] ; then
   break
 else
-  echo "${RED}Aborting release...${NOCOLOR}"
+  printf "${RED}Aborting release...${NOCOLOR}\n"
   exit 0
 fi
-echo "${GREEN}Updating package to version ${new_version}${NOCOLOR}"
+printf "${GREEN}Updating package to version ${new_version}${NOCOLOR}\n"
 
 # Update version in VERSION file
-echo $new_version > $version_file
+printf $new_version > $version_file
 
 # Make a git commit with the updated VERSION file
 git add $version_file
