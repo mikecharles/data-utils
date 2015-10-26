@@ -13,13 +13,10 @@ from .reading import read_grib
 from string_utils.strings import replace_vars_in_string
 
 
-logger = logging.getLogger('root')
-
-
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
                    fhr_int=6, fhr_stat='mean', collapse=False, yrev=False,
-                   remove_dup_fhrs=None, debug=False):
+                   remove_dup_fhrs=None):
     """
     Loads ensemble forecast data
 
@@ -61,7 +58,6 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     grib file - this is useful for gribs that may for some reason have
     duplicate records for a given variable but with different fhrs. This way you
     can get the record for the correct fhr.
-    - debug - *boolean* (optional) - print debug lines
 
     Returns
     -------
@@ -98,13 +94,6 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
         ...            fhr_range=(150, 264), num_members=num_members,  # doctest: +SKIP
         ...            collapse=True)  # doctest: +SKIP
     """
-    # --------------------------------------------------------------------------
-    # Enable debug logging if necessary
-    #
-    if debug:
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
     # --------------------------------------------------------------------------
     # num_members is required
     #
@@ -144,14 +133,12 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     # Loop over dates
     #
     for d, date in enumerate(dates):
-        logger.debug('Date: {}'.format(date))
         date_obj = datetime.strptime(date, '%Y%m%d')
         # ----------------------------------------------------------------------
         # Loop over members
         #
         for m in range(num_members):
             member = '{:02d}'.format(m)
-            logger.debug('  Member: {}'.format(member))
             # ------------------------------------------------------------------
             # Loop over fhr
             #
@@ -164,7 +151,6 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                 else:
                     grep_fhr = None
                 fhr = '{:03d}'.format(fhr)
-                logger.debug('    Fhr: {}'.format(fhr))
                 # --------------------------------------------------------------
                 # Convert file template to real file
                 #
@@ -177,7 +163,6 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                 # grib1 or grib2
                 if data_type in ['grib1', 'grib2']:
                     # Open file and read the appropriate data
-                    logger.debug('Loading data from {}...'.format(file))
                     try:
                         # Read in one forecast hour, one member
                         data_f[f] = read_grib(file, data_type, variable,
@@ -186,7 +171,6 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                     except OSError:
                         data_f[f] = np.nan
                 elif data_type == 'bin':
-                    logger.debug('Loading data from {}...'.format(file))
                     # Open file and read the appropriate data
                     try:
                         # Read in one forecast hour, one member
@@ -242,8 +226,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
         return data
 
 
-def load_obs(dates, file_template, data_type, grid, record_num=None,
-             debug=False):
+def load_obs(dates, file_template, data_type, grid, record_num=None):
     """
     Load observation data
 
@@ -262,7 +245,6 @@ def load_obs(dates, file_template, data_type, grid, record_num=None,
     - data_type - *string* - input data type (bin, grib1, grib2)
     - grid - *Grid* - Grid associated with the input data
     - record_num - *int* - binary record containing the desired variable
-    - debug - *boolean* (optional) - print debug lines
 
     Returns
     -------
@@ -284,13 +266,6 @@ def load_obs(dates, file_template, data_type, grid, record_num=None,
         >>> obs_data = load_obs(dates, file_tmplt, data_type, grid) # doctest: +SKIP
     """
     # --------------------------------------------------------------------------
-    # Enable debug logging if necessary
-    #
-    if debug:
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
-    # --------------------------------------------------------------------------
     # Make sure dates is a list
     #
     if not isinstance(dates, list):
@@ -303,7 +278,6 @@ def load_obs(dates, file_template, data_type, grid, record_num=None,
     # Loop over dates
     #
     for d, date in enumerate(dates):
-        logger.debug('Date: {}'.format(date))
         # ----------------------------------------------------------------------
         # Convert file template to real file
         #
@@ -312,7 +286,6 @@ def load_obs(dates, file_template, data_type, grid, record_num=None,
         # ----------------------------------------------------------------------
         # Open file and read the appropriate data
         #
-        logger.debug('Loading data from {}'.format(file))
         try:
             data[d] = np.fromfile(file, 'float32')
         except FileNotFoundError:
@@ -323,7 +296,7 @@ def load_obs(dates, file_template, data_type, grid, record_num=None,
     return data
 
 
-def load_climos(days, file_template, grid, debug=False):
+def load_climos(days, file_template, grid):
     """
     Load climatology data
 
@@ -339,7 +312,6 @@ def load_climos(days, file_template, grid, debug=False):
     bracketed variables. Date formatting (eg. %Y%m%d) will be converted into
     the given date.
     - grid - *Grid* - Grid associated with the input data
-    - debug - *boolean* (optional) - print debug lines
 
     Returns
     -------
@@ -360,13 +332,6 @@ def load_climos(days, file_template, grid, debug=False):
         >>> climo_data = load_obs(days, file_tmplt, grid) #doctest: +SKIP
     """
     # --------------------------------------------------------------------------
-    # Enable debug logging if necessary
-    #
-    if debug:
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
-    # --------------------------------------------------------------------------
     # Make sure dates is a list
     #
     if not isinstance(days, list):
@@ -385,7 +350,6 @@ def load_climos(days, file_template, grid, debug=False):
     # Loop over dates
     #
     for d, day in enumerate(days):
-        logger.debug('Day: {}'.format(day))
         # ----------------------------------------------------------------------
         # Convert file template to real file
         #
@@ -394,7 +358,6 @@ def load_climos(days, file_template, grid, debug=False):
         # ----------------------------------------------------------------------
         # Open file and read the appropriate data
         #
-        logger.debug('Loading data from {}'.format(file))
         try:
             data[d] = np.fromfile(file, 'float32').reshape(
                 num_ptiles, grid.num_y * grid.num_x)
