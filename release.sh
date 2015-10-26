@@ -33,14 +33,14 @@ else
 fi
 
 # Define some colors for printfs
-RED='\e[31m'
-GREEN='\e[32m'
-YELLOW='\e[33m'
-BLUE='\e[34m'
-MAGENTA='\e[35m'
-CYAN='\e[36m'
-WHITE='\e[37m'
-BLACK='\e[38m'
+RED='\e[0;31m'
+GREEN='\e[0;32m'
+YELLOW='\e[0;33m'
+BLUE='\e[0;34m'
+MAGENTA='\e[0;35m'
+CYAN='\e[0;36m'
+WHITE='\e[0;37m'
+BLACK='\e[0;38m'
 NOCOLOR='\e[m'
 
 # Get name and path of this script
