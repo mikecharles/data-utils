@@ -645,7 +645,9 @@ def _save_plot(file, dpi=200):
         - dpi of the image (higher means higher resolution). By default `dpi =
           200`.
     """
-    matplotlib.pyplot.savefig(file, dpi=dpi, bbox_inches='tight')
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        matplotlib.pyplot.savefig(file, dpi=dpi, bbox_inches='tight')
 
 
 def _put_terciles_in_one_array(below, near, above):
