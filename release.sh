@@ -70,7 +70,7 @@ printf "${BLUE}Current version:${NOCOLOR} $current_version\n"
 # Prompt user for the new version
 new_version=''
 while [[ $new_version = '' ]] ; do
-  printf "${BLUE}Enter the new version: ${NOCOLOR}\n"
+  printf "${BLUE}Enter the new version: ${NOCOLOR}"
   read new_version
 done
 
