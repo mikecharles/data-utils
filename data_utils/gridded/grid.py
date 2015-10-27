@@ -179,3 +179,30 @@ class Grid:
                 raise GridError('Total number of points in array is incorrect')
         except AttributeError:
             raise GridError('Data not a valid NumPy array')
+
+    def lonlat_to_gridpoint(self, lon, lat):
+        """
+        Returns the index of the 1-dimensional array corresponding to this
+        grid, given the lon and lat values. The lon/lat value pair must match
+        the location of a grid point in this grid, otherwise None will be
+        returned.
+
+        Parameters
+        ----------
+
+        - lon - *float* - longitude of grid point
+        - lat - *float* - latitude of grid point
+
+        Returns
+        -------
+
+        *int* or *None* - array index containing the give grid point, or None
+        """
+        lons, lats = np.meshgrid(self.lons, self.lats)
+        lons = lons.reshape((self.num_y * self.num_x))
+        lats = lats.reshape((self.num_y * self.num_x))
+        match = np.argwhere((lats == lat) & (lons == lon))
+        if match.size == 0:
+            return None
+        else:
+            return match
