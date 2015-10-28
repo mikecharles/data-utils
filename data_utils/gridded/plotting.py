@@ -6,6 +6,8 @@ from __future__ import print_function
 import mpl_toolkits.basemap
 import matplotlib
 from matplotlib.patches import Polygon
+from matplotlib.colors import LogNorm
+from matplotlib.ticker import LogFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import scipy.ndimage
@@ -48,6 +50,12 @@ _docstring_kwargs = """
     - cbar_type (string, optional)
         - Type of colorbar ('normal' for a normal colorbar, or 'tercile' for a
         tercile colorbar with 3 color ranges)
+    - cbar_color_spacing (str, optional)
+        - Colorbar color spacing ('natural' will space the color gradient
+        based on the gradient in levels [eg. faster change in levels will
+        correspond to faster change in color], 'equal' will result in a
+        uniform gradient in color [same change in color between 2 levels,
+        regardless of the difference in the value of the levels])
     - tercile_type (str, optional)
         - Type of tercile ('normal' or 'median')
     - smoothing_factor (float, optional)
@@ -89,6 +97,7 @@ def _make_plot(*args, **kwargs):
     lon_range = kwargs['lon_range']
     cbar_ends = kwargs['cbar_ends']
     cbar_type = kwargs['cbar_type']
+    cbar_color_spacing = kwargs['cbar_color_spacing']
     tercile_type = kwargs['tercile_type']
     smoothing_factor = kwargs['smoothing_factor']
     fill_coastal_vals = kwargs['fill_coastal_vals']
@@ -262,8 +271,17 @@ def _make_plot(*args, **kwargs):
             plot = m.contourf(lons, lats, data, levels, latlon=True,
                               extend=extend, colors=colors)
         else:
-            plot = m.contourf(lons, lats, data, levels, latlon=True,
-                              extend=extend)
+            if cbar_color_spacing == 'equal':
+                cmap = matplotlib.cm.get_cmap('jet', len(levels))
+                norm = matplotlib.colors.BoundaryNorm(levels, cmap.N)
+                plot = m.contourf(lons, lats, data, levels, latlon=True,
+                                  extend=extend, cmap=cmap, norm=norm)
+            elif cbar_color_spacing == 'natural':
+                plot = m.contourf(lons, lats, data, levels, latlon=True,
+                                  extend=extend)
+            else:
+                raise ValueError('Incorrect setting for cbar_color_spacing - '
+                                 'must be either \'equal\' or \'natural\'')
     else:
         plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
         levels = plot._levels
@@ -300,7 +318,10 @@ def _make_plot(*args, **kwargs):
         # Add the colorbar (attached to figure above)
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("bottom", size="4%", pad=0.3)
-        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax)
+        ticks = [str(level) for level in levels]
+        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
+                                        cax=cax, ticks=levels)
+        cb.ax.set_xticklabels(ticks)
 
 
 def plot_to_screen(data, grid, levels=None, colors=None,
@@ -308,6 +329,7 @@ def plot_to_screen(data, grid, levels=None, colors=None,
                    lat_range=None, lon_range=None,
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal',
+                   cbar_color_spacing='natural',
                    fill_coastal_vals=False):
     """
     Plots the given data and displays on-screen.
@@ -372,7 +394,7 @@ def plot_to_file(data, grid, file, dpi=200, levels=None,
                  title='', lat_range=None, lon_range=None,
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal',
-                 fill_coastal_vals=False):
+                 cbar_color_spacing='natural', fill_coastal_vals=False):
     """
     Plots the given data and saves to a file.
 
@@ -446,7 +468,9 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
                                  lat_range=None, lon_range=None,
                                  cbar_ends='triangular',
                                  tercile_type='normal', smoothing_factor=0,
-                                 cbar_type='tercile', fill_coastal_vals=False):
+                                 cbar_type='tercile',
+                                 cbar_color_spacing='natural',
+                                 fill_coastal_vals=False):
     """
     Plots below, near, and above normal (median) terciles to the screen.
 
@@ -535,6 +559,7 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
                                lat_range=None, lon_range=None,
                                cbar_ends='triangular', tercile_type='normal',
                                smoothing_factor=0, cbar_type='tercile',
+                               cbar_color_spacing='natural',
                                fill_coastal_vals=False):
     """
     Plots below, near, and above normal (median) terciles to a file.
