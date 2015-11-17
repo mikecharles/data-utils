@@ -13,6 +13,49 @@ from .reading import read_grib
 from string_utils.strings import replace_vars_in_string
 
 
+class Dataset:
+    """
+    Object containing various components of a dataset.
+
+    There are currently 3 types of datasets:
+
+      - forecast
+      - observation
+      - climatology
+    """
+    def __init__(self, ens=None, ens_mean=None, ens_spread=None, obs=None,
+                 climo=None, qc_ens_missing_dates=None,
+                 qc_obs_missing_dates=None, qc_climo_missing_dates=None):
+        """
+        Initialize Dataset object
+
+        Attributes
+        ----------
+
+        - ens - *NumPy array* - Ensemble forecast data (dates, members, x*y)
+        - ens_mean - *NumPy array* - Ensemble forecast data averaged over the
+        ensemble dimension (dates, x*y)
+        - ens_spread - *NumPy array* - Ensemble forecast spread data (dates,
+        x*y)
+        - obs - *NumPy array* - Observation data (dates, x*y)
+        - climo - *NumPy array* - Climatology data (dates, ptiles, x*y)
+        - qc_ens_missing_dates - *NumPy array* - QC data - number of dates
+        missing in the ensemble data
+        - qc_obs_missing_dates - *NumPy array* - QC data - number of dates
+        missing in the observation data
+        - qc_climo_missing_dates - *NumPy array* - QC data - number of dates
+        missing in the climatology data
+        """
+        self.ens = ens
+        self.ens_mean = ens_mean
+        self.ens_spread = ens_spread
+        self.obs = obs
+        self.climo = climo
+        self.qc_ens_missing_dates = qc_ens_missing_dates
+        self.qc_obs_missing_dates = qc_obs_missing_dates
+        self.qc_climo_missing_dates = qc_climo_missing_dates
+
+
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
                    fhr_int=6, fhr_stat='mean', collapse=False, yrev=False,
@@ -22,13 +65,13 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
 
     Data is loaded over a given range of dates, forecast hours, and ensemble
     members. If collapse==True, then the information retrieved is collapsed
-    into an object containing the following information:
+    into an object containing the following attributes:
 
-        - Ensemble mean (dates, x * y)
-        - Ensemble spread (dates, x * y)
+        - ens_mean (dates, x * y)
+        - ens_spread (dates, x * y)
 
-    If collapse==False, then the object returned will contain a single array
-    with all the members in tact (dates, members, x * y)
+    If collapse==False, then the object returned will contain a single attribute
+    with all the members in tact (dates, members, x * y) called ens.
 
     Parameters
     ----------
@@ -65,11 +108,11 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     If `collapse=True`, a tuple of 2 NumPy arrays will be returned (ensemble
     mean and ensemble spread). For example:
 
-        >>> ens_mean, ens_spread = load_ens_fcsts(..., collapse=True)  # doctest: +SKIP
+        >>> dataset = load_ens_fcsts(..., collapse=True)  # doctest: +SKIP
 
     If `collapse=False`, a single NumPy array will be returned. For example:
 
-        >>> ens_fcst = load_ens_fcsts(..., collapse=False))  # doctest: +SKIP
+        >>> dataset = load_ens_fcsts(..., collapse=False))  # doctest: +SKIP
 
     Examples
     --------
@@ -88,7 +131,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
         >>> variable = 'TMP'
         >>> level = '2 m above ground'
         >>> num_members = 11
-        >>> fcst_ens_mean, fcst_ens_spread = \  # doctest: +SKIP
+        >>> dataset = \  # doctest: +SKIP
         load_ens_fcsts(dates, file_template=file_tmplt, data_type=data_type,  # doctest: +SKIP
         ...            grid=grid, variable=variable, level=level,  # doctest: +SKIP
         ...            fhr_range=(150, 264), num_members=num_members,  # doctest: +SKIP
@@ -221,9 +264,9 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     # Return the data
     #
     if collapse:
-        return ens_mean, ens_spread
+        return Dataset(ens_mean=ens_mean, ens_spread=ens_spread)
     else:
-        return data
+        return Dataset(ens=data)
 
 
 def load_obs(dates, file_template, data_type, grid, record_num=None):
@@ -249,7 +292,8 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
     Returns
     -------
 
-    *NumPy array* - array of observation data (dates x gridpoint)
+    Dataset object with the attribute 'obs' set to an array of observation
+    data (dates x gridpoint)
 
     Examples
     --------
@@ -263,7 +307,8 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
         >>> file_tmplt = '/path/to/obs/%Y/%m/%d/tmean_05d_%Y%m%d.bin'
         >>> data_type = 'bin'
         >>> grid = Grid('1deg-global')
-        >>> obs_data = load_obs(dates, file_tmplt, data_type, grid) # doctest: +SKIP
+        >>> dataset = load_obs(dates, file_tmplt, data_type, grid) # doctest:
+        # +SKIP
     """
     # --------------------------------------------------------------------------
     # Make sure dates is a list
@@ -293,7 +338,7 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
     # --------------------------------------------------------------------------
     # Return data
     #
-    return data
+    return Dataset(obs=data)
 
 
 def load_climos(days, file_template, grid):
@@ -316,7 +361,8 @@ def load_climos(days, file_template, grid):
     Returns
     -------
 
-    *NumPy array* - array of climatology data (days x ptiles x gridpoint)
+    Dataset object containing an attribute 'climo' containing an array of
+    climatology data (days x ptiles x gridpoint)
 
     Examples
     --------
@@ -329,7 +375,7 @@ def load_climos(days, file_template, grid):
         >>> days = generate_date_list('20010525', '20010531', interval='days')
         >>> file_tmplt = '/path/to/climos/tmean_clim_poe_05d_%m%d.bin'
         >>> grid = Grid('1deg-global')
-        >>> climo_data = load_obs(days, file_tmplt, grid) #doctest: +SKIP
+        >>> dataset = load_obs(days, file_tmplt, grid) #doctest: +SKIP
     """
     # --------------------------------------------------------------------------
     # Make sure dates is a list
@@ -366,4 +412,4 @@ def load_climos(days, file_template, grid):
     # --------------------------------------------------------------------------
     # Return data
     #
-    return data
+    return Dataset(climo=data)
