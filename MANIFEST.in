@@ -1,2 +1,2 @@
-include VERSION
+include VERSION pip-requirements.txt
 recursive-include data_utils/lib *
