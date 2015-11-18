@@ -5,12 +5,20 @@ import sys
 import subprocess
 from setuptools import setup, find_packages, Command
 from setuptools.command.test import test as TestCommand
+import pip
+from pip.req import parse_requirements
 
 
 # Get the version
 script_path = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(script_path, 'VERSION')) as version_file:
     version = version_file.read().strip()
+
+# Get requirements
+install_reqs = parse_requirements(
+    os.path.join(script_path, 'pip-requirements.txt'),
+    session=pip.download.PipSession())
+reqs = [str(ir.req) for ir in install_reqs]
 
 class PyTest(TestCommand):
     user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
@@ -84,15 +92,7 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Atmospheric Science",
     ],
-    install_requires=[
-        'numpy>=1.9.2',
-        'scipy>=0.15.1',
-        'matplotlib>=1.4.3',
-        'basemap>=1.0.7',
-        'pyyaml>=3.11',
-        'stats-utils>=1.2',
-        'palettable>=2.1.1'
-    ],
+    install_requires=install_reqs,
     tests_require=['pytest'],
     cmdclass={
         'test': PyTest,
