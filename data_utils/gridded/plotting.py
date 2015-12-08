@@ -56,6 +56,8 @@ _docstring_kwargs = """
         correspond to faster change in color], 'equal' will result in a
         uniform gradient in color [same change in color between 2 levels,
         regardless of the difference in the value of the levels])
+    - cbar_label (str, optional)
+        - Label for the colorbar - default is no label
     - tercile_type (str, optional)
         - Type of tercile ('normal' or 'median')
     - smoothing_factor (float, optional)
@@ -101,6 +103,7 @@ def _make_plot(*args, **kwargs):
     tercile_type = kwargs['tercile_type']
     smoothing_factor = kwargs['smoothing_factor']
     fill_coastal_vals = kwargs['fill_coastal_vals']
+    cbar_label = kwargs['cbar_label']
 
     # --------------------------------------------------------------------------
     # Check args
@@ -299,7 +302,8 @@ def _make_plot(*args, **kwargs):
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("bottom", size="4%", pad=0.3)
         cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
-                                        ticks=levels, cax=cax)
+                                        ticks=levels, cax=cax,
+                                        cbar_label=cbar_label)
         cb.ax.set_xticklabels(labels)
         cb.ax.tick_params(labelsize=8)
         # Add colorbar labels
@@ -320,7 +324,8 @@ def _make_plot(*args, **kwargs):
         cax = divider.append_axes("bottom", size="4%", pad=0.3)
         ticks = [str(level) for level in levels]
         cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
-                                        cax=cax, ticks=levels)
+                                        cax=cax, ticks=levels,
+                                        label=cbar_label)
         cb.ax.set_xticklabels(ticks)
 
 
@@ -330,7 +335,7 @@ def plot_to_screen(data, grid, levels=None, colors=None,
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal',
                    cbar_color_spacing='natural',
-                   fill_coastal_vals=False):
+                   fill_coastal_vals=False, cbar_label=None):
     """
     Plots the given data and displays on-screen.
 
@@ -394,7 +399,8 @@ def plot_to_file(data, grid, file, dpi=200, levels=None,
                  title='', lat_range=None, lon_range=None,
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal',
-                 cbar_color_spacing='natural', fill_coastal_vals=False):
+                 cbar_color_spacing='natural', fill_coastal_vals=False,
+                 cbar_label=None):
     """
     Plots the given data and saves to a file.
 
@@ -470,7 +476,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
                                  tercile_type='normal', smoothing_factor=0,
                                  cbar_type='tercile',
                                  cbar_color_spacing='natural',
-                                 fill_coastal_vals=False):
+                                 fill_coastal_vals=False, cbar_label=None):
     """
     Plots below, near, and above normal (median) terciles to the screen.
 
@@ -560,7 +566,7 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
                                cbar_ends='triangular', tercile_type='normal',
                                smoothing_factor=0, cbar_type='tercile',
                                cbar_color_spacing='natural',
-                               fill_coastal_vals=False):
+                               fill_coastal_vals=False, cbar_label=None):
     """
     Plots below, near, and above normal (median) terciles to a file.
 
