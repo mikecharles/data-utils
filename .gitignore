@@ -6,6 +6,7 @@
 /build
 /docs
 /.coverage
+/.cache
 # Files/dirs anywhere in this repo
 __pycache__
 __init__.pyc
