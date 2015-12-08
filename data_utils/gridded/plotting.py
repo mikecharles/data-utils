@@ -104,6 +104,7 @@ def _make_plot(*args, **kwargs):
     smoothing_factor = kwargs['smoothing_factor']
     fill_coastal_vals = kwargs['fill_coastal_vals']
     cbar_label = kwargs['cbar_label']
+    cbar_ticks = kwargs['cbar_ticks']
 
     # --------------------------------------------------------------------------
     # Check args
@@ -301,9 +302,14 @@ def _make_plot(*args, **kwargs):
         # Add the colorbar (attached to figure above)
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("bottom", size="4%", pad=0.3)
-        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
-                                        ticks=levels, cax=cax,
-                                        cbar_label=cbar_label)
+        # If cbar_ticks_opt is set
+        if cbar_ticks:
+            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
+                                            ticks=cbar_ticks, cax=cax,
+                                            cbar_label=cbar_label)
+        else:
+            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
+                                            cax=cax, cbar_label=cbar_label)
         cb.ax.set_xticklabels(labels)
         cb.ax.tick_params(labelsize=8)
         # Add colorbar labels
@@ -322,11 +328,15 @@ def _make_plot(*args, **kwargs):
         # Add the colorbar (attached to figure above)
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("bottom", size="4%", pad=0.3)
-        ticks = [str(level) for level in levels]
-        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
-                                        cax=cax, ticks=levels,
-                                        label=cbar_label)
-        cb.ax.set_xticklabels(ticks)
+        # If cbar_ticks_opt is set
+        if cbar_ticks:
+            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
+                                            cax=cax, ticks=cbar_ticks,
+                                            label=cbar_label)
+            cb.ax.set_xticklabels(cbar_ticks)
+        else:
+            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
+                                            cax=cax, label=cbar_label)
 
 
 def plot_to_screen(data, grid, levels=None, colors=None,
@@ -335,7 +345,7 @@ def plot_to_screen(data, grid, levels=None, colors=None,
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal',
                    cbar_color_spacing='natural',
-                   fill_coastal_vals=False, cbar_label=None):
+                   fill_coastal_vals=False, cbar_label=None, cbar_ticks=None):
     """
     Plots the given data and displays on-screen.
 
@@ -400,7 +410,7 @@ def plot_to_file(data, grid, file, dpi=200, levels=None,
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal',
                  cbar_color_spacing='natural', fill_coastal_vals=False,
-                 cbar_label=None):
+                 cbar_label=None, cbar_ticks=None):
     """
     Plots the given data and saves to a file.
 
@@ -476,7 +486,8 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
                                  tercile_type='normal', smoothing_factor=0,
                                  cbar_type='tercile',
                                  cbar_color_spacing='natural',
-                                 fill_coastal_vals=False, cbar_label=None):
+                                 fill_coastal_vals=False, cbar_label=None,
+                                 cbar_ticks=None):
     """
     Plots below, near, and above normal (median) terciles to the screen.
 
@@ -566,7 +577,8 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
                                cbar_ends='triangular', tercile_type='normal',
                                smoothing_factor=0, cbar_type='tercile',
                                cbar_color_spacing='natural',
-                               fill_coastal_vals=False, cbar_label=None):
+                               fill_coastal_vals=False, cbar_label=None,
+                               cbar_ticks=None):
     """
     Plots below, near, and above normal (median) terciles to a file.
 
