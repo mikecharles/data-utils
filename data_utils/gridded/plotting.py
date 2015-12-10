@@ -345,7 +345,7 @@ def plot_to_screen(data, grid, levels=None, colors=None,
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal',
                    cbar_color_spacing='natural',
-                   fill_coastal_vals=False, cbar_label=None, cbar_ticks=None):
+                   fill_coastal_vals=False, cbar_label='', cbar_ticks=None):
     """
     Plots the given data and displays on-screen.
 
@@ -410,7 +410,7 @@ def plot_to_file(data, grid, file, dpi=200, levels=None,
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal',
                  cbar_color_spacing='natural', fill_coastal_vals=False,
-                 cbar_label=None, cbar_ticks=None):
+                 cbar_label='', cbar_ticks=None):
     """
     Plots the given data and saves to a file.
 
@@ -486,7 +486,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
                                  tercile_type='normal', smoothing_factor=0,
                                  cbar_type='tercile',
                                  cbar_color_spacing='natural',
-                                 fill_coastal_vals=False, cbar_label=None,
+                                 fill_coastal_vals=False, cbar_label='',
                                  cbar_ticks=None):
     """
     Plots below, near, and above normal (median) terciles to the screen.
@@ -577,7 +577,7 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
                                cbar_ends='triangular', tercile_type='normal',
                                smoothing_factor=0, cbar_type='tercile',
                                cbar_color_spacing='natural',
-                               fill_coastal_vals=False, cbar_label=None,
+                               fill_coastal_vals=False, cbar_label='',
                                cbar_ticks=None):
     """
     Plots below, near, and above normal (median) terciles to a file.
