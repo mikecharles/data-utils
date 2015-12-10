@@ -306,10 +306,10 @@ def _make_plot(*args, **kwargs):
         if cbar_ticks:
             cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
                                             ticks=cbar_ticks, cax=cax,
-                                            cbar_label=cbar_label)
+                                            label=cbar_label)
         else:
             cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
-                                            cax=cax, cbar_label=cbar_label)
+                                            cax=cax, label=cbar_label)
         cb.ax.set_xticklabels(labels)
         cb.ax.tick_params(labelsize=8)
         # Add colorbar labels
