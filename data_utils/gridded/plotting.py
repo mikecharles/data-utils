@@ -129,6 +129,10 @@ def _make_plot(*args, **kwargs):
     if region == 'global' and projection != 'mercator':
         raise ValueError('Only the \'mercator\' projection can be used when '
                          'region is set to \'global\'')
+    # If cbar_type is 'tercile', levels and cbar_ticks must both be set
+    if cbar_type == 'tercile' and not (levels and cbar_ticks):
+        raise ValueError('When cbar_type==\'tercile\', levels and cbar_ticks '
+                         'need to be set')
 
     # --------------------------------------------------------------------------
     # Check colors variable
@@ -487,7 +491,8 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
                                  cbar_type='tercile',
                                  cbar_color_spacing='natural',
                                  fill_coastal_vals=False, cbar_label='',
-                                 cbar_ticks=None):
+                                 cbar_ticks=[-90, -80, -70, -60, -50, -40, -33,
+                                             33, 40, 50, 60, 70, 80, 90]):
     """
     Plots below, near, and above normal (median) terciles to the screen.
 
@@ -578,7 +583,8 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
                                smoothing_factor=0, cbar_type='tercile',
                                cbar_color_spacing='natural',
                                fill_coastal_vals=False, cbar_label='',
-                               cbar_ticks=None):
+                               cbar_ticks=[-90, -80, -70, -60, -50, -40, -33,
+                                           33, 40, 50, 60, 70, 80, 90]):
     """
     Plots below, near, and above normal (median) terciles to a file.
 
