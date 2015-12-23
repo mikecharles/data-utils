@@ -59,7 +59,7 @@ class Dataset:
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
                    fhr_int=6, fhr_stat='mean', collapse=False, yrev=False,
-                   remove_dup_fhrs=None):
+                   remove_dup_fhrs=None, log=False):
     """
     Loads ensemble forecast data
 
@@ -101,6 +101,9 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     grib file - this is useful for gribs that may for some reason have
     duplicate records for a given variable but with different fhrs. This way you
     can get the record for the correct fhr.
+    - log - *boolean* (optional) - take the log of the forecast variable
+    before calculating an ensemble mean and/or returning the data (default:
+    False)
 
     Returns
     -------
@@ -247,8 +250,11 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                         data[d, m] = np.nansum(data_f, axis=0)
             else:
                 raise ValueError('Supported fhr_stat values: mean, sum')
+
         # ----------------------------------------------------------------------
         # Calculate ensemble mean and spread (if collapse==True)
+        #
+        # Note that the log of the forecast is taken if log == True
         #
         # TODO: Add QCing
         # import pdb ; pdb.set_trace()
@@ -257,8 +263,17 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                 ens_mean[d] = np.empty(data_m.shape[1]) * np.nan
                 ens_spread[d] = np.empty(data_m.shape[1]) * np.nan
             else:
-                ens_mean[d] = np.nanmean(data_m, axis=0)
-                ens_spread[d] = np.nanstd(data_m, axis=0)
+                if log:
+                    # Assuming a minimum log value of -2, set vals of < 1mm to
+                    # 0.14 (exp(-2))
+                    data_m = np.where(data_m < 1, 0.14, data_m)
+                    ens_mean[d] = np.nanmean(np.log(data_m), axis=0)
+                    ens_spread[d] = np.nanstd(np.log(data_m), axis=0)
+                else:
+                    ens_mean[d] = np.nanmean(data_m, axis=0)
+                    ens_spread[d] = np.nanstd(data_m, axis=0)
+        else:
+            data = np.log(data)
 
     # --------------------------------------------------------------------------
     # Return the data
