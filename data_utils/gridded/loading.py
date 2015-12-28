@@ -273,7 +273,8 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                     ens_mean[d] = np.nanmean(data_m, axis=0)
                     ens_spread[d] = np.nanstd(data_m, axis=0)
         else:
-            data = np.log(data)
+            if log:
+                data = np.log(data)
 
     # --------------------------------------------------------------------------
     # Return the data
