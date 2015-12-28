@@ -59,7 +59,7 @@ class Dataset:
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
                    fhr_int=6, fhr_stat='mean', collapse=False, yrev=False,
-                   remove_dup_fhrs=None, log=False):
+                   remove_dup_fhrs=False, log=False):
     """
     Loads ensemble forecast data
 
@@ -95,7 +95,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     information is summarized (default: False)
     - yrev - *boolean* - whether fcst data is reversed in the y-direction (
     default: False)
-    - remove_dup_fhrs - *boolean* (optional) - remove potential duplicate
+    - remove_dup_fhrs - *boolean* (optional, default=false) - remove potential duplicate
     fhrs from the grib files - sets the `grep_fhr` parameter to the current
     fhr when calling `read_grib()`,  which greps for the fhr in the given
     grib file - this is useful for gribs that may for some reason have
@@ -192,8 +192,8 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                                           fhr_int)):
                 # Grep for the fhr hour in case there are any duplicate grib
                 # records (same var, different fhr)
-                if remove_dup_fhrs is not None:
-                    grep_fhr = ':anl' if fhr == 0 else '{:d} hour'.format(fhr)
+                if remove_dup_fhrs:
+                    grep_fhr = ':anl' if fhr == 0 else '({:d} hour|{:d}hr)'.format(fhr, fhr)
                 else:
                     grep_fhr = None
                 fhr = '{:03d}'.format(fhr)

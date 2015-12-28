@@ -85,7 +85,7 @@ def read_grib(file, grib_type, variable, level, grid=None, yrev=False,
         grep_fhr_str = ''
     # Set the name of the wgrib program to call
     if grib_type == 'grib1':
-        wgrib_call = 'wgrib "{}" | grep "{}" | grep "{}" | grep "{}" | wgrib ' \
+        wgrib_call = 'wgrib "{}" | grep "{}" | grep "{}" | grep -P "{}" | wgrib ' \
                      '-i "{}" -nh -bin -o "{}"'.format(file, variable, level,
                                            grep_fhr_str, file, temp_file)
     elif grib_type == 'grib2':
