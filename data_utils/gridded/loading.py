@@ -233,7 +233,6 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                     uc = UnitConverter()
                     conversion = unit_conversion
                     data_f[f] = uc.convert(data_f[f], conversion)
-                print(data_f[f])
             # ------------------------------------------------------------------
             # Calculate stat (mean, total) across fhr
             #
