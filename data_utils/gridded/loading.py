@@ -11,6 +11,7 @@ from datetime import datetime
 import logging
 from .reading import read_grib
 from string_utils.strings import replace_vars_in_string
+from data_utils.units import UnitConverter
 
 
 class Dataset:
@@ -59,7 +60,7 @@ class Dataset:
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
                    fhr_int=6, fhr_stat='mean', collapse=False, yrev=False,
-                   remove_dup_fhrs=False, log=False):
+                   remove_dup_fhrs=False, log=False, unit_conversion=None):
     """
     Loads ensemble forecast data
 
@@ -104,6 +105,8 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     - log - *boolean* (optional) - take the log of the forecast variable
     before calculating an ensemble mean and/or returning the data (default:
     False)
+    - unit_conversion - *string* (optional) - type of unit conversion to perform. If None,
+    then no unit conversion will be performed.
 
     Returns
     -------
@@ -223,6 +226,14 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                         data_f[f] = np.fromfile(file, dtype='float32')
                     except:
                         data_f[f] = np.nan
+                # --------------------------------------------------------------
+                # Convert units (if necessary)
+                #
+                if unit_conversion:
+                    uc = UnitConverter()
+                    conversion = unit_conversion
+                    data_f[f] = uc.convert(data_f[f], conversion)
+                print(data_f[f])
             # ------------------------------------------------------------------
             # Calculate stat (mean, total) across fhr
             #
