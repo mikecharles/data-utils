@@ -60,7 +60,7 @@ class Dataset:
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
                    fhr_int=6, fhr_stat='mean', collapse=False, yrev=False,
-                   remove_dup_fhrs=False, log=False, unit_conversion=None):
+                   remove_dup_fhrs=False, log=False, unit_conversion=None, accum_over_fhr=False):
     """
     Loads ensemble forecast data
 
@@ -191,8 +191,16 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
             # ------------------------------------------------------------------
             # Loop over fhr
             #
+            #
+            # Note that if accum_over_fhr=True, only the first and last fhr will be loaded. When a
+            # variable is accumulated over forecast hour in a grib file (such as ECENS precip),
+            # only the first and last values are needed to calculate the total accumulation over
+            # the given fhr period.
             for f, fhr in enumerate(range(fhr_range[0], fhr_range[1]+1,
                                           fhr_int)):
+                if accum_over_fhr and (0 < f < len(range(fhr_range[0], fhr_range[1] + 1,
+                                                         fhr_int)) - 1):
+                    continue
                 # Grep for the fhr hour in case there are any duplicate grib
                 # records (same var, different fhr)
                 if remove_dup_fhrs:
@@ -241,23 +249,35 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                     if np.all(np.isnan(data_f)):
                         data_m[m] = np.empty(data_f.shape[1]) * np.nan
                     else:
-                        data_m[m] = np.nanmean(data_f, axis=0)
+                        if accum_over_fhr:
+                            data_m[m] = (data_f[-1] - data_f[0]) / data_f.shape[0]
+                        else:
+                            data_m[m] = np.nanmean(data_f, axis=0)
                 else:
                     if np.all(np.isnan(data_f)):
                         data[d, m] = np.empty(data_f.shape[1]) * np.nan
                     else:
-                        data[d, m] = np.nanmean(data_f, axis=0)
+                        if accum_over_fhr:
+                            data[d, m] = (data_f[-1] - data_f[0]) / data_f.shape[0]
+                        else:
+                            data[d, m] = np.nanmean(data_f, axis=0)
             elif fhr_stat == 'sum':
                 if collapse:
                     if np.all(np.isnan(data_f)):
                         data_m[m] = np.empty(data_f.shape[1]) * np.nan
                     else:
-                        data_m[m] = np.nansum(data_f, axis=0)
+                        if accum_over_fhr:
+                            data_m[m] = data_f[-1] - data_f[0]
+                        else:
+                            data_m[m] = np.nansum(data_f, axis=0)
                 else:
                     if np.all(np.isnan(data_f)):
                         data[d, m] = np.empty(data_f.shape[1]) * np.nan
                     else:
-                        data[d, m] = np.nansum(data_f, axis=0)
+                        if accum_over_fhr:
+                            data[d, m] = data_f[-1] - data_f[0]
+                        else:
+                            data[d, m] = np.nansum(data_f, axis=0)
             else:
                 raise ValueError('Supported fhr_stat values: mean, sum')
 
