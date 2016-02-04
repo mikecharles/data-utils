@@ -27,12 +27,15 @@ import warnings
 _docstring_kwargs = """
     - levels (list, optional)
         - List of levels to shade/contour.
-    - colors (list of lists, or string)
+    - fill_colors (list of lists, or string)
         - Specifies the colors to be used to plot the data. It can either be:
             - A list of colors, each color being a list of RGB values from 0
             to 1 (ex. [[0.2, 0.2, 1],[0.4, 0.5, 0.8],[0.2, 0.2, 0.5]])
+            - A tuple of matplotlib color args (string, float, rgb, etc), different levels will
+            be plotted in different colors in the order specified.
             - A string specifying the variable and plot type. Supported values:
                 - tmean-terciles
+    - colors - alias of `fill_colors`
     - projection (str, optional)
         - Set the map projection ('lcc' or 'mercator')
     - region (str, optional)
@@ -94,6 +97,7 @@ def _make_plot(*args, **kwargs):
     projection = kwargs['projection']
     region = kwargs['region']
     colors = kwargs['colors']
+    fill_colors = kwargs['fill_colors']
     title = kwargs['title']
     lat_range = kwargs['lat_range']
     lon_range = kwargs['lon_range']
@@ -105,13 +109,14 @@ def _make_plot(*args, **kwargs):
     fill_coastal_vals = kwargs['fill_coastal_vals']
     cbar_label = kwargs['cbar_label']
     cbar_ticks = kwargs['cbar_ticks']
+    contour_colors = kwargs['contour_colors']
 
     # --------------------------------------------------------------------------
     # Check args
     #
-    # Levels must be set if colors is set
-    if colors and not levels:
-        raise ValueError('The "levels" argument must be set if the "colors" '
+    # Levels must be set if fill_colors is set
+    if fill_colors and not levels:
+        raise ValueError('The "levels" argument must be set if the "fill_colors" '
                          'argument is set')
     # Make sure either region is set, or lat_range and lon_range are set
     if lat_range and lon_range:
@@ -133,17 +138,22 @@ def _make_plot(*args, **kwargs):
     if cbar_type == 'tercile' and not (levels and cbar_ticks):
         raise ValueError('When cbar_type==\'tercile\', levels and cbar_ticks '
                          'need to be set')
+    # Make fill_colors and colors equal
+    if colors and not fill_colors:
+        fill_colors = colors
+    elif fill_colors and not colors:
+        colors = fill_colors
 
     # --------------------------------------------------------------------------
-    # Check colors variable
+    # Check colors variables
     #
-    # If colors is a string, obtain a colors list
-    if isinstance(colors, str):
-        colors = _get_colors(colors)
+    # If fill_colors is a string, obtain a colors list
+    if isinstance(fill_colors, str):
+        fill_colors = _get_colors(fill_colors)
     # Make sure there is 1 more color than levels
-    if colors:
-        if len(colors) != (len(levels) + 1):
-            raise ValueError('The number of colors must be 1 greater than the '
+    if fill_colors:
+        if len(fill_colors) != (len(levels) + 1):
+            raise ValueError('The number of fill_colors must be 1 greater than the '
                              'number of levels')
 
     # Convert the ll_corner and res to arrays of lons and lats
@@ -275,9 +285,9 @@ def _make_plot(*args, **kwargs):
         raise ValueError('cbar_ends must be either \'triangular\' or '
                          '\'square\'')
     if levels:
-        if colors:
+        if fill_colors:
             plot = m.contourf(lons, lats, data, levels, latlon=True,
-                              extend=extend, colors=colors)
+                              extend=extend, colors=fill_colors)
         else:
             if cbar_color_spacing == 'equal':
                 cmap = matplotlib.cm.get_cmap('jet', len(levels))
@@ -343,7 +353,7 @@ def _make_plot(*args, **kwargs):
                                             cax=cax, label=cbar_label)
 
 
-def plot_to_screen(data, grid, levels=None, colors=None,
+def plot_to_screen(data, grid, levels=None, colors=None, fill_colors=None,
                    projection='equal-area', region='US', title='',
                    lat_range=None, lon_range=None,
                    cbar_ends='triangular', tercile_type='normal',
@@ -409,7 +419,7 @@ def plot_to_screen(data, grid, levels=None, colors=None,
 
 
 def plot_to_file(data, grid, file, dpi=200, levels=None,
-                 projection='equal-area', region='US', colors=None,
+                 projection='equal-area', region='US', colors=None, fill_colors=None,
                  title='', lat_range=None, lon_range=None,
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal',
@@ -484,7 +494,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
                                  levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                          40, 50, 60, 70, 80, 90],
                                  projection='equal-area', region='US',
-                                 colors='tmean-terciles', title='',
+                                 colors='tmean-terciles', fill_colors='tmean-terciles', title='',
                                  lat_range=None, lon_range=None,
                                  cbar_ends='triangular',
                                  tercile_type='normal', smoothing_factor=0,
@@ -577,7 +587,7 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
                                levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                        40, 50, 60, 70, 80, 90],
                                projection='equal-area', region='US',
-                               colors=None, title='',
+                               colors='tmean-terciles', fill_colors='tmean-terciles', title='',
                                lat_range=None, lon_range=None,
                                cbar_ends='triangular', tercile_type='normal',
                                smoothing_factor=0, cbar_type='tercile',
