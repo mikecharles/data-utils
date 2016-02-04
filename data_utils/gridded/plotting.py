@@ -67,6 +67,12 @@ _docstring_kwargs = """
         - Level of smoothing (gaussian filter, this represents the kernel
         width in standard deviations - may need to experiment with value -
         generally between 0 and 2 should suffice)
+    - contour_colors (str or mpl_colors)
+        - Color of contours
+            - If None, then no contours are plotted
+            - If string, like 'r' or 'red', contours will be plotted in this color
+            - If a tuple of matplotlib color args (string, float, rgb, etc), different levels
+            will be plotted in different colors in the order specified.
     """
 
 
@@ -276,7 +282,7 @@ def _make_plot(*args, **kwargs):
         data = mpl_toolkits.basemap.maskoceans((lons - 360), lats, data,
                                                inlands=True)
 
-    # Plot data
+    # Plot filled contours
     if cbar_ends == 'triangular':
         extend='both'
     elif cbar_ends == 'square':
@@ -303,6 +309,17 @@ def _make_plot(*args, **kwargs):
     else:
         plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
         levels = plot._levels
+    # Plot line contours
+    if contour_colors:
+        contours = m.contour(lons, lats, data, levels, latlon=True,
+                             colors=contour_colors, linewidths=0.5)
+        # If all contours all whole numbers, format the labels as such, otherwise they
+        # all get 0.000 added to the end
+        if np.all(np.mod(contours.levels, 1) == 0):
+            fmt = '%d'
+        else:
+            fmt = '%s'
+        matplotlib.pyplot.clabel(contours, inline=1, fontsize=5, fmt=fmt)
 
     # Add labels
     matplotlib.pyplot.title(title, fontsize=10)
@@ -359,7 +376,7 @@ def plot_to_screen(data, grid, levels=None, colors=None, fill_colors=None,
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal',
                    cbar_color_spacing='natural',
-                   fill_coastal_vals=False, cbar_label='', cbar_ticks=None):
+                   fill_coastal_vals=False, cbar_label='', cbar_ticks=None, contour_colors=None):
     """
     Plots the given data and displays on-screen.
 
@@ -424,7 +441,7 @@ def plot_to_file(data, grid, file, dpi=200, levels=None,
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal',
                  cbar_color_spacing='natural', fill_coastal_vals=False,
-                 cbar_label='', cbar_ticks=None):
+                 cbar_label='', cbar_ticks=None, contour_colors=None):
     """
     Plots the given data and saves to a file.
 
@@ -502,7 +519,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
                                  cbar_color_spacing='natural',
                                  fill_coastal_vals=False, cbar_label='',
                                  cbar_ticks=[-90, -80, -70, -60, -50, -40, -33,
-                                             33, 40, 50, 60, 70, 80, 90]):
+                                             33, 40, 50, 60, 70, 80, 90], contour_colors=None):
     """
     Plots below, near, and above normal (median) terciles to the screen.
 
@@ -594,7 +611,7 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
                                cbar_color_spacing='natural',
                                fill_coastal_vals=False, cbar_label='',
                                cbar_ticks=[-90, -80, -70, -60, -50, -40, -33,
-                                           33, 40, 50, 60, 70, 80, 90]):
+                                           33, 40, 50, 60, 70, 80, 90], contour_colors=None):
     """
     Plots below, near, and above normal (median) terciles to a file.
 
