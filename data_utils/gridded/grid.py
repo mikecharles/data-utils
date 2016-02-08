@@ -127,7 +127,7 @@ class Grid:
         # Otherwise create a custom grid definition
         else:
             if not all([self.ll_corner, self.ur_corner, self.res]):
-                raise ValueError('You must either supply the name of a '
+                raise GridError('You must either supply the name of a '
                                  'built-in Grid, or an ll_corner, '
                                  'ur_corner, and res to create a custom '
                                  'Grid')
