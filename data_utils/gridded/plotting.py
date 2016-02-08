@@ -314,8 +314,10 @@ def _make_plot(*args, **kwargs):
         levels = plot._levels
     # Plot line contours
     if contour_colors:
-        contours = m.contour(lons, lats, data, levels, latlon=True,
-                             colors=contour_colors, linewidths=0.5)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            contours = m.contour(lons, lats, data, levels, latlon=True, colors=contour_colors,
+                                 linewidths=0.5)
     # Plot contour labels
     if contour_labels:
         if contours:
