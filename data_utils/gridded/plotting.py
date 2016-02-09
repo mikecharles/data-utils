@@ -61,6 +61,8 @@ _docstring_kwargs = """
         regardless of the difference in the value of the levels])
     - cbar_label (str, optional)
         - Label for the colorbar - default is no label
+    - cbar_tick_labels (list of strings, optional)
+        - Specify how the cbar ticks should be labelled
     - tercile_type (str, optional)
         - Type of tercile ('normal' or 'median')
     - smoothing_factor (float, optional)
@@ -116,7 +118,7 @@ def _make_plot(*args, **kwargs):
     smoothing_factor = kwargs['smoothing_factor']
     fill_coastal_vals = kwargs['fill_coastal_vals']
     cbar_label = kwargs['cbar_label']
-    cbar_ticks = kwargs['cbar_ticks']
+    cbar_tick_labels = kwargs['cbar_tick_labels']
     contour_colors = kwargs['contour_colors']
     contour_labels = kwargs['contour_labels']
 
@@ -143,9 +145,9 @@ def _make_plot(*args, **kwargs):
     if region == 'global' and projection != 'mercator':
         raise ValueError('Only the \'mercator\' projection can be used when '
                          'region is set to \'global\'')
-    # If cbar_type is 'tercile', levels and cbar_ticks must both be set
-    if cbar_type == 'tercile' and not (levels and cbar_ticks):
-        raise ValueError('When cbar_type==\'tercile\', levels and cbar_ticks '
+    # If cbar_type is 'tercile', levels and cbar_tick_labels must both be set
+    if cbar_type == 'tercile' and not (levels and cbar_tick_labels):
+        raise ValueError('When cbar_type==\'tercile\', levels and cbar_tick_labels '
                          'need to be set')
     # Make fill_colors and colors equal
     if colors and not fill_colors:
@@ -341,14 +343,7 @@ def _make_plot(*args, **kwargs):
         # Add the colorbar (attached to figure above)
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("bottom", size="4%", pad=0.3)
-        # If cbar_ticks_opt is set
-        if cbar_ticks:
-            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
-                                            ticks=cbar_ticks, cax=cax,
-                                            label=cbar_label)
-        else:
-            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
-                                            cax=cax, label=cbar_label)
+        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax, label=cbar_label)
         cb.ax.set_xticklabels(labels)
         cb.ax.tick_params(labelsize=8)
         # Add colorbar labels
@@ -367,15 +362,15 @@ def _make_plot(*args, **kwargs):
         # Add the colorbar (attached to figure above)
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("bottom", size="4%", pad=0.3)
-        # If cbar_ticks_opt is set
-        if cbar_ticks:
-            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
-                                            cax=cax, ticks=cbar_ticks,
+        # If cbar_tick_labels_opt is set
+        if cbar_tick_labels:
+            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax,
                                             label=cbar_label)
-            cb.ax.set_xticklabels(cbar_ticks)
+            cb.ax.set_xticklabels(cbar_tick_labels)
         else:
             cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
                                             cax=cax, label=cbar_label)
+        cb.ax.tick_params(labelsize=8)
 
 
 def plot_to_screen(data, grid, levels=None, colors=None, fill_colors=None,
@@ -384,7 +379,7 @@ def plot_to_screen(data, grid, levels=None, colors=None, fill_colors=None,
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal',
                    cbar_color_spacing='natural',
-                   fill_coastal_vals=False, cbar_label='', cbar_ticks=None, contour_colors=None,
+                   fill_coastal_vals=False, cbar_label='', cbar_tick_labels=None, contour_colors=None,
                    contour_labels=False):
     """
     Plots the given data and displays on-screen.
@@ -450,7 +445,7 @@ def plot_to_file(data, grid, file, dpi=200, levels=None,
                  cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal',
                  cbar_color_spacing='natural', fill_coastal_vals=False,
-                 cbar_label='', cbar_ticks=None, contour_colors=None, contour_labels=False):
+                 cbar_label='', cbar_tick_labels=None, contour_colors=None, contour_labels=False):
     """
     Plots the given data and saves to a file.
 
@@ -527,7 +522,7 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
                                  cbar_type='tercile',
                                  cbar_color_spacing='natural',
                                  fill_coastal_vals=False, cbar_label='',
-                                 cbar_ticks=[-90, -80, -70, -60, -50, -40, -33,
+                                 cbar_tick_labels=[-90, -80, -70, -60, -50, -40, -33,
                                              33, 40, 50, 60, 70, 80, 90], contour_colors=None,
                                  contour_labels=False):
     """
@@ -620,7 +615,7 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
                                smoothing_factor=0, cbar_type='tercile',
                                cbar_color_spacing='natural',
                                fill_coastal_vals=False, cbar_label='',
-                               cbar_ticks=[-90, -80, -70, -60, -50, -40, -33,
+                               cbar_tick_labels=[-90, -80, -70, -60, -50, -40, -33,
                                            33, 40, 50, 60, 70, 80, 90], contour_colors=None,
                                contour_labels=False):
     """
