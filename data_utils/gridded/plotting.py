@@ -262,7 +262,8 @@ def _make_plot(*args, **kwargs):
         raise ValueError('Supported projections: \'mercator\', \'lcc\'')
 
     # Smooth the data
-    data = smooth(data, grid, smoothing_factor=smoothing_factor)
+    if smoothing_factor > 0:
+        data = smooth(data, grid, smoothing_factor=smoothing_factor)
 
     # --------------------------------------------------------------------------
     # Fill coastal values (if requested)
@@ -368,9 +369,9 @@ def _make_plot(*args, **kwargs):
                                             label=cbar_label)
             cb.ax.set_xticklabels(cbar_tick_labels)
         else:
-            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal",
-                                            cax=cax, label=cbar_label)
+            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax)
         cb.ax.tick_params(labelsize=8)
+        cb.set_label(cbar_label, fontsize=8)
 
 
 def plot_to_screen(data, grid, levels=None, colors=None, fill_colors=None,
