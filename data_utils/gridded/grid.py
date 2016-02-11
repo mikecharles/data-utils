@@ -180,7 +180,7 @@ class Grid:
         except AttributeError:
             raise GridError('Data not a valid NumPy array')
 
-    def latlon_to_gridpoint(self, lats, lons):
+    def latlon_to_gridpoint(self, latlons):
         """
         Returns the index of the 1-dimensional array corresponding to this
         grid, given the lat and lon values. The lat/lon value pair must match
@@ -190,8 +190,7 @@ class Grid:
         Parameters
         ----------
 
-        - lats - *float* or *list of floats* - latitude(s) of grid point(s)
-        - lons - *float* or *list of floats* - longitude(s) of grid point(s)
+        - latlons - tuple of *float* or *list of tuple of floats* - lat/lon of grid point(s)
 
         Returns
         -------
@@ -199,13 +198,12 @@ class Grid:
         *int* or *None* - array index containing the given grid point(s) index(es), or -1 if no
         grid point matches the given lat/lon value
         """
-        if type(lons) is not list and type(lats) is not list:
-            lons = [float(lons)]
-            lats = [float(lats)]
-        elif type(lons) != type(lats):
-            raise ValueError('lat and lon must both be floats or lists of floats')
+        if type(latlons) is not list:
+            latlons = [latlons]
         matches = []
-        for lat, lon in zip(lats, lons):
+        for latlon in latlons:
+            lat, lon = latlon
+            lon = 360 + lon if lon < 0 else lon
             lats, lons = np.meshgrid(self.lats, self.lons)
             lats = lats.reshape((self.num_y * self.num_x))
             lons = lons.reshape((self.num_y * self.num_x))
