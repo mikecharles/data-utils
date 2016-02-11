@@ -207,9 +207,17 @@ class Grid:
             lats, lons = np.meshgrid(self.lats, self.lons)
             lats = lats.reshape((self.num_y * self.num_x))
             lons = lons.reshape((self.num_y * self.num_x))
-            match = np.argwhere((lats == lat) & (lons == lon))[0][0]
-            if match.size == 0:
+            try:
+                match = np.argwhere((lats == lat) & (lons == lon))[0][0]
+                if match.size == 0:
+                    matches.append(-1)
+                else:
+                    matches.append(match)
+            except IndexError:
                 matches.append(-1)
-            else:
-                matches.append(match)
         return matches
+
+if __name__ == '__main__':
+    grid = Grid('1deg-global')
+    latlons = [(-93, 31), (-88, 38), (-115, 36)]
+    print(grid.latlon_to_gridpoint(latlons))
