@@ -432,7 +432,7 @@ def load_climos(days, file_template, grid):
     # Initialize a NumPy array to store the data
     #
     # Open first file to determine num ptiles
-    date_obj = datetime.strptime('2001' + days[0], '%Y%m%d')
+    date_obj = datetime.strptime('2000' + days[0], '%Y%m%d')
     file = datetime.strftime(date_obj, file_template)
     data = np.fromfile(file, 'float32')
     num_ptiles = int(data.size / (grid.num_y * grid.num_x))
@@ -445,7 +445,7 @@ def load_climos(days, file_template, grid):
         # ----------------------------------------------------------------------
         # Convert file template to real file
         #
-        date_obj = datetime.strptime('2001'+day, '%Y%m%d')
+        date_obj = datetime.strptime('2000'+day, '%Y%m%d')
         file = datetime.strftime(date_obj, file_template)
         # ----------------------------------------------------------------------
         # Open file and read the appropriate data
