@@ -32,10 +32,8 @@ class UnitConverter:
         ----------
 
         - data (*array_like*) - NumPy array or list containing data to convert
-        - units (*string*) - Units to convert from and to (formatted as
-          XXX-to-YYY). For example:
-            - '0.1mm-to-mm'
-            - 'degK-to-degC'
+        - units (*string*) - Units to convert from and to (formatted as XXX-to-YYY). For a list
+        of all supported units, call `data_utils.units.UnitConverter.get_supported_units`
 
         Returns
         -------
