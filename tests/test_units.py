@@ -33,7 +33,7 @@ def test_convert_0pt1mm_to_mm():
     # 1-d List
     before = [100, 200, 300, 400, 500]
     after = [10, 20, 30, 40, 50]
-    assert_array_equal(unit_converter.convert(before, '0.1mm-to-mm'), after)
+    assert_allclose(unit_converter.convert(before, '0.1mm-to-mm'), after)
     # NumPy array
     before = np.array([[300., 305., 310.],
                        [305., 310., 315.]], dtype='float64')
