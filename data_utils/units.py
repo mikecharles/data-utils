@@ -36,7 +36,7 @@ class UnitConverter:
         Returns
         -------
 
-        - *array_like* - NumPy array or list containing the converted data
+        - *array_like* or *float* - NumPy array, list, or float containing the converted data
 
         Examples
         --------
