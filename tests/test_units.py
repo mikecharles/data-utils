@@ -35,8 +35,8 @@ def test_convert_0pt1mm_to_mm():
     after = [10, 20, 30, 40, 50]
     assert_allclose(unit_converter.convert(before, '0.1mm-to-mm'), after)
     # NumPy array
-    before = np.array([[300., 305., 310.],
-                       [305., 310., 315.]], dtype='float64')
-    after = np.array([[26.85, 31.85, 36.85],
-                      [31.85, 36.85, 41.85]], dtype='float64')
-    assert_allclose(unit_converter.convert(before, 'degK-to-degC'), after)
+    before = np.array([[100, 200, 300],
+                       [200, 300, 400]], dtype='float64')
+    after = np.array([[10, 20, 30],
+                      [20, 30, 40]], dtype='float64')
+    assert_allclose(unit_converter.convert(before, '0.1mm-to-mm'), after)
