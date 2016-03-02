@@ -59,3 +59,22 @@ def test_convert_mm_to_inches():
     after = np.array([[1.0, 2.0, 3.0],
                       [2.0, 3.0, 4.0]], dtype='float64')
     assert_allclose(unit_converter.convert(before, 'mm-to-inches'), after)
+
+
+def test_convert_inches_to_mm():
+    """Test converting from inches to mm"""
+    unit_converter = units.UnitConverter()
+    # Single value
+    before = 1.0
+    after = 25.4
+    assert(unit_converter.convert(before, 'inches-to-mm') == after)
+    # 1-d List
+    before = [1.0, 2.0, 3.0, 4.0, 5.0]
+    after = [25.4, 50.8, 76.2, 101.6, 127.0]
+    assert_allclose(unit_converter.convert(before, 'inches-to-mm'), after)
+    # NumPy array
+    before = np.array([[1.0, 2.0, 3.0],
+                      [2.0, 3.0, 4.0]], dtype='float64')
+    after = np.array([[25.4, 50.8, 76.2],
+                       [50.8, 76.2, 101.6]], dtype='float64')
+    assert_allclose(unit_converter.convert(before, 'inches-to-mm'), after)
