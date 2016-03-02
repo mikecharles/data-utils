@@ -13,7 +13,8 @@ class UnitConverter:
         self.supported_units = [
             '0.1mm-to-mm',
             'degK-to-degC',
-            'm-to-mm'
+            'm-to-mm',
+            'mm-to-inches',
         ]
 
     def get_supported_units(self):
@@ -67,6 +68,8 @@ class UnitConverter:
             data = data - 273.15
         elif units == 'm-to-mm':
             data = data * 1000
+        elif units == 'mm-to-inches':
+            data = data / 25.4
 
         # Return data
         return data
