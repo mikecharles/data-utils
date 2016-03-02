@@ -97,3 +97,22 @@ def test_convert_degC_to_degF():
     after = np.array([[-40., 32.],
                       [32., 212.]], dtype='float64')
     assert_allclose(unit_converter.convert(before, 'degC-to-degF'), after)
+
+
+def test_convert_degF_to_degC():
+    """Test converting from degC to degF"""
+    unit_converter = units.UnitConverter()
+    # Single value
+    before = 32.
+    after = 0.
+    assert(unit_converter.convert(before, 'degF-to-degC') == after)
+    # 1-d List
+    before = [-40., 32., 212.]
+    after = [-40., 0., 100.]
+    assert_allclose(unit_converter.convert(before, 'degF-to-degC'), after)
+    # NumPy array
+    before = np.array([[-40., 32.],
+                       [32., 212.]], dtype='float64')
+    after = np.array([[-40., 0.],
+                      [0., 100.]], dtype='float64')
+    assert_allclose(unit_converter.convert(before, 'degF-to-degC'), after)

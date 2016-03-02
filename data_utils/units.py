@@ -14,6 +14,7 @@ class UnitConverter:
             '0.1mm-to-mm',
             'degK-to-degC',
             'degC-to-degF',
+            'degF-to-degC',
             'm-to-mm',
             'mm-to-inches',
             'inches-to-mm',
@@ -76,6 +77,11 @@ class UnitConverter:
             data = data * 25.4
         elif units == 'degC-to-degF':
             data = data * 9/5 + 32
+        elif units == 'degF-to-degC':
+            data = (data - 32) * 5/9
+        else:
+            raise ValueError('Unsupported units, must be one of {}'.format(
+                self.supported_units))
 
         # Return data
         return data
