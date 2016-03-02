@@ -78,3 +78,22 @@ def test_convert_inches_to_mm():
     after = np.array([[25.4, 50.8, 76.2],
                        [50.8, 76.2, 101.6]], dtype='float64')
     assert_allclose(unit_converter.convert(before, 'inches-to-mm'), after)
+
+
+def test_convert_degC_to_degF():
+    """Test converting from degC to degF"""
+    unit_converter = units.UnitConverter()
+    # Single value
+    before = 0.
+    after = 32.
+    assert(unit_converter.convert(before, 'degC-to-degF') == after)
+    # 1-d List
+    before = [-40., 0., 100.]
+    after = [-40., 32., 212.]
+    assert_allclose(unit_converter.convert(before, 'degC-to-degF'), after)
+    # NumPy array
+    before = np.array([[-40., 0.],
+                      [0., 100.]], dtype='float64')
+    after = np.array([[-40., 32.],
+                      [32., 212.]], dtype='float64')
+    assert_allclose(unit_converter.convert(before, 'degC-to-degF'), after)

@@ -13,6 +13,7 @@ class UnitConverter:
         self.supported_units = [
             '0.1mm-to-mm',
             'degK-to-degC',
+            'degC-to-degF',
             'm-to-mm',
             'mm-to-inches',
             'inches-to-mm',
@@ -73,6 +74,8 @@ class UnitConverter:
             data = data / 25.4
         elif units == 'inches-to-mm':
             data = data * 25.4
+        elif units == 'degC-to-degF':
+            data = data * 9/5 + 32
 
         # Return data
         return data
