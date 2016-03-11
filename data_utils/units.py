@@ -59,8 +59,9 @@ class UnitConverter:
             raise ValueError('Unsupported units, must be one of {}'.format(
                 self.supported_units))
 
-        # Convert given data to a NumPy array
-        data = np.array(data)
+        # Convert given data to a NumPy array if necessary
+        if type(data) is not np.ma.core.MaskedArray and type(data) is not np.ndarray:
+            data = np.array(data)
 
         # 0.1mm-to-mm
         if units == '0.1mm-to-mm':
