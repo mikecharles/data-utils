@@ -13,7 +13,11 @@ class UnitConverter:
         self.supported_units = [
             '0.1mm-to-mm',
             'degK-to-degC',
-            'm-to-mm'
+            'degC-to-degF',
+            'degF-to-degC',
+            'm-to-mm',
+            'mm-to-inches',
+            'inches-to-mm',
         ]
 
     def get_supported_units(self):
@@ -28,15 +32,13 @@ class UnitConverter:
         ----------
 
         - data (*array_like*) - NumPy array or list containing data to convert
-        - units (*string*) - Units to convert from and to (formatted as
-          XXX-to-YYY). For example:
-            - '0.1mm-to-mm'
-            - 'degK-to-degC'
+        - units (*string*) - Units to convert from and to (formatted as XXX-to-YYY). For a list
+        of all supported units, call `data_utils.units.UnitConverter.get_supported_units`
 
         Returns
         -------
 
-        - *array_like* - NumPy array or list containing the converted data
+        - *array_like* or *float* - NumPy array, list, or float containing the converted data
 
         Examples
         --------
@@ -67,6 +69,17 @@ class UnitConverter:
             data = data - 273.15
         elif units == 'm-to-mm':
             data = data * 1000
+        elif units == 'mm-to-inches':
+            data = data / 25.4
+        elif units == 'inches-to-mm':
+            data = data * 25.4
+        elif units == 'degC-to-degF':
+            data = data * 9/5 + 32
+        elif units == 'degF-to-degC':
+            data = (data - 32) * 5/9
+        else:
+            raise ValueError('Unsupported units, must be one of {}'.format(
+                self.supported_units))
 
         # Return data
         return data
