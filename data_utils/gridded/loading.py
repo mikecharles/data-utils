@@ -60,7 +60,8 @@ class Dataset:
 def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                    fhr_range, variable=None, level=None, record_num=None,
                    fhr_int=6, fhr_stat='mean', collapse=False, yrev=False,
-                   remove_dup_fhrs=False, log=False, unit_conversion=None, accum_over_fhr=False):
+                   remove_dup_fhrs=False, log=False, unit_conversion=None, accum_over_fhr=False,
+                   debug=False):
     """
     Loads ensemble forecast data
 
@@ -107,6 +108,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
     False)
     - unit_conversion - *string* (optional) - type of unit conversion to perform. If None,
     then no unit conversion will be performed.
+    - debug - *boolean* - if True the file data is loaded from will be printed out
 
     Returns
     -------
@@ -214,6 +216,8 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                 file = datetime.strftime(date_obj, file_template)
                 var_dict = {'fhr': fhr, 'member': member}
                 file = replace_vars_in_string(file, **var_dict)
+                if debug:
+                    print('Loading data from {}'.format(file));
                 # --------------------------------------------------------------
                 # Read data file
                 #
@@ -315,7 +319,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
         return Dataset(ens=data)
 
 
-def load_obs(dates, file_template, data_type, grid, record_num=None):
+def load_obs(dates, file_template, data_type, grid, record_num=None, debug=False):
     """
     Load observation data
 
@@ -334,6 +338,7 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
     - data_type - *string* - input data type (bin, grib1, grib2)
     - grid - *Grid* - Grid associated with the input data
     - record_num - *int* - binary record containing the desired variable
+    - debug - *boolean* - if True the file data is loaded from will be printed out
 
     Returns
     -------
@@ -387,7 +392,7 @@ def load_obs(dates, file_template, data_type, grid, record_num=None):
     return Dataset(obs=data)
 
 
-def load_climos(days, file_template, grid):
+def load_climos(days, file_template, grid, debug=False):
     """
     Load climatology data
 
@@ -403,6 +408,7 @@ def load_climos(days, file_template, grid):
     bracketed variables. Date formatting (eg. %Y%m%d) will be converted into
     the given date.
     - grid - *Grid* - Grid associated with the input data
+    - debug - *boolean* - if True the file data is loaded from will be printed out
 
     Returns
     -------
@@ -432,7 +438,7 @@ def load_climos(days, file_template, grid):
     # Initialize a NumPy array to store the data
     #
     # Open first file to determine num ptiles
-    date_obj = datetime.strptime('2001' + days[0], '%Y%m%d')
+    date_obj = datetime.strptime('2000' + days[0], '%Y%m%d')
     file = datetime.strftime(date_obj, file_template)
     data = np.fromfile(file, 'float32')
     num_ptiles = int(data.size / (grid.num_y * grid.num_x))
@@ -445,7 +451,7 @@ def load_climos(days, file_template, grid):
         # ----------------------------------------------------------------------
         # Convert file template to real file
         #
-        date_obj = datetime.strptime('2001'+day, '%Y%m%d')
+        date_obj = datetime.strptime('2000'+day, '%Y%m%d')
         file = datetime.strftime(date_obj, file_template)
         # ----------------------------------------------------------------------
         # Open file and read the appropriate data

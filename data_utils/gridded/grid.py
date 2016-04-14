@@ -180,29 +180,44 @@ class Grid:
         except AttributeError:
             raise GridError('Data not a valid NumPy array')
 
-    def lonlat_to_gridpoint(self, lon, lat):
+    def latlon_to_gridpoint(self, latlons):
         """
         Returns the index of the 1-dimensional array corresponding to this
-        grid, given the lon and lat values. The lon/lat value pair must match
+        grid, given the lat and lon values. The lat/lon value pair must match
         the location of a grid point in this grid, otherwise None will be
         returned.
 
         Parameters
         ----------
 
-        - lon - *float* - longitude of grid point
-        - lat - *float* - latitude of grid point
+        - latlons - tuple of *float* or *list of tuple of floats* - lat/lon of grid point(s)
 
         Returns
         -------
 
-        *int* or *None* - array index containing the give grid point, or None
+        *int* or *None* - array index containing the given grid point(s) index(es), or -1 if no
+        grid point matches the given lat/lon value
         """
-        lons, lats = np.meshgrid(self.lons, self.lats)
-        lons = lons.reshape((self.num_y * self.num_x))
-        lats = lats.reshape((self.num_y * self.num_x))
-        match = np.argwhere((lats == lat) & (lons == lon))
-        if match.size == 0:
-            return None
-        else:
-            return match
+        if type(latlons) is not list:
+            latlons = [latlons]
+        matches = []
+        for latlon in latlons:
+            lat, lon = latlon
+            lon = 360 + lon if lon < 0 else lon
+            lats, lons = np.meshgrid(self.lats, self.lons)
+            lats = lats.reshape((self.num_y * self.num_x))
+            lons = lons.reshape((self.num_y * self.num_x))
+            try:
+                match = np.argwhere((lats == lat) & (lons == lon))[0][0]
+                if match.size == 0:
+                    matches.append(-1)
+                else:
+                    matches.append(match)
+            except IndexError:
+                matches.append(-1)
+        return matches
+
+if __name__ == '__main__':
+    grid = Grid('1deg-global')
+    latlons = [(-93, 31), (-88, 38), (-115, 36)]
+    print(grid.latlon_to_gridpoint(latlons))
