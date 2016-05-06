@@ -381,6 +381,10 @@ def load_obs(dates, file_template, data_type, grid, record_num=None, debug=False
         file = datetime.strftime(date_obj, file_template)
         # ----------------------------------------------------------------------
         # Open file and read the appropriate data
+        if debug:
+            print('Loading data from {}'.format(file))
+        # --------------------------------------------------------------
+        # Read data file
         #
         try:
             data[d] = np.fromfile(file, 'float32')
