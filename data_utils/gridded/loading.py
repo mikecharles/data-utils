@@ -400,7 +400,7 @@ def load_obs(dates, file_template, data_type, grid, record_num=None, debug=False
                                     debug=debug)
             except OSError:
                 data[d] = np.nan
-        elif data_type == 'bin':
+        elif data_type == 'binary':
             # Open file and read the appropriate data
             try:
                 # Read in one forecast hour, one member
