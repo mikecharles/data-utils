@@ -82,7 +82,7 @@ def read_grib(file, grib_type, variable, level, grid=None, yrev=False,
     if grep_fhr:
         grep_fhr_str = grep_fhr
     else:
-        grep_fhr_str = ''
+        grep_fhr_str = '.*'
     # Set the name of the wgrib program to call
     if grib_type == 'grib1':
         wgrib_call = 'wgrib "{}" | grep ":{}:" | grep ":{}:" | grep -P "{}" | wgrib ' \
