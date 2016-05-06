@@ -320,7 +320,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
 
 
 def load_obs(dates, file_template, data_type, grid, record_num=None, debug=False, yrev=False,
-             variable=None, level=None):
+             variable=None, level=None, unit_conversion=None):
     """
     Load observation data
 
@@ -407,6 +407,15 @@ def load_obs(dates, file_template, data_type, grid, record_num=None, debug=False
                 data[d] = np.fromfile(file, dtype='float32')
             except:
                 data[d] = np.nan
+
+    # -------------------------------------------------------------------------
+    # Convert units (if necessary)
+    #
+    if unit_conversion:
+        uc = UnitConverter()
+        conversion = unit_conversion
+        data = uc.convert(data, conversion)
+
     # --------------------------------------------------------------------------
     # Return data
     #
