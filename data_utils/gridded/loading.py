@@ -319,7 +319,8 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
         return Dataset(ens=data)
 
 
-def load_obs(dates, file_template, data_type, grid, record_num=None, debug=False):
+def load_obs(dates, file_template, data_type, grid, record_num=None, debug=False, yrev=False,
+             variable=None, level=None):
     """
     Load observation data
 
@@ -377,19 +378,35 @@ def load_obs(dates, file_template, data_type, grid, record_num=None, debug=False
         # ----------------------------------------------------------------------
         # Convert file template to real file
         #
-        date_obj = datetime.strptime(date, '%Y%m%d')
+        if len(date) == 8:
+            fmt = '%Y%m%d'
+        elif len(date) == 10:
+            fmt = '%Y%m%d%H'
+        else:
+            raise ValueError('Dates must be in the format YYYYMMDD or YYYYMMDDHH')
+        date_obj = datetime.strptime(date, fmt)
         file = datetime.strftime(date_obj, file_template)
-        # ----------------------------------------------------------------------
-        # Open file and read the appropriate data
         if debug:
             print('Loading data from {}'.format(file))
         # --------------------------------------------------------------
         # Read data file
         #
-        try:
-            data[d] = np.fromfile(file, 'float32')
-        except FileNotFoundError:
-            data[d] = np.nan
+        # grib1 or grib2
+        if data_type in ['grib1', 'grib2']:
+            # Open file and read the appropriate data
+            try:
+                # Read in one forecast hour, one member
+                data[d] = read_grib(file, data_type, variable, level, grid=grid, yrev=yrev,
+                                    debug=debug)
+            except OSError:
+                data[d] = np.nan
+        elif data_type == 'bin':
+            # Open file and read the appropriate data
+            try:
+                # Read in one forecast hour, one member
+                data[d] = np.fromfile(file, dtype='float32')
+            except:
+                data[d] = np.nan
     # --------------------------------------------------------------------------
     # Return data
     #
