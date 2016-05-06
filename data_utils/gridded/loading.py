@@ -217,7 +217,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
                 var_dict = {'fhr': fhr, 'member': member}
                 file = replace_vars_in_string(file, **var_dict)
                 if debug:
-                    print('Loading data from {}'.format(file));
+                    print('Loading data from {}'.format(file))
                 # --------------------------------------------------------------
                 # Read data file
                 #
