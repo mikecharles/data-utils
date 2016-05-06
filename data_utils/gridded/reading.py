@@ -13,7 +13,7 @@ from data_utils.gridded.grid import Grid
 
 
 def read_grib(file, grib_type, variable, level, grid=None, yrev=False,
-              grep_fhr=None):
+              grep_fhr=None, debug=False):
     """
     Reads a record from a grib file
 
@@ -95,6 +95,8 @@ def read_grib(file, grib_type, variable, level, grid=None, yrev=False,
             file, variable, level, grep_fhr_str)
     else:
         raise IOError(__name__ + ' requires grib_type to be grib1 or grib2')
+    if debug:
+        print('wgrib command: {}'.format(wgrib_call))
     # Generate a wgrib call
     try:
         if grib_type == 'grib1':
