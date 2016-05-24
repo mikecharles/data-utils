@@ -107,7 +107,7 @@ def _make_plot(*args, **kwargs):
     fields = list(args)
     # Get **kwargs
     grid = kwargs['grid']
-    levels = kwargs['levels']
+    levels = np.array(kwargs['levels']) if kwargs['levels'] else None
     projection = kwargs['projection']
     region = kwargs['region']
     fill_colors = kwargs['fill_colors']
@@ -156,14 +156,12 @@ def _make_plot(*args, **kwargs):
     # Make sure that certain args match the length of fields. For example, if 2 fields are
     # provided, then levels, fill_colors, and contour_colors must all have a length of 2 as well,
     # as they apply to each of the fields
-    if levels:
-        if type(levels) != list:
-            levels = [levels]
+    if levels is not None:
         if len(fields) > 1:
-            if fill_first_field is False and len(levels) != len(fields):
+            if fill_first_field is False and levels.shape[0] != len(fields):
                 raise ValueError('levels must be a list with a length matching the number of '
                                  'fields to plot')
-            elif fill_first_field is True and len(levels) != (len(fields) - 1):
+            elif fill_first_field is True and levels.shape[0] != (len(fields) - 1):
                 raise ValueError('levels must be a list with a length of 1 less than the the '
                                  'number of fields to plot')
     if fill_colors:
@@ -348,7 +346,7 @@ def _make_plot(*args, **kwargs):
     # ----------------------------------------------------------------------------------------------
     # Plot first field
     #
-    if levels:
+    if levels is not None:
         if fill_colors:
             if fill_first_field:
                 contours = m.contourf(lons, lats, fields[0], levels, latlon=True, extend=extend,
