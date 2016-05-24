@@ -20,7 +20,7 @@ from data_utils.gridded.interpolation import fill_outside_mask_borders
 from data_utils.gridded.interpolation import smooth
 import warnings
 
-
+print(mpl_toolkits.basemap.__file__)
 # ------------------------------------------------------------------------------
 # Setup reusable docstring
 #
@@ -35,7 +35,23 @@ _docstring_kwargs = """
             be plotted in different colors in the order specified.
             - A string specifying the variable and plot type. Supported values:
                 - tmean-terciles
-    - colors - alias of `fill_colors`
+    - contour_colors (str or mpl_colors)
+        - Color of contours
+            - If None, then no contours are plotted
+            - If string, like 'r' or 'red', contours will be plotted in this color
+            - If a tuple of matplotlib color args (string, float, rgb, etc), different levels
+            will be plotted in different colors in the order specified.
+    - fill_first_field (bool, optional)
+        - Whether to fill the first field plotted (default True)
+            - If True, then the first field plotted will have filled contours - all subsequent
+            fields will be contour-only
+            - If False, then all fields plotted will be contour-only
+    - contour_labels (bool, optional)
+        - Whether contour labels are plotted (default False)
+    - smoothing_factor (float, optional)
+        - Level of smoothing (gaussian filter, this represents the kernel
+        width in standard deviations - may need to experiment with value -
+        generally between 0 and 2 should suffice)
     - projection (str, optional)
         - Set the map projection ('lcc' or 'mercator')
     - region (str, optional)
@@ -65,18 +81,6 @@ _docstring_kwargs = """
         - Specify how the cbar ticks should be labelled
     - tercile_type (str, optional)
         - Type of tercile ('normal' or 'median')
-    - smoothing_factor (float, optional)
-        - Level of smoothing (gaussian filter, this represents the kernel
-        width in standard deviations - may need to experiment with value -
-        generally between 0 and 2 should suffice)
-    - contour_colors (str or mpl_colors)
-        - Color of contours
-            - If None, then no contours are plotted
-            - If string, like 'r' or 'red', contours will be plotted in this color
-            - If a tuple of matplotlib color args (string, float, rgb, etc), different levels
-            will be plotted in different colors in the order specified.
-    - contour_labels (bool, optional)
-        - Whether contour labels are plotted (default False)
     """
 
 
@@ -100,14 +104,14 @@ def _make_plot(*args, **kwargs):
     """
 
     # Get *args
-    data = args[0]
-    grid = args[1]
+    fields = list(args)
     # Get **kwargs
+    grid = kwargs['grid']
     levels = kwargs['levels']
     projection = kwargs['projection']
     region = kwargs['region']
-    colors = kwargs['colors']
     fill_colors = kwargs['fill_colors']
+    fill_first_field = kwargs['fill_first_field']
     title = kwargs['title']
     lat_range = kwargs['lat_range']
     lon_range = kwargs['lon_range']
@@ -149,11 +153,38 @@ def _make_plot(*args, **kwargs):
     if cbar_type == 'tercile' and not (levels and cbar_tick_labels):
         raise ValueError('When cbar_type==\'tercile\', levels and cbar_tick_labels '
                          'need to be set')
-    # Make fill_colors and colors equal
-    if colors and not fill_colors:
-        fill_colors = colors
-    elif fill_colors and not colors:
-        colors = fill_colors
+    # Make sure that certain args match the length of fields. For example, if 2 fields are
+    # provided, then levels, fill_colors, and contour_colors must all have a length of 2 as well,
+    # as they apply to each of the fields
+    if levels:
+        if type(levels) != list:
+            levels = [levels]
+        if len(fields) > 1:
+            if fill_first_field is False and len(levels) != len(fields):
+                raise ValueError('levels must be a list with a length matching the number of '
+                                 'fields to plot')
+            elif fill_first_field is True and len(levels) != (len(fields) - 1):
+                raise ValueError('levels must be a list with a length of 1 less than the the '
+                                 'number of fields to plot')
+    if fill_colors:
+        if type(fill_colors) != list:
+            fill_colors = [fill_colors]
+        if len(fields) > 1:
+            if fill_first_field is False and len(fill_colors) != len(fields):
+                raise ValueError('fill_colors must be a list with a length matching the number of '
+                                 'fields to plot')
+            elif fill_first_field is True and len(fill_colors) != (len(fields) - 1):
+                raise ValueError('fill_colors must be a list with a length of 1 less than the the '
+                                 'number of fields to plot')
+    if type(contour_colors) != list:
+        contour_colors = [contour_colors]
+    if len(fields) < 1:
+        if fill_first_field is False and len(contour_colors) != len(fields):
+            raise ValueError('contour_colors must be a list with a length matching the number of '
+                             'fields to plot')
+        elif fill_first_field is True and len(contour_colors) != (len(fields) - 1):
+            raise ValueError('contour_colors must be a list with a length of 1 less than the the '
+                             'number of fields to plot')
 
     # --------------------------------------------------------------------------
     # Check colors variables
@@ -263,32 +294,29 @@ def _make_plot(*args, **kwargs):
 
     # Smooth the data
     if smoothing_factor > 0:
-        data = smooth(data, grid, smoothing_factor=smoothing_factor)
+        for i in range(len(fields)):
+            fields[i] = smooth(fields[i], grid, smoothing_factor=smoothing_factor)
 
     # --------------------------------------------------------------------------
     # Fill coastal values (if requested)
     #
     if fill_coastal_vals:
-        # Datasets (particularly datasets on a course grid) that are masked
-        # out over the water suffer from some missing grid points along the
-        # coast. The methodology below remedies this, filling in those values
-        #  while creating a clean mask along the water.
-        #
-        # Shift the entire data array 1 grid point in each direction,
-        # and for every grid point that becomes "unmissing" after shifting
-        # the grid (every grid point that has a non-missing neighbor),
-        # set the value of the grid point to the neighbor's value.
-        data = fill_outside_mask_borders(data, passes=2)
+        for i in range(len(fields)):
+            # Datasets (particularly datasets on a course grid) that are masked out over the
+            # water suffer from some missing grid points along the coast. The methodology below
+            # remedies this, filling in those values while creating a clean mask along the water.
+            # Shift the entire data array 1 grid point in each direction, and for every grid
+            # point that becomes "unmissing" after shifting the grid (every grid point that has a
+            # non-missing neighbor), set the value of the grid point to the neighbor's value.
+            fields[i] = fill_outside_mask_borders(fields[i], passes=2)
 
-        # Place data in a high-res grid so the ocean masking looks decent
-        high_res_grid = Grid('1/6th-deg-global')
-        data = interpolate(data, grid, high_res_grid)
-        lons, lats = np.meshgrid(high_res_grid.lons, high_res_grid.lats)
-        # Mask the ocean values
-        data = mpl_toolkits.basemap.maskoceans((lons - 360), lats, data,
-                                               inlands=True)
+            # Place data in a high-res grid so the ocean masking looks decent
+            high_res_grid = Grid('1/6th-deg-global')
+            fields[i] = interpolate(fields[i], grid, high_res_grid)
+            lons, lats = np.meshgrid(high_res_grid.lons, high_res_grid.lats)
+            # Mask the ocean values
+            fields[i] = mpl_toolkits.basemap.maskoceans((lons - 360), lats, fields[i], inlands=True)
 
-    # Plot filled contours
     if cbar_ends == 'triangular':
         extend='both'
     elif cbar_ends == 'square':
@@ -296,32 +324,66 @@ def _make_plot(*args, **kwargs):
     else:
         raise ValueError('cbar_ends must be either \'triangular\' or '
                          '\'square\'')
+
+    # # ----------------------------------------------------------------------------------------------
+    # # Mask values outside of the map boundaries
+    # #
+    # # This needs to be done because if we plot the data as is, matplotlib.pyplot.clabel will put
+    # # some labels outside of the map borders, so we need to force it to understand that we don't
+    # # care about the data outside of the map borders.
+    # #
+    # # Compute native map projection coordinates of lat/lon grid.
+    # x, y = m(lons, lats)
+    #
+    # # Create a mask of everything outside the map boundaries
+    # mask1 = x < np.min(x)
+    # mask2 = x > np.max(x)
+    # mask3 = y > np.max(y)
+    # mask4 = y < np.min(y)
+    # mask = mask1 + mask2 + mask3 + mask4
+    # # Convert the fields into masked arrays
+    # for i in range(len(fields)):
+    #     fields[i] = np.ma.masked_array(fields[i], mask=mask)
+
+    # ----------------------------------------------------------------------------------------------
+    # Plot first field
+    #
     if levels:
         if fill_colors:
-            plot = m.contourf(lons, lats, data, levels, latlon=True,
-                              extend=extend, colors=fill_colors)
+            if fill_first_field:
+                contours = m.contourf(lons, lats, fields[0], levels, latlon=True, extend=extend,
+                                      colors=fill_colors)
+            else:
+                contours = m.contour(lons, lats, fields[0], levels, latlon=True, extend=extend,
+                                     colors=contour_colors[0])
         else:
             if cbar_color_spacing == 'equal':
                 cmap = matplotlib.cm.get_cmap('jet', len(levels))
                 norm = matplotlib.colors.BoundaryNorm(levels, cmap.N)
-                plot = m.contourf(lons, lats, data, levels, latlon=True,
-                                  extend=extend, cmap=cmap, norm=norm)
+                contours = m.contourf(lons, lats, fields[0], levels, latlon=True, extend=extend,
+                                      cmap=cmap, norm=norm)
             elif cbar_color_spacing == 'natural':
-                plot = m.contourf(lons, lats, data, levels, latlon=True,
-                                  extend=extend)
+                contours = m.contourf(lons, lats, fields[0], levels, latlon=True, extend=extend)
             else:
-                raise ValueError('Incorrect setting for cbar_color_spacing - '
-                                 'must be either \'equal\' or \'natural\'')
+                raise ValueError('Incorrect setting for cbar_color_spacing - must be either '
+                                 '\'equal\' or \'natural\'')
+    # If levels were not specified
     else:
-        plot = m.contourf(lons, lats, data, latlon=True, extend=extend)
-        levels = plot._levels
-    # Plot line contours
-    if contour_colors:
+        if fill_first_field:
+            contours = m.contourf(lons, lats, fields[0], latlon=True, extend=extend)
+        else:
+            contours = m.contour(lons, lats, fields[0], latlon=True, extend=extend,
+                                 colors=contour_colors[0], clabel=True)
+
+        levels = contours._levels
+    # Plot line contours (only for a single field)
+    if contour_colors and len(fields) == 1:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=FutureWarning)
-            contours = m.contour(lons, lats, data, levels, latlon=True, colors=contour_colors,
-                                 linewidths=0.5)
-    # Plot contour labels
+            contours = m.contour(lons, lats, fields[0], levels, latlon=True,
+                                 colors=contour_colors, linewidths=0.5)
+    # Plot contour labels for the first field
+    ax.set_clip_on(True)
     if contour_labels:
         if contours:
             # If all contours all whole numbers, format the labels as such, otherwise they
@@ -334,55 +396,55 @@ def _make_plot(*args, **kwargs):
 
     # Add labels
     matplotlib.pyplot.title(title, fontsize=10)
-
-    # --------------------------------------------------------------------------
-    # Add a colorbar
     #
-    if cbar_type == 'tercile':
-        # Generate probability tick labels
-        labels = ['{:.0f}%'.format(math.fabs(level)) for level in levels]
-        # Add the colorbar (attached to figure above)
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("bottom", size="4%", pad=0.3)
-        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax,
-                                        label=cbar_label, ticks=cbar_tick_labels)
-        cb.ax.set_xticklabels(labels)
-        cb.ax.tick_params(labelsize=8)
-        # Add colorbar labels
-        fontsize=8
-        tercile_type = tercile_type.capitalize()
-        cb.ax.text(0.24, 1.2, 'Probability of Below {}'.format(tercile_type),
-                   horizontalalignment='center', transform=cb.ax.transAxes,
-                   fontsize=fontsize, fontstyle='normal')
-        cb.ax.text(0.5, 1.2, '{}'.format(tercile_type),
-                   horizontalalignment='center', transform=cb.ax.transAxes,
-                   fontsize=fontsize, fontstyle='normal')
-        cb.ax.text(0.76, 1.2, 'Probability of Above {}'.format(tercile_type),
-                   horizontalalignment='center', transform=cb.ax.transAxes,
-                   fontsize=fontsize, fontstyle='normal')
-    else:
-        # Add the colorbar (attached to figure above)
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("bottom", size="4%", pad=0.3)
-        # If cbar_tick_labels_opt is set
-        if cbar_tick_labels:
-            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax,
-                                            label=cbar_label)
-            cb.ax.set_xticklabels(cbar_tick_labels)
-        else:
-            cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax)
-        cb.ax.tick_params(labelsize=8)
-        cb.set_label(cbar_label, fontsize=8)
+    # # --------------------------------------------------------------------------
+    # # Add a colorbar
+    # #
+    # if cbar_type == 'tercile':
+    #     # Generate probability tick labels
+    #     labels = ['{:.0f}%'.format(math.fabs(level)) for level in levels]
+    #     # Add the colorbar (attached to figure above)
+    #     divider = make_axes_locatable(ax)
+    #     cax = divider.append_axes("bottom", size="4%", pad=0.3)
+    #     cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax,
+    #                                     label=cbar_label, ticks=cbar_tick_labels)
+    #     cb.ax.set_xticklabels(labels)
+    #     cb.ax.tick_params(labelsize=8)
+    #     # Add colorbar labels
+    #     fontsize=8
+    #     tercile_type = tercile_type.capitalize()
+    #     cb.ax.text(0.24, 1.2, 'Probability of Below {}'.format(tercile_type),
+    #                horizontalalignment='center', transform=cb.ax.transAxes,
+    #                fontsize=fontsize, fontstyle='normal')
+    #     cb.ax.text(0.5, 1.2, '{}'.format(tercile_type),
+    #                horizontalalignment='center', transform=cb.ax.transAxes,
+    #                fontsize=fontsize, fontstyle='normal')
+    #     cb.ax.text(0.76, 1.2, 'Probability of Above {}'.format(tercile_type),
+    #                horizontalalignment='center', transform=cb.ax.transAxes,
+    #                fontsize=fontsize, fontstyle='normal')
+    # else:
+    #     # Add the colorbar (attached to figure above)
+    #     divider = make_axes_locatable(ax)
+    #     cax = divider.append_axes("bottom", size="4%", pad=0.3)
+    #     # If cbar_tick_labels_opt is set
+    #     if cbar_tick_labels:
+    #         cb = matplotlib.pyplot.colorbar(contours, orientation="horizontal", cax=cax,
+    #                                         label=cbar_label)
+    #         cb.ax.set_xticklabels(cbar_tick_labels)
+    #     else:
+    #         cb = matplotlib.pyplot.colorbar(contours, orientation="horizontal", cax=cax)
+    #     cb.ax.tick_params(labelsize=8)
+    #     cb.set_label(cbar_label, fontsize=8)
 
 
-def plot_to_screen(data, grid, levels=None, colors=None, fill_colors=None,
+def plot_to_screen(data, grid=None, levels=None, colors=None, fill_colors=None,
                    projection='equal-area', region='US', title='',
                    lat_range=None, lon_range=None,
                    cbar_ends='triangular', tercile_type='normal',
                    smoothing_factor=0, cbar_type='normal',
                    cbar_color_spacing='natural',
                    fill_coastal_vals=False, cbar_label='', cbar_tick_labels=None, contour_colors=None,
-                   contour_labels=False):
+                   fill_first_field=True, contour_labels=False):
     """
     Plots the given data and displays on-screen.
 
@@ -421,7 +483,6 @@ def plot_to_screen(data, grid, levels=None, colors=None, fill_colors=None,
     kwargs = locals()
     # Remove positional args
     del kwargs['data']
-    del kwargs['grid']
     # --------------------------------------------------------------------------
     # Reshape array if necessary
     #
@@ -441,13 +502,12 @@ def plot_to_screen(data, grid, levels=None, colors=None, fill_colors=None,
     matplotlib.pyplot.close("all")
 
 
-def plot_to_file(data, grid, file, dpi=200, levels=None,
-                 projection='equal-area', region='US', colors=None, fill_colors=None,
-                 title='', lat_range=None, lon_range=None,
-                 cbar_ends='triangular', tercile_type='normal',
-                 smoothing_factor=0, cbar_type='normal',
-                 cbar_color_spacing='natural', fill_coastal_vals=False,
-                 cbar_label='', cbar_tick_labels=None, contour_colors=None, contour_labels=False):
+def plot_to_file(*fields, grid=None, file=None, dpi=200, levels=None, projection='equal-area',
+                 region='US', fill_colors=None, fill_first_field=True, title='', lat_range=None,
+                 lon_range=None, cbar_ends='triangular', tercile_type='normal',
+                 smoothing_factor=0, cbar_type='normal', cbar_color_spacing='natural',
+                 fill_coastal_vals=False, cbar_label='', cbar_tick_labels=None,
+                 contour_colors=None, contour_labels=False):
     """
     Plots the given data and saves to a file.
 
@@ -487,28 +547,35 @@ def plot_to_file(data, grid, file, dpi=200, levels=None,
     # Use locals() function to get all defined vars
     kwargs = locals()
     # Remove positional args
-    del kwargs['data']
-    del kwargs['grid']
-    del kwargs['file']
+    del kwargs['fields']
+    # del kwargs['grid']
+    # del kwargs['file']
     # --------------------------------------------------------------------------
     # Set backend to Agg which won't require X11
     #
     matplotlib.pyplot.switch_backend('Agg')
     # --------------------------------------------------------------------------
-    # Reshape array if necessary
+    # Reshape field array(s) if necessary
     #
-    if data.ndim == 1:
-        data = np.reshape(data, (grid.num_y, grid.num_x))
-    elif data.ndim != 2:
-        raise ValueError('data array must have 1 or 2 dimensions')
-    # --------------------------------------------------------------------------
-    # Define *args to pass to child function
-    #
-    args = [data, grid]
+    # Create empty array to store reshaped fields
+    reshaped_fields = np.nan * np.empty((len(fields), grid.num_y, grid.num_x))
+    # Loop over fields
+    for i in range(len(fields)):
+        # If the current field is 1 dimensional, make it 2 dimensions (x, y)
+        if fields[i].ndim == 1:
+            reshaped_fields[i] = np.reshape(fields[i], (grid.num_y, grid.num_x))
+        # If the current field is 2 dimensional, leave it alone
+        elif fields[i].ndim == 2:
+            reshaped_fields[i] = fields[i]
+        # If the current field is not 1 or 2 dimensional, we can't know what to do with it
+        else:
+            raise ValueError('fields must have 1 or 2 dimensions')
+    # Save reshaped fields back to tuple of fields
+    fields = tuple([np.squeeze(A) for A in np.split(reshaped_fields, len(reshaped_fields), axis=0)])
     # --------------------------------------------------------------------------
     # Call _make_plot()
     #
-    _make_plot(*args, **kwargs)
+    _make_plot(*fields, **kwargs)
     _save_plot(file, dpi)
     matplotlib.pyplot.close("all")
 
