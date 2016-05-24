@@ -388,6 +388,45 @@ def _make_plot(*args, **kwargs):
                     fmt = '%s'
                 matplotlib.pyplot.clabel(contours, inline=1, fontsize=5, fmt=fmt)
 
+    # --------------------------------------------------------------------------
+    # Add a colorbar
+    #
+    if cbar_type == 'tercile':
+        # Generate probability tick labels
+        labels = ['{:.0f}%'.format(math.fabs(level)) for level in levels]
+        # Add the colorbar (attached to figure above)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("bottom", size="4%", pad=0.3)
+        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax,
+                                        label=cbar_label, ticks=cbar_tick_labels)
+        cb.ax.set_xticklabels(labels)
+        cb.ax.tick_params(labelsize=8)
+        # Add colorbar labels
+        fontsize = 8
+        tercile_type = tercile_type.capitalize()
+        cb.ax.text(0.24, 1.2, 'Probability of Below {}'.format(tercile_type),
+                   horizontalalignment='center', transform=cb.ax.transAxes,
+                   fontsize=fontsize, fontstyle='normal')
+        cb.ax.text(0.5, 1.2, '{}'.format(tercile_type),
+                   horizontalalignment='center', transform=cb.ax.transAxes,
+                   fontsize=fontsize, fontstyle='normal')
+        cb.ax.text(0.76, 1.2, 'Probability of Above {}'.format(tercile_type),
+                   horizontalalignment='center', transform=cb.ax.transAxes,
+                   fontsize=fontsize, fontstyle='normal')
+    else:
+        # Add the colorbar (attached to figure above)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("bottom", size="4%", pad=0.3)
+        # If cbar_tick_labels_opt is set
+        if cbar_tick_labels:
+            cb = matplotlib.pyplot.colorbar(contours, orientation="horizontal", cax=cax,
+                                            label=cbar_label)
+            cb.ax.set_xticklabels(cbar_tick_labels)
+        else:
+            cb = matplotlib.pyplot.colorbar(contours, orientation="horizontal", cax=cax)
+        cb.ax.tick_params(labelsize=8)
+        cb.set_label(cbar_label, fontsize=8)
+
     # ----------------------------------------------------------------------------------------------
     # Plot second field (and any additional fields)
     #
@@ -415,45 +454,6 @@ def _make_plot(*args, **kwargs):
 
     # Add labels
     matplotlib.pyplot.title(title, fontsize=10)
-    #
-    # # --------------------------------------------------------------------------
-    # # Add a colorbar
-    # #
-    # if cbar_type == 'tercile':
-    #     # Generate probability tick labels
-    #     labels = ['{:.0f}%'.format(math.fabs(level)) for level in levels]
-    #     # Add the colorbar (attached to figure above)
-    #     divider = make_axes_locatable(ax)
-    #     cax = divider.append_axes("bottom", size="4%", pad=0.3)
-    #     cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax,
-    #                                     label=cbar_label, ticks=cbar_tick_labels)
-    #     cb.ax.set_xticklabels(labels)
-    #     cb.ax.tick_params(labelsize=8)
-    #     # Add colorbar labels
-    #     fontsize=8
-    #     tercile_type = tercile_type.capitalize()
-    #     cb.ax.text(0.24, 1.2, 'Probability of Below {}'.format(tercile_type),
-    #                horizontalalignment='center', transform=cb.ax.transAxes,
-    #                fontsize=fontsize, fontstyle='normal')
-    #     cb.ax.text(0.5, 1.2, '{}'.format(tercile_type),
-    #                horizontalalignment='center', transform=cb.ax.transAxes,
-    #                fontsize=fontsize, fontstyle='normal')
-    #     cb.ax.text(0.76, 1.2, 'Probability of Above {}'.format(tercile_type),
-    #                horizontalalignment='center', transform=cb.ax.transAxes,
-    #                fontsize=fontsize, fontstyle='normal')
-    # else:
-    #     # Add the colorbar (attached to figure above)
-    #     divider = make_axes_locatable(ax)
-    #     cax = divider.append_axes("bottom", size="4%", pad=0.3)
-    #     # If cbar_tick_labels_opt is set
-    #     if cbar_tick_labels:
-    #         cb = matplotlib.pyplot.colorbar(contours, orientation="horizontal", cax=cax,
-    #                                         label=cbar_label)
-    #         cb.ax.set_xticklabels(cbar_tick_labels)
-    #     else:
-    #         cb = matplotlib.pyplot.colorbar(contours, orientation="horizontal", cax=cax)
-    #     cb.ax.tick_params(labelsize=8)
-    #     cb.set_label(cbar_label, fontsize=8)
 
 
 def plot_to_screen(data, grid=None, levels=None, colors=None, fill_colors=None,
