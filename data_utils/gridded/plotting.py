@@ -382,17 +382,17 @@ def _make_plot(*args, **kwargs):
             warnings.filterwarnings("ignore", category=FutureWarning)
             contours = m.contour(lons, lats, fields[0], levels, latlon=True,
                                  colors=contour_colors, linewidths=0.5)
-    # Plot contour labels for the first field
-    ax.set_clip_on(True)
-    if contour_labels:
-        if contours:
-            # If all contours all whole numbers, format the labels as such, otherwise they
-            # all get 0.000 added to the end
-            if np.all(np.mod(contours.levels, 1) == 0):
-                fmt = '%d'
-            else:
-                fmt = '%s'
-            matplotlib.pyplot.clabel(contours, inline=1, fontsize=5, fmt=fmt)
+        # Plot contour labels for the first field
+        ax.set_clip_on(True)
+        if contour_labels:
+            if contours:
+                # If all contours all whole numbers, format the labels as such, otherwise they
+                # all get 0.000 added to the end
+                if np.all(np.mod(contours.levels, 1) == 0):
+                    fmt = '%d'
+                else:
+                    fmt = '%s'
+                matplotlib.pyplot.clabel(contours, inline=1, fontsize=5, fmt=fmt)
 
     # Add labels
     matplotlib.pyplot.title(title, fontsize=10)
