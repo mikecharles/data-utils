@@ -375,7 +375,7 @@ def _make_plot(*args, **kwargs):
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=FutureWarning)
             contours = m.contour(lons, lats, fields[0], levels[0], latlon=True,
-                                 colors=contour_colors, linewidths=0.5)
+                                 colors=contour_colors, linewidths=1)
         # Plot contour labels for the first field
         ax.set_clip_on(True)
         if contour_labels:
@@ -436,10 +436,10 @@ def _make_plot(*args, **kwargs):
             warnings.filterwarnings("ignore", category=FutureWarning)
             if levels is not None:
                 contours = m.contour(lons, lats, fields[i], levels[i], latlon=True,
-                                     colors=contour_colors[i], linewidths=0.5)
+                                     colors=contour_colors[i], linewidths=1)
             else:
                 contours = m.contour(lons, lats, fields[i], latlon=True,
-                                     colors=contour_colors[i], linewidths=0.5)
+                                     colors=contour_colors[i], linewidths=1)
         # Plot contour labels for the first field
         ax.set_clip_on(True)
         if contour_labels:
