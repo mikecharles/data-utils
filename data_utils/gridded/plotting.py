@@ -161,9 +161,6 @@ def _make_plot(*args, **kwargs):
             if fill_first_field is False and levels.shape[0] != len(fields):
                 raise ValueError('levels must be a list with a length matching the number of '
                                  'fields to plot')
-            elif fill_first_field is True and levels.shape[0] != (len(fields) - 1):
-                raise ValueError('levels must be a list with a length of 1 less than the the '
-                                 'number of fields to plot')
     if fill_colors:
         if type(fill_colors) != list:
             fill_colors = [fill_colors]
@@ -349,19 +346,19 @@ def _make_plot(*args, **kwargs):
     if levels is not None:
         if fill_colors:
             if fill_first_field:
-                contours = m.contourf(lons, lats, fields[0], levels, latlon=True, extend=extend,
+                contours = m.contourf(lons, lats, fields[0], levels[0], latlon=True, extend=extend,
                                       colors=fill_colors)
             else:
-                contours = m.contour(lons, lats, fields[0], levels, latlon=True, extend=extend,
+                contours = m.contour(lons, lats, fields[0], levels[0], latlon=True, extend=extend,
                                      colors=contour_colors[0])
         else:
             if cbar_color_spacing == 'equal':
                 cmap = matplotlib.cm.get_cmap('jet', len(levels))
-                norm = matplotlib.colors.BoundaryNorm(levels, cmap.N)
-                contours = m.contourf(lons, lats, fields[0], levels, latlon=True, extend=extend,
+                norm = matplotlib.colors.BoundaryNorm(levels[0], cmap.N)
+                contours = m.contourf(lons, lats, fields[0], levels[0], latlon=True, extend=extend,
                                       cmap=cmap, norm=norm)
             elif cbar_color_spacing == 'natural':
-                contours = m.contourf(lons, lats, fields[0], levels, latlon=True, extend=extend)
+                contours = m.contourf(lons, lats, fields[0], levels[0], latlon=True, extend=extend)
             else:
                 raise ValueError('Incorrect setting for cbar_color_spacing - must be either '
                                  '\'equal\' or \'natural\'')
@@ -373,12 +370,11 @@ def _make_plot(*args, **kwargs):
             contours = m.contour(lons, lats, fields[0], latlon=True, extend=extend,
                                  colors=contour_colors[0], clabel=True)
 
-        levels = contours._levels
     # Plot line contours (only for a single field)
     if contour_colors and len(fields) == 1:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=FutureWarning)
-            contours = m.contour(lons, lats, fields[0], levels, latlon=True,
+            contours = m.contour(lons, lats, fields[0], levels[0], latlon=True,
                                  colors=contour_colors, linewidths=0.5)
         # Plot contour labels for the first field
         ax.set_clip_on(True)
@@ -386,7 +382,32 @@ def _make_plot(*args, **kwargs):
             if contours:
                 # If all contours all whole numbers, format the labels as such, otherwise they
                 # all get 0.000 added to the end
-                if np.all(np.mod(contours.levels, 1) == 0):
+                if np.all(np.mod(contours.levels[0], 1) == 0):
+                    fmt = '%d'
+                else:
+                    fmt = '%s'
+                matplotlib.pyplot.clabel(contours, inline=1, fontsize=5, fmt=fmt)
+
+    # ----------------------------------------------------------------------------------------------
+    # Plot second field (and any additional fields)
+    #
+    for i in range(1, len(fields)):
+        # Plot contours for fields[i]
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            if levels is not None:
+                contours = m.contour(lons, lats, fields[i], levels[i], latlon=True,
+                                     colors=contour_colors[i], linewidths=0.5)
+            else:
+                contours = m.contour(lons, lats, fields[i], latlon=True,
+                                     colors=contour_colors[i], linewidths=0.5)
+        # Plot contour labels for the first field
+        ax.set_clip_on(True)
+        if contour_labels:
+            if contours:
+                # If all contours all whole numbers, format the labels as such, otherwise they
+                # all get 0.000 added to the end
+                if np.all(np.mod(contours.levels[i], 1) == 0):
                     fmt = '%d'
                 else:
                     fmt = '%s'
