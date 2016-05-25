@@ -35,6 +35,8 @@ _docstring_kwargs = """
             be plotted in different colors in the order specified.
             - A string specifying the variable and plot type. Supported values:
                 - tmean-terciles
+    - fill_alpha (number between 0 and 1, optional)
+        - Alpha of the color fills - 0 is completely transparent, 1 is completly opaque
     - contour_colors (str or mpl_colors)
         - Color of contours
             - If None, then no contours are plotted
@@ -125,6 +127,7 @@ def _make_plot(*args, **kwargs):
     cbar_tick_labels = kwargs['cbar_tick_labels']
     contour_colors = kwargs['contour_colors']
     contour_labels = kwargs['contour_labels']
+    fill_alpha = kwargs['fill_alpha']
 
     # --------------------------------------------------------------------------
     # Check args
@@ -327,28 +330,29 @@ def _make_plot(*args, **kwargs):
         if fill_colors:
             if fill_first_field:
                 contours = m.contourf(lons, lats, fields[0], levels[0], latlon=True, extend=extend,
-                                      colors=fill_colors)
+                                      colors=fill_colors, alpha=fill_alpha)
             else:
                 contours = m.contour(lons, lats, fields[0], levels[0], latlon=True, extend=extend,
-                                     colors=contour_colors[0])
+                                     colors=contour_colors[0], alpha=fill_alpha)
         else:
             if cbar_color_spacing == 'equal':
                 cmap = matplotlib.cm.get_cmap('jet', len(levels))
                 norm = matplotlib.colors.BoundaryNorm(levels[0], cmap.N)
                 contours = m.contourf(lons, lats, fields[0], levels[0], latlon=True, extend=extend,
-                                      cmap=cmap, norm=norm)
+                                      cmap=cmap, norm=norm, alpha=fill_alpha)
             elif cbar_color_spacing == 'natural':
-                contours = m.contourf(lons, lats, fields[0], levels[0], latlon=True, extend=extend)
+                contours = m.contourf(lons, lats, fields[0], levels[0], latlon=True, extend=extend,
+                                      alpha=fill_alpha)
             else:
                 raise ValueError('Incorrect setting for cbar_color_spacing - must be either '
                                  '\'equal\' or \'natural\'')
     # If levels were not specified
     else:
         if fill_first_field:
-            contours = m.contourf(lons, lats, fields[0], latlon=True, extend=extend)
+            contours = m.contourf(lons, lats, fields[0], latlon=True, extend=extend, alpha=fill_alpha)
         else:
             contours = m.contour(lons, lats, fields[0], latlon=True, extend=extend,
-                                 colors=contour_colors[0], clabel=True)
+                                 colors=contour_colors[0], clabel=True, alpha=fill_alpha)
 
     # Plot line contours (only for a single field)
     if contour_colors and len(fields) == 1:
@@ -436,7 +440,7 @@ def _make_plot(*args, **kwargs):
     matplotlib.pyplot.title(title, fontsize=10)
 
 
-def plot_to_screen(data, grid=None, levels=None, colors=None, fill_colors=None,
+def plot_to_screen(data, grid=None, levels=None, colors=None, fill_colors=None, fill_alpha=1,
                    projection='equal-area', region='US', title='',
                    lat_range=None, lon_range=None,
                    cbar_ends='triangular', tercile_type='normal',
@@ -502,8 +506,8 @@ def plot_to_screen(data, grid=None, levels=None, colors=None, fill_colors=None,
 
 
 def plot_to_file(*fields, grid=None, file=None, dpi=200, levels=None, projection='equal-area',
-                 region='US', fill_colors=None, fill_first_field=True, title='', lat_range=None,
-                 lon_range=None, cbar_ends='triangular', tercile_type='normal',
+                 region='US', fill_colors=None, fill_alpha=1, fill_first_field=True, title='',
+                 lat_range=None, lon_range=None, cbar_ends='triangular', tercile_type='normal',
                  smoothing_factor=0, cbar_type='normal', cbar_color_spacing='natural',
                  fill_coastal_vals=False, cbar_label='', cbar_tick_labels=None,
                  contour_colors=None, contour_labels=False):
@@ -583,7 +587,8 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
                                  levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                          40, 50, 60, 70, 80, 90],
                                  projection='equal-area', region='US',
-                                 colors='tmean-terciles', fill_colors='tmean-terciles', title='',
+                                 colors='tmean-terciles', fill_colors='tmean-terciles',
+                                 fill_alpha=1, title='',
                                  lat_range=None, lon_range=None,
                                  cbar_ends='triangular',
                                  tercile_type='normal', smoothing_factor=0,
@@ -677,7 +682,8 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
                                levels=[-90, -80, -70, -60, -50, -40, -33, 33,
                                        40, 50, 60, 70, 80, 90],
                                projection='equal-area', region='US',
-                               colors='tmean-terciles', fill_colors='tmean-terciles', title='',
+                               colors='tmean-terciles', fill_colors='tmean-terciles',
+                               fill_alpha=1, title='',
                                lat_range=None, lon_range=None,
                                cbar_ends='triangular', tercile_type='normal',
                                smoothing_factor=0, cbar_type='tercile',
