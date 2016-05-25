@@ -320,26 +320,6 @@ def _make_plot(*args, **kwargs):
         raise ValueError('cbar_ends must be either \'triangular\' or '
                          '\'square\'')
 
-    # # ----------------------------------------------------------------------------------------------
-    # # Mask values outside of the map boundaries
-    # #
-    # # This needs to be done because if we plot the data as is, matplotlib.pyplot.clabel will put
-    # # some labels outside of the map borders, so we need to force it to understand that we don't
-    # # care about the data outside of the map borders.
-    # #
-    # # Compute native map projection coordinates of lat/lon grid.
-    # x, y = m(lons, lats)
-    #
-    # # Create a mask of everything outside the map boundaries
-    # mask1 = x < np.min(x)
-    # mask2 = x > np.max(x)
-    # mask3 = y > np.max(y)
-    # mask4 = y < np.min(y)
-    # mask = mask1 + mask2 + mask3 + mask4
-    # # Convert the fields into masked arrays
-    # for i in range(len(fields)):
-    #     fields[i] = np.ma.masked_array(fields[i], mask=mask)
-
     # ----------------------------------------------------------------------------------------------
     # Plot first field
     #
