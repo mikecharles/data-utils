@@ -320,7 +320,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
 
 
 def load_obs(dates, file_template, data_type, grid, record_num=None, debug=False, yrev=False,
-             variable=None, level=None):
+             variable=None, level=None, unit_conversion=None):
     """
     Load observation data
 
@@ -403,10 +403,24 @@ def load_obs(dates, file_template, data_type, grid, record_num=None, debug=False
         elif data_type == 'binary':
             # Open file and read the appropriate data
             try:
-                # Read in one forecast hour, one member
-                data[d] = np.fromfile(file, dtype='float32')
+                # Load data
+                data_temp = np.fromfile(file, dtype='float32')
+                print(data_temp.size, record_num)
+                # Determine number of records in the binary file
+                num_records = data_temp.size / (grid.num_y * grid.num_x)
+                # Reshape data and extract the appropriate record
+                data[d] = data_temp.reshape(num_records, grid.num_y * grid.num_x)[record_num]
             except:
                 data[d] = np.nan
+
+    # -------------------------------------------------------------------------
+    # Convert units (if necessary)
+    #
+    if unit_conversion:
+        uc = UnitConverter()
+        conversion = unit_conversion
+        data = uc.convert(data, conversion)
+
     # --------------------------------------------------------------------------
     # Return data
     #
