@@ -821,7 +821,7 @@ def _put_terciles_in_one_array(below, near, above):
 
 def _get_colors(colors):
     # Colors should be set to '[var]-[plot-type]'
-    if colors == 'tmean-terciles':
+    if colors in ['tmean-terciles', '500hgt-terciles']:
         return [
             # Below normal (blues)
             [0.01, 0.31, 0.48],
