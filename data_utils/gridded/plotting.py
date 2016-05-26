@@ -317,21 +317,25 @@ def _make_plot(*args, **kwargs):
     # Plot first field
     #
     if levels is not None:
+        if len(fields) == 1:
+            new_levels = levels
+        else:
+            new_levels = levels[0]
         if fill_colors:
             if fill_first_field:
-                contours = m.contourf(lons, lats, fields[0], levels[0], latlon=True, extend=extend,
+                contours = m.contourf(lons, lats, fields[0], new_levels, latlon=True, extend=extend,
                                       colors=fill_colors, alpha=fill_alpha)
             else:
-                contours = m.contour(lons, lats, fields[0], levels[0], latlon=True, extend=extend,
+                contours = m.contour(lons, lats, fields[0], new_levels, latlon=True, extend=extend,
                                      colors=contour_colors[0], alpha=fill_alpha)
         else:
             if cbar_color_spacing == 'equal':
-                cmap = matplotlib.cm.get_cmap('jet', len(levels))
-                norm = matplotlib.colors.BoundaryNorm(levels[0], cmap.N)
-                contours = m.contourf(lons, lats, fields[0], levels[0], latlon=True, extend=extend,
+                cmap = matplotlib.cm.get_cmap('jet', len(new_levels))
+                norm = matplotlib.colors.BoundaryNorm(new_levels, cmap.N)
+                contours = m.contourf(lons, lats, fields[0], new_levels, latlon=True, extend=extend,
                                       cmap=cmap, norm=norm, alpha=fill_alpha)
             elif cbar_color_spacing == 'natural':
-                contours = m.contourf(lons, lats, fields[0], levels[0], latlon=True, extend=extend,
+                contours = m.contourf(lons, lats, fields[0], new_levels, latlon=True, extend=extend,
                                       alpha=fill_alpha)
             else:
                 raise ValueError('Incorrect setting for cbar_color_spacing - must be either '
@@ -348,7 +352,7 @@ def _make_plot(*args, **kwargs):
     if contour_colors and len(fields) == 1:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=FutureWarning)
-            contours = m.contour(lons, lats, fields[0], levels[0], latlon=True,
+            contours = m.contour(lons, lats, fields[0], new_levels, latlon=True,
                                  colors=contour_colors, linewidths=1)
         # Plot contour labels for the first field
         ax.set_clip_on(True)
