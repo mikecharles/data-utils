@@ -470,7 +470,7 @@ def plot_to_screen(*fields, grid=None, levels=None, colors=None, fill_colors=Non
         ... 'lib/example-tmean-obs.bin'), dtype='float32')
         >>> A = np.reshape(A, (grid.num_y, grid.num_x))
         >>> A[A == -999] = np.nan
-        >>> plot_to_screen(A, grid)  # doctest: +SKIP
+        >>> plot_to_screen(A, grid=grid)  # doctest: +SKIP
     """
 
     # --------------------------------------------------------------------------
@@ -542,7 +542,7 @@ def plot_to_file(*fields, grid=None, file=None, dpi=200, levels=None, projection
         ... 'lib/example-tmean-obs.bin'), dtype='float32')
         >>> A = np.reshape(A, (grid.num_y, grid.num_x))
         >>> A[A == -999] = np.nan
-        >>> plot_to_file(A, grid, 'out.png')  # doctest: +SKIP
+        >>> plot_to_file(A, grid=grid, file='out.png')  # doctest: +SKIP
     """
 
     # --------------------------------------------------------------------------
