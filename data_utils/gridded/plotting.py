@@ -157,23 +157,13 @@ def _make_plot(*args, **kwargs):
         raise ValueError('When cbar_type==\'tercile\', levels and cbar_tick_labels '
                          'need to be set')
     # Make sure that certain args match the length of fields. For example, if 2 fields are
-    # provided, then levels, fill_colors, and contour_colors must all have a length of 2 as well,
-    # as they apply to each of the fields
+    # provided, then levels and contour_colors must have a length of 2 as well, as they apply to
+    # each of the fields
     if levels is not None:
         if len(fields) > 1:
             if fill_first_field is False and levels.shape[0] != len(fields):
                 raise ValueError('levels must be a list with a length matching the number of '
                                  'fields to plot')
-    if fill_colors:
-        if type(fill_colors) != list:
-            fill_colors = [fill_colors]
-        if len(fields) > 1:
-            if fill_first_field is False and len(fill_colors) != len(fields):
-                raise ValueError('fill_colors must be a list with a length matching the number of '
-                                 'fields to plot')
-            elif fill_first_field is True and len(fill_colors) != (len(fields) - 1):
-                raise ValueError('fill_colors must be a list with a length of 1 less than the the '
-                                 'number of fields to plot')
     if type(contour_colors) != list:
         contour_colors = [contour_colors]
     if len(fields) < 1:
