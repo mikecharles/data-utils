@@ -133,7 +133,7 @@ def _make_plot(*args, **kwargs):
     # Check args
     #
     # Levels must be set if fill_colors is set
-    if fill_colors and not levels:
+    if fill_colors and levels is None:
         raise ValueError('The "levels" argument must be set if the "fill_colors" '
                          'argument is set')
     # Make sure either region is set, or lat_range and lon_range are set
@@ -153,7 +153,7 @@ def _make_plot(*args, **kwargs):
         raise ValueError('Only the \'mercator\' projection can be used when '
                          'region is set to \'global\'')
     # If cbar_type is 'tercile', levels and cbar_tick_labels must both be set
-    if cbar_type == 'tercile' and not (levels and cbar_tick_labels):
+    if cbar_type == 'tercile' and not (levels is not None and cbar_tick_labels):
         raise ValueError('When cbar_type==\'tercile\', levels and cbar_tick_labels '
                          'need to be set')
     # Make sure that certain args match the length of fields. For example, if 2 fields are
