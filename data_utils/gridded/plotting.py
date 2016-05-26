@@ -663,13 +663,13 @@ def plot_tercile_probs_to_screen(below, near, above, grid,
     #
     all_probs *= 100
     # --------------------------------------------------------------------------
-    # Define *args for child function
+    # Define **kwargs for child function
     #
-    args = [all_probs, grid]
+    kwargs['grid'] = grid
     # --------------------------------------------------------------------------
     # Plot
     #
-    plot_to_screen(*args, **kwargs)
+    plot_to_screen(all_probs, **kwargs)
 
 
 def plot_tercile_probs_to_file(below, near, above, grid, file,
@@ -760,13 +760,14 @@ def plot_tercile_probs_to_file(below, near, above, grid, file,
     #
     all_probs *= 100
     # --------------------------------------------------------------------------
-    # Define *args for child function
+    # Define **kwargs for child function
     #
-    args = [all_probs, grid, file]
+    kwargs['grid'] = grid
+    kwargs['file'] = file
     # --------------------------------------------------------------------------
     # Plot
     #
-    plot_to_file(*args, **kwargs)
+    plot_to_file(all_probs, **kwargs)
 
 
 def _show_plot():
