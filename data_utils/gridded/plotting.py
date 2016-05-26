@@ -434,7 +434,7 @@ def _make_plot(*args, **kwargs):
                 matplotlib.pyplot.clabel(contours, inline=1, fontsize=5, fmt=fmt)
 
 
-def plot_to_screen(data, grid=None, levels=None, colors=None, fill_colors=None, fill_alpha=1,
+def plot_to_screen(*fields, grid=None, levels=None, colors=None, fill_colors=None, fill_alpha=1,
                    projection='equal-area', region='US', title='',
                    lat_range=None, lon_range=None,
                    cbar_ends='triangular', tercile_type='normal',
@@ -479,22 +479,29 @@ def plot_to_screen(data, grid=None, levels=None, colors=None, fill_colors=None, 
     # Use locals() function to get all defined vars
     kwargs = locals()
     # Remove positional args
-    del kwargs['data']
+    del kwargs['fields']
     # --------------------------------------------------------------------------
-    # Reshape array if necessary
+    # Reshape field array(s) if necessary
     #
-    if data.ndim == 1:
-        data = np.reshape(data, (grid.num_y, grid.num_x))
-    elif data.ndim != 2:
-        raise ValueError('data array must have 1 or 2 dimensions')
-    # --------------------------------------------------------------------------
-    # Define *args to pass to child function
-    #
-    args = [data, grid]
+    # Create empty array to store reshaped fields
+    reshaped_fields = np.nan * np.empty((len(fields), grid.num_y, grid.num_x))
+    # Loop over fields
+    for i in range(len(fields)):
+        # If the current field is 1 dimensional, make it 2 dimensions (x, y)
+        if fields[i].ndim == 1:
+            reshaped_fields[i] = np.reshape(fields[i], (grid.num_y, grid.num_x))
+        # If the current field is 2 dimensional, leave it alone
+        elif fields[i].ndim == 2:
+            reshaped_fields[i] = fields[i]
+        # If the current field is not 1 or 2 dimensional, we can't know what to do with it
+        else:
+            raise ValueError('fields must have 1 or 2 dimensions')
+    # Save reshaped fields back to tuple of fields
+    fields = tuple([np.squeeze(A) for A in np.split(reshaped_fields, len(reshaped_fields), axis=0)])
     # --------------------------------------------------------------------------
     # Call _make_plot()
     #
-    _make_plot(*args, **kwargs)
+    _make_plot(*fields, **kwargs)
     _show_plot()
     matplotlib.pyplot.close("all")
 
