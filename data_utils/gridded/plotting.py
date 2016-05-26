@@ -366,6 +366,9 @@ def _make_plot(*args, **kwargs):
                     fmt = '%s'
                 matplotlib.pyplot.clabel(contours, inline=1, fontsize=5, fmt=fmt)
 
+    # Add labels
+    matplotlib.pyplot.title(title, fontsize=10)
+
     # --------------------------------------------------------------------------
     # Add a colorbar
     #
@@ -429,9 +432,6 @@ def _make_plot(*args, **kwargs):
                 else:
                     fmt = '%s'
                 matplotlib.pyplot.clabel(contours, inline=1, fontsize=5, fmt=fmt)
-
-    # Add labels
-    matplotlib.pyplot.title(title, fontsize=10)
 
 
 def plot_to_screen(data, grid=None, levels=None, colors=None, fill_colors=None, fill_alpha=1,
