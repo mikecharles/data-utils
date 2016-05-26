@@ -164,7 +164,7 @@ def _make_plot(*args, **kwargs):
             if fill_first_field is False and levels.shape[0] != len(fields):
                 raise ValueError('levels must be a list with a length matching the number of '
                                  'fields to plot')
-    if type(contour_colors) != list:
+    if contour_colors is not None and type(contour_colors) != list:
         contour_colors = [contour_colors]
     if len(fields) < 1:
         if fill_first_field is False and len(contour_colors) != len(fields):
