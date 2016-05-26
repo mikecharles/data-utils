@@ -375,7 +375,7 @@ def _make_plot(*args, **kwargs):
         # Add the colorbar (attached to figure above)
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("bottom", size="4%", pad=0.3)
-        cb = matplotlib.pyplot.colorbar(plot, orientation="horizontal", cax=cax,
+        cb = matplotlib.pyplot.colorbar(contours, orientation="horizontal", cax=cax,
                                         label=cbar_label, ticks=cbar_tick_labels)
         cb.ax.set_xticklabels(labels)
         cb.ax.tick_params(labelsize=8)
