@@ -132,8 +132,7 @@ def load_ens_fcsts(dates, file_template, data_type, grid, num_members,
         >>> from data_utils.gridded.grid import Grid
         >>> from data_utils.gridded.loading import load_obs
         >>> dates = generate_date_list('19810525', '20100525', interval='years')
-        >>> file_tmplt = '/path/to/fcsts/%Y/%m/%d/gefs_%Y%m%d_00z_f{fhr}_m{'
-        ... 'member}.grb'
+        >>> file_tmplt = '/path/to/fcsts/%Y/%m/%d/gefs_%Y%m%d_00z_f{fhr}_m{member}.grb'
         >>> data_type = 'grib2'
         >>> grid = Grid('1deg-global')
         >>> variable = 'TMP'
@@ -359,8 +358,7 @@ def load_obs(dates, file_template, data_type, grid, record_num=None, debug=False
         >>> file_tmplt = '/path/to/obs/%Y/%m/%d/tmean_05d_%Y%m%d.bin'
         >>> data_type = 'bin'
         >>> grid = Grid('1deg-global')
-        >>> dataset = load_obs(dates, file_tmplt, data_type, grid) # doctest:
-        # +SKIP
+        >>> dataset = load_obs(dates, file_tmplt, data_type, grid) # doctest: +SKIP
     """
     # --------------------------------------------------------------------------
     # Make sure dates is a list
