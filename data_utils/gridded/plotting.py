@@ -173,6 +173,9 @@ def _make_plot(*args, **kwargs):
         elif fill_first_field is True and len(contour_colors) != (len(fields) - 1):
             raise ValueError('contour_colors must be a list with a length of 1 less than the the '
                              'number of fields to plot')
+    # Set a default value for contour_colors
+    if contour_colors is None:
+        contour_colors = ['black'] * 2
 
     # --------------------------------------------------------------------------
     # Check colors variables
