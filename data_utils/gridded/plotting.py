@@ -182,7 +182,7 @@ def _make_plot(*args, **kwargs):
         fill_colors = _get_colors(fill_colors)
     # Make sure there is 1 more color than levels
     if fill_colors:
-        if len(fill_colors) != (len(levels) + 1):
+        if len(fill_colors) != (len(levels[0]) + 1):
             raise ValueError('The number of fill_colors must be 1 greater than the '
                              'number of levels')
 
