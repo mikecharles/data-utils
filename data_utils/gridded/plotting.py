@@ -401,15 +401,22 @@ def _make_plot(*args, **kwargs):
         # Add the colorbar (attached to figure above)
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("bottom", size="4%", pad=0.3)
-        # If cbar_tick_labels_opt is set
-        if cbar_tick_labels:
+        # If cbar_label is set
+        if cbar_label and cbar_tick_labels:
+            cb = matplotlib.pyplot.colorbar(contours, orientation="horizontal", cax=cax,
+                                            label=cbar_label, ticks=cbar_tick_labels)
+            cb.set_label(cbar_label, fontsize=8)
+            cb.ax.tick_params(labelsize=8)
+        elif cbar_label:
             cb = matplotlib.pyplot.colorbar(contours, orientation="horizontal", cax=cax,
                                             label=cbar_label)
-            cb.ax.set_xticklabels(cbar_tick_labels)
+            cb.set_label(cbar_label, fontsize=8)
+        elif cbar_tick_labels:
+            cb = matplotlib.pyplot.colorbar(contours, orientation="horizontal", cax=cax,
+                                            ticks=cbar_tick_labels)
+            cb.ax.tick_params(labelsize=8)
         else:
             cb = matplotlib.pyplot.colorbar(contours, orientation="horizontal", cax=cax)
-        cb.ax.tick_params(labelsize=8)
-        cb.set_label(cbar_label, fontsize=8)
 
     # ----------------------------------------------------------------------------------------------
     # Plot second field (and any additional fields)
